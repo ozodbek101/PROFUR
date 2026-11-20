@@ -4,27 +4,14 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.utils.translation import gettext_lazy as _
 
-from apps.users.models import (
-    LocalizedName,
-    code_validator,
-    localized,
-    normalize_roles,
-    role_label,
-    validate_worker_role_list,
-)
+from apps.users.models import WORKER_ROLES, UserRole, normalize_roles
 
 ZERO = Decimal("0.00")
 CENTS = Decimal("0.01")
 
 
 class MaterialCategory(models.TextChoices):
-    """
-    Built-in category codes the system ships with. Administrators add more
-    categories (``Category``) in the app, so never treat this list as complete.
-    """
-
     SHEET = "SHEET", "Sheet & Board Materials (MDF, Fanera, PVC, Shpon)"
     LIQUID = "LIQUID", "Liquids & Paints (Kraska, Lak, Gruntovka)"
     LINEAR = "LINEAR", "Linear Materials (Lenta, Shkurka roll)"
@@ -32,119 +19,72 @@ class MaterialCategory(models.TextChoices):
 
 
 class MeasurementUnit(models.TextChoices):
-    SHEET_COUNT = "SHEET", _("Dona (list)")
-    LITER = "LITER", _("Litr (L)")
-    KILOGRAM = "KG", _("Kilogramm (kg)")
-    METER = "METER", _("Metr (m)")
-    CENTIMETER = "CM", _("Santimetr (sm)")
-    PIECE = "PIECE", _("Dona")
+    SHEET_COUNT = "SHEET", "Sheet Count (Dona)"
+    LITER = "LITER", "Liter (L)"
+    KILOGRAM = "KG", "Kilogram (kg)"
+    METER = "METER", "Meter (m)"
+    CENTIMETER = "CM", "Centimeter (cm)"
+    PIECE = "PIECE", "Unit Piece (Dona)"
 
+
+#: Short Uzbek category names for the UI (the TextChoices labels are the long bilingual ones).
+CATEGORY_SHORT_LABELS = {
+    MaterialCategory.SHEET: "List materiallar",
+    MaterialCategory.LIQUID: "Bo'yoq va suyuqliklar",
+    MaterialCategory.LINEAR: "Lenta va rulonlar",
+    MaterialCategory.HARDWARE: "Furnitura",
+}
 
 #: Short unit labels for compact tables and buttons.
 UNIT_SHORT_LABELS = {
-    MeasurementUnit.SHEET_COUNT: _("dona"),
+    MeasurementUnit.SHEET_COUNT: "dona",
     MeasurementUnit.LITER: "L",
     MeasurementUnit.KILOGRAM: "kg",
     MeasurementUnit.METER: "m",
-    MeasurementUnit.CENTIMETER: _("sm"),
-    MeasurementUnit.PIECE: _("dona"),
+    MeasurementUnit.CENTIMETER: "sm",
+    MeasurementUnit.PIECE: "dona",
 }
 
 #: Units that can only move in whole numbers (you cannot take 1.5 hinges).
 INTEGER_UNITS = frozenset({MeasurementUnit.SHEET_COUNT, MeasurementUnit.PIECE})
 
+#: Default trade access per category; admins can override per material.
+DEFAULT_CATEGORY_ROLES: dict[str, list[str]] = {
+    MaterialCategory.SHEET: [UserRole.ARRACHI, UserRole.ROVERCHI],
+    MaterialCategory.LIQUID: [UserRole.KRASKACHI],
+    MaterialCategory.LINEAR: [UserRole.SHKURKACHI, UserRole.SBORKACHI],
+    MaterialCategory.HARDWARE: [UserRole.SBORKACHI],
+}
 
-class Category(LocalizedName):
-    """A material category, managed by administrators."""
-
-    code = models.CharField(_("Kod"), max_length=40, unique=True, validators=[code_validator])
-    default_roles = models.JSONField(
-        _("Standart kasblar"),
-        default=list,
-        blank=True,
-        validators=[validate_worker_role_list],
-        help_text=_("Yangi material uchun kasb belgilanmasa, shu kasblar ko'radi va oladi."),
-    )
-    supports_offcuts = models.BooleanField(
-        _("Qoldiq yoziladi"),
-        default=False,
-        help_text=_("List yoki lenta kabi kesiladigan materiallar uchun: qoldiq (uzunlik × eni) qayd etiladi."),
-    )
-    is_active = models.BooleanField(
-        _("Faol"), default=True, help_text=_("O'chirilsa, yangi material uchun tanlab bo'lmaydi; mavjudlari qoladi.")
-    )
-    sort_order = models.PositiveIntegerField(_("Tartib"), default=100)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ["sort_order", "name_uz"]
-        verbose_name = _("kategoriya")
-        verbose_name_plural = _("kategoriyalar")
-
-    def __str__(self) -> str:
-        return self.name
-
-    def save(self, *args, **kwargs):
-        self.default_roles = normalize_roles(self.default_roles)
-        super().save(*args, **kwargs)
-
-    @property
-    def default_role_labels(self) -> list[str]:
-        return [role_label(role) for role in self.default_roles]
-
-
-# Category labels cached per process; cleared each request and on Category save.
-_category_label_cache: dict[str, tuple[str, str, str]] | None = None
-
-
-def clear_category_cache() -> None:
-    global _category_label_cache
-    _category_label_cache = None
-
-
-def category_label(code: str) -> str:
-    global _category_label_cache
-    if _category_label_cache is None:
-        _category_label_cache = {
-            c: (uz, en, ru) for c, uz, en, ru in Category.objects.values_list("code", "name_uz", "name_en", "name_ru")
-        }
-    names = _category_label_cache.get(code)
-    return localized(*names) if names else code
-
-
-def category_choices(include=()) -> list[tuple[str, str]]:
-    """Active categories as form choices, plus any codes in ``include``."""
-    keep = set(include or ())
-    return [(c.code, c.name) for c in Category.objects.all() if c.is_active or c.code in keep]
-
-
-def offcut_category_codes() -> list[str]:
-    return list(Category.objects.filter(supports_offcuts=True).values_list("code", flat=True))
+#: Categories for which leftover offcuts (length x width) make sense.
+OFFCUT_CATEGORIES = frozenset({MaterialCategory.SHEET, MaterialCategory.LINEAR})
 
 
 def default_roles_for_category(category: str) -> list[str]:
-    roles = Category.objects.filter(code=category).values_list("default_roles", flat=True).first()
-    return list(roles or [])
+    return [str(role) for role in DEFAULT_CATEGORY_ROLES.get(category, [])]
 
 
-def validate_category_code(value) -> None:
-    if not Category.objects.filter(code=value).exists():
-        raise ValidationError(_("Noma'lum kategoriya: %(code)s"), params={"code": value})
+def validate_worker_role_list(value) -> None:
+    if not isinstance(value, list):
+        raise ValidationError("Ruxsat etilgan kasblar ro'yxat (list) bo'lishi kerak.")
+    unknown = [role for role in value if role not in WORKER_ROLES]
+    if unknown:
+        raise ValidationError("Noma'lum kasb(lar): %(roles)s", params={"roles": ", ".join(map(str, unknown))})
 
 
 class BaseMaterial(models.Model):
-    name = models.CharField(_("Nomi"), max_length=255)
-    category = models.CharField(_("Kategoriya"), max_length=50, validators=[validate_category_code])
+    name = models.CharField("Nomi", max_length=255)
+    category = models.CharField("Kategoriya", max_length=50, choices=MaterialCategory.choices)
     allowed_roles = models.JSONField(
-        _("Ruxsat etilgan kasblar"),
+        "Ruxsat etilgan kasblar",
         default=list,
         blank=True,
         validators=[validate_worker_role_list],
         help_text="List of UserRoles permitted to view/deduct this material",
     )
-    unit_of_measure = models.CharField(_("O'lchov birligi"), max_length=20, choices=MeasurementUnit.choices)
+    unit_of_measure = models.CharField("O'lchov birligi", max_length=20, choices=MeasurementUnit.choices)
     container_size = models.DecimalField(
-        _("Idish hajmi"),
+        "Idish hajmi",
         max_digits=10,
         decimal_places=2,
         null=True,
@@ -155,7 +95,7 @@ class BaseMaterial(models.Model):
 
     # Stock thresholds
     minimum_threshold = models.DecimalField(
-        _("Minimal qoldiq"),
+        "Minimal qoldiq",
         max_digits=12,
         decimal_places=2,
         default=ZERO,
@@ -164,7 +104,7 @@ class BaseMaterial(models.Model):
 
     # Price tracking (USD). Maintained as a weighted average cost by Kirim entries.
     unit_price_usd = models.DecimalField(
-        _("Birlik narxi (USD)"),
+        "Birlik narxi (USD)",
         max_digits=12,
         decimal_places=4,
         default=Decimal("0.0000"),
@@ -172,7 +112,7 @@ class BaseMaterial(models.Model):
     )
 
     is_active = models.BooleanField(
-        _("Faol"), default=True, help_text="Archived materials are hidden from workers but keep their history."
+        "Faol", default=True, help_text="Archived materials are hidden from workers but keep their history."
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -180,8 +120,8 @@ class BaseMaterial(models.Model):
 
     class Meta:
         ordering = ["name"]
-        verbose_name = _("material")
-        verbose_name_plural = _("materiallar")
+        verbose_name = "material"
+        verbose_name_plural = "materiallar"
         constraints = [
             models.CheckConstraint(condition=models.Q(unit_price_usd__gte=0), name="material_price_non_negative"),
             models.CheckConstraint(condition=models.Q(minimum_threshold__gte=0), name="material_threshold_non_negative"),
@@ -196,7 +136,7 @@ class BaseMaterial(models.Model):
 
     @property
     def category_short(self) -> str:
-        return category_label(self.category)
+        return CATEGORY_SHORT_LABELS.get(self.category, self.category)
 
     @property
     def unit_short(self) -> str:
@@ -208,30 +148,30 @@ class BaseMaterial(models.Model):
 
     @property
     def supports_offcuts(self) -> bool:
-        return Category.objects.filter(code=self.category, supports_offcuts=True).exists()
+        return self.category in OFFCUT_CATEGORIES
 
     @property
     def allowed_role_labels(self) -> list[str]:
-        return [role_label(role) for role in self.allowed_roles]
+        return [UserRole(role).label for role in self.allowed_roles if role in UserRole.values]
 
 
 class WholeMaterial(models.Model):
     material = models.OneToOneField(BaseMaterial, on_delete=models.CASCADE, related_name="whole_stock")
     quantity = models.DecimalField(
-        _("Miqdor"),
+        "Miqdor",
         max_digits=12,
         decimal_places=2,
         default=ZERO,
         validators=[MinValueValidator(ZERO)],
     )
-    length_mm = models.IntegerField(_("Uzunligi (mm)"), null=True, blank=True, help_text="Standard sheet length in mm")
-    width_mm = models.IntegerField(_("Eni (mm)"), null=True, blank=True, help_text="Standard sheet width in mm")
+    length_mm = models.IntegerField("Uzunligi (mm)", null=True, blank=True, help_text="Standard sheet length in mm")
+    width_mm = models.IntegerField("Eni (mm)", null=True, blank=True, help_text="Standard sheet width in mm")
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["material__name"]
-        verbose_name = _("butun material")
-        verbose_name_plural = _("butun materiallar")
+        verbose_name = "butun material"
+        verbose_name_plural = "butun materiallar"
         constraints = [
             models.CheckConstraint(condition=models.Q(quantity__gte=0), name="whole_stock_non_negative"),
         ]
@@ -267,10 +207,10 @@ class WholeMaterial(models.Model):
 
 class LeftoverOffcut(models.Model):
     material = models.ForeignKey(BaseMaterial, on_delete=models.CASCADE, related_name="offcuts")
-    length_mm = models.IntegerField(_("Uzunligi (mm)"), validators=[MinValueValidator(1)], help_text="Remaining length in mm")
-    width_mm = models.IntegerField(_("Eni (mm)"), validators=[MinValueValidator(1)], help_text="Remaining width in mm")
-    quantity = models.IntegerField(_("Soni"), default=1, validators=[MinValueValidator(1)])
-    notes = models.TextField(_("Izoh"), blank=True, help_text="Location or description of offcut scrap")
+    length_mm = models.IntegerField("Uzunligi (mm)", validators=[MinValueValidator(1)], help_text="Remaining length in mm")
+    width_mm = models.IntegerField("Eni (mm)", validators=[MinValueValidator(1)], help_text="Remaining width in mm")
+    quantity = models.IntegerField("Soni", default=1, validators=[MinValueValidator(1)])
+    notes = models.TextField("Izoh", blank=True, help_text="Location or description of offcut scrap")
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="registered_offcuts"
     )
@@ -278,8 +218,8 @@ class LeftoverOffcut(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
-        verbose_name = _("qoldiq material")
-        verbose_name_plural = _("qoldiq materiallar")
+        verbose_name = "qoldiq material"
+        verbose_name_plural = "qoldiq materiallar"
         constraints = [
             models.CheckConstraint(condition=models.Q(quantity__gte=1), name="offcut_quantity_positive"),
             models.CheckConstraint(
@@ -312,9 +252,9 @@ class LeftoverOffcut(models.Model):
 
 
 class TransactionType(models.TextChoices):
-    KIRIM = "KIRIM", _("Kirim")
-    CHIQIM = "CHIQIM", _("Chiqim")
-    OFFCUT_DEPOSIT = "OFFCUT_DEPOSIT", _("Qoldiq qo'shildi")
+    KIRIM = "KIRIM", "Stock Arrival (Kirim)"
+    CHIQIM = "CHIQIM", "Worker Withdrawal (Chiqim)"
+    OFFCUT_DEPOSIT = "OFFCUT_DEPOSIT", "Offcut Deposit (Qoldiq)"
 
 
 class ImmutableLedgerError(Exception):
@@ -372,8 +312,8 @@ class InventoryTransaction(models.Model):
 
     class Meta:
         ordering = ["-created_at", "-id"]
-        verbose_name = _("ombor harakati")
-        verbose_name_plural = _("ombor harakatlari")
+        verbose_name = "ombor harakati"
+        verbose_name_plural = "ombor harakatlari"
         indexes = [
             models.Index(fields=["transaction_type", "created_at"]),
             models.Index(fields=["material", "created_at"]),

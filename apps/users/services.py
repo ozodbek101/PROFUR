@@ -1,7 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
-from django.utils.translation import gettext as _
 
 from .models import User, normalize_roles
 
@@ -11,7 +10,7 @@ def register_worker(*, username: str, password: str, full_name: str, roles: list
     """Create a self-registered worker. Access stays locked until an admin approves."""
     roles = normalize_roles(roles)
     if not roles:
-        raise ValidationError({"roles": _("Kamida bitta kasbni tanlang.")})
+        raise ValidationError({"roles": "Kamida bitta kasbni tanlang."})
     user = User(username=username, full_name=full_name, roles=roles, is_approved=False, is_active=True)
     user.set_password(password)
     user.full_clean()
@@ -24,7 +23,7 @@ def approve_user(user: User, *, approved_by: User, roles: list[str] | None = Non
     if roles is not None:
         user.roles = normalize_roles(roles)
     if not user.roles:
-        raise ValidationError({"roles": _("Tasdiqlashdan oldin kamida bitta rol belgilang.")})
+        raise ValidationError({"roles": "Tasdiqlashdan oldin kamida bitta rol belgilang."})
     user.is_approved = True
     user.is_active = True
     user.approved_at = timezone.now()
@@ -37,5 +36,5 @@ def approve_user(user: User, *, approved_by: User, roles: list[str] | None = Non
 def reject_registration(user: User) -> None:
     """Discard a pending registration request (pending accounts have no ledger history)."""
     if user.is_approved or user.is_superuser:
-        raise ValidationError(_("Faqat tasdiqlanmagan so'rovlarni rad etish mumkin."))
+        raise ValidationError("Faqat tasdiqlanmagan so'rovlarni rad etish mumkin.")
     user.delete()

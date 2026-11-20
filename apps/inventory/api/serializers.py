@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from rest_framework import serializers
 
-from apps.users.models import worker_role_choices
+from apps.users.models import WORKER_ROLE_CHOICES
 
 from .. import services
 from ..models import (
@@ -10,7 +10,6 @@ from ..models import (
     InventoryTransaction,
     LeftoverOffcut,
     WholeMaterial,
-    category_choices,
     default_roles_for_category,
 )
 
@@ -31,8 +30,7 @@ class HidePricesForWorkersMixin:
 
 
 class BaseMaterialSerializer(serializers.ModelSerializer):
-    category = serializers.ChoiceField(choices=())
-    allowed_roles = serializers.MultipleChoiceField(choices=(), required=False)
+    allowed_roles = serializers.MultipleChoiceField(choices=WORKER_ROLE_CHOICES, required=False)
     unit_short = serializers.CharField(read_only=True)
     quantity = serializers.DecimalField(
         source="whole_stock.quantity", max_digits=12, decimal_places=2, read_only=True
@@ -60,12 +58,6 @@ class BaseMaterialSerializer(serializers.ModelSerializer):
             "updated_at",
         )
         read_only_fields = ("unit_price_usd", "created_at", "updated_at")
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        instance = self.instance if isinstance(self.instance, BaseMaterial) else None
-        self.fields["category"].choices = category_choices(include=[instance.category] if instance else [])
-        self.fields["allowed_roles"].choices = worker_role_choices(include=instance.allowed_roles if instance else [])
 
     def to_representation(self, instance):
         data = super().to_representation(instance)

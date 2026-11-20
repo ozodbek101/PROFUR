@@ -16,10 +16,4 @@ for (const subset of ["latin", "latin-ext"]) {
     copyFileSync(join(root, "node_modules/@fontsource/dm-sans/files", name), out("fonts", name));
   }
 }
-// DM Sans has no Cyrillic glyphs; Inter's Cyrillic subset is served under the
-// same family name (see the unicode-range rules in frontend/app.css).
-for (const weight of [400, 500, 600, 700]) {
-  const name = `inter-cyrillic-${weight}-normal.woff2`;
-  copyFileSync(join(root, "node_modules/@fontsource/inter/files", name), out("fonts", name));
-}
-console.log("Vendored Alpine.js, DM Sans and Inter Cyrillic into static/");
+console.log("Vendored Alpine.js and DM Sans into static/");

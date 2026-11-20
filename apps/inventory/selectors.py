@@ -17,8 +17,8 @@ from django.db.models.functions import Coalesce, Round, TruncMonth
 from django.utils import timezone
 
 from .models import (
+    OFFCUT_CATEGORIES,
     BaseMaterial,
-    Category,
     InventoryTransaction,
     LeftoverOffcut,
     TransactionType,
@@ -85,8 +85,7 @@ def visible_offcuts(user) -> QuerySet[LeftoverOffcut]:
 
 
 def offcut_capable_materials(user) -> QuerySet[BaseMaterial]:
-    offcut_codes = Category.objects.filter(supports_offcuts=True).values("code")
-    return visible_materials(user).filter(category__in=offcut_codes)
+    return visible_materials(user).filter(category__in=OFFCUT_CATEGORIES)
 
 
 def user_can_access_material(user, material: BaseMaterial) -> bool:

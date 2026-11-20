@@ -23,17 +23,9 @@
 @font-face { font-family: "DM Sans"; font-style: normal; font-weight: 500; font-display: swap; src: url("../fonts/dm-sans-latin-ext-500-normal.woff2") format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
 @font-face { font-family: "DM Sans"; font-style: normal; font-weight: 600; font-display: swap; src: url("../fonts/dm-sans-latin-ext-600-normal.woff2") format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
 @font-face { font-family: "DM Sans"; font-style: normal; font-weight: 700; font-display: swap; src: url("../fonts/dm-sans-latin-ext-700-normal.woff2") format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
-/* DM Sans has no Cyrillic: Inter fills in under the same family for Russian. */
-@font-face { font-family: "DM Sans"; font-style: normal; font-weight: 400; font-display: swap; src: url("../fonts/inter-cyrillic-400-normal.woff2") format("woff2"); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
-@font-face { font-family: "DM Sans"; font-style: normal; font-weight: 500; font-display: swap; src: url("../fonts/inter-cyrillic-500-normal.woff2") format("woff2"); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
-@font-face { font-family: "DM Sans"; font-style: normal; font-weight: 600; font-display: swap; src: url("../fonts/inter-cyrillic-600-normal.woff2") format("woff2"); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
-@font-face { font-family: "DM Sans"; font-style: normal; font-weight: 700; font-display: swap; src: url("../fonts/inter-cyrillic-700-normal.woff2") format("woff2"); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
 
 @theme {
   --font-sans: "DM Sans", Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
-  /* One step heavier than stock so text reads well on workshop screens. */
-  --font-weight-medium: 600;
-  --font-weight-semibold: 700;
 
   --color-ground: #f9fafb;
   --color-surface: #ffffff;
@@ -90,9 +82,8 @@
   html { -webkit-text-size-adjust: 100%; }
   body {
     @apply bg-ground text-ink font-sans antialiased;
-    font-size: 15px;
-    line-height: 22px;
-    font-weight: 500;
+    font-size: 14px;
+    line-height: 20px;
   }
   [x-cloak] { display: none !important; }
   :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
@@ -105,8 +96,7 @@
   /* Buttons: tight style, 6px radius; one filled primary per screen */
   .btn {
     @apply inline-flex items-center justify-center gap-2 rounded-[6px] px-3.5 font-medium whitespace-nowrap select-none;
-    min-height: 38px;
-    font-size: 15px;
+    min-height: 36px;
     transition: background-color 120ms ease, border-color 120ms ease, transform 80ms ease;
   }
   .btn:active { transform: translateY(1px); }
@@ -121,16 +111,16 @@
   .btn-ghost:hover { @apply bg-raised; }
   .btn-danger { @apply border border-control bg-surface text-negative; }
   .btn-danger:hover { @apply bg-neg-bg; border-color: #f3b8b2; }
-  .btn-lg { min-height: 48px; font-size: 17px; @apply px-5; }
+  .btn-lg { min-height: 48px; font-size: 16px; @apply px-5; }
   .btn-block { @apply w-full; }
 
   /* Panels */
   .panel { @apply rounded-[8px] border border-line bg-surface; }
   .panel-head { @apply flex items-center justify-between gap-3 px-5 pt-4 pb-3; }
-  .panel-title { font-size: 17px; line-height: 26px; @apply font-semibold; }
+  .panel-title { font-size: 16px; line-height: 24px; @apply font-semibold; }
 
   /* Pills: pale tint, dark ink of the same hue */
-  .pill { @apply inline-flex flex-none items-center gap-1 rounded-full px-2 whitespace-nowrap font-medium; font-size: 13px; line-height: 22px; }
+  .pill { @apply inline-flex flex-none items-center gap-1 rounded-full px-2 whitespace-nowrap font-medium; font-size: 12px; line-height: 20px; }
   .pill-neutral { @apply bg-neutral-bg text-neutral-ink; }
   .pill-accent { @apply bg-accent-soft text-accent-ink; }
   .pill-pos { @apply bg-pos-bg text-pos-ink; }
@@ -139,14 +129,14 @@
 
   /* Form controls */
   .form-stack { @apply grid gap-4; }
-  .field-label { @apply mb-2 block font-medium; font-size: 15px; }
-  .field-help { @apply mt-1.5 text-muted; font-size: 13px; line-height: 18px; }
-  .field-error { @apply mt-1.5 text-negative; font-size: 14px; line-height: 20px; }
+  .field-label { @apply mb-2 block font-medium; font-size: 14px; }
+  .field-help { @apply mt-1.5 text-muted; font-size: 12px; line-height: 16px; }
+  .field-error { @apply mt-1.5 text-negative; font-size: 13px; line-height: 18px; }
   .control,
   .form-stack input[type="text"], .form-stack input[type="password"], .form-stack input[type="number"],
   .form-stack input[type="month"], .form-stack input[type="search"], .form-stack select, .form-stack textarea {
     @apply block w-full rounded-[6px] border border-control bg-surface px-3 text-ink;
-    min-height: 42px;
+    min-height: 40px;
     font-size: 16px; /* 16px stops iOS zooming into the field */
     line-height: 22px;
   }
@@ -155,16 +145,6 @@
   .control:focus, .form-stack input:focus, .form-stack select:focus, .form-stack textarea:focus {
     outline: 2px solid var(--color-accent); outline-offset: 0; border-color: var(--color-accent);
   }
-  /* Password with a show/hide eye inside the right edge */
-  .pw-field { @apply relative; }
-  .pw-field input { padding-right: 48px !important; }
-  .pw-toggle {
-    @apply absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-r-[6px] text-muted;
-    transition: color 120ms ease;
-  }
-  .pw-toggle:hover, .pw-toggle[aria-pressed="true"] { @apply text-ink; }
-  .pw-toggle svg { width: 20px; height: 20px; }
-
   .form-stack .has-error input, .form-stack .has-error select, .form-stack .has-error textarea { border-color: var(--color-negative); }
 
   /* Checkbox / radio tiles (roles, price mode) */
@@ -178,7 +158,7 @@
 
   /* Tables: rules and alignment, no zebra, no header band */
   .data-table { @apply w-full border-collapse; }
-  .data-table th { @apply px-3 pb-2 text-left font-normal text-muted; font-size: 13px; line-height: 18px; }
+  .data-table th { @apply px-3 pb-2 text-left font-normal text-muted; font-size: 12px; line-height: 16px; }
   .data-table td { @apply border-t border-rule px-3 align-middle; height: 48px; }
   .data-table th:first-child, .data-table td:first-child { padding-left: 20px; }
   .data-table th:last-child, .data-table td:last-child { padding-right: 20px; }
@@ -186,28 +166,19 @@
   .data-table tbody tr:hover td { background: #fcfcfd; }
 
   /* Navigation */
-  .nav-item { @apply flex items-center gap-2.5 rounded-[6px] px-2.5 text-ink; height: 40px; font-size: 15px; }
-  .nav-item svg { width: 18px; height: 18px; color: var(--color-muted); flex: none; }
+  .nav-item { @apply flex items-center gap-2.5 rounded-[6px] px-2.5 text-ink; height: 36px; }
+  .nav-item svg { width: 16px; height: 16px; color: var(--color-muted); flex: none; }
   .nav-item:hover { @apply bg-raised; }
   .nav-item[aria-current="page"] { @apply bg-accent-soft text-accent-ink font-medium; }
   .nav-item[aria-current="page"] svg { color: var(--color-accent); }
-  .nav-count { @apply ml-auto rounded-full bg-negative px-1.5 text-white tabular-nums; font-size: 12px; line-height: 20px; min-width: 20px; text-align: center; }
+  .nav-count { @apply ml-auto rounded-full bg-negative px-1.5 text-white tabular-nums; font-size: 11px; line-height: 18px; min-width: 18px; text-align: center; }
 
   .tab { @apply -mb-px inline-flex items-center gap-2 border-b-2 border-transparent px-1 pb-2.5 text-muted whitespace-nowrap; }
   .tab:hover { @apply text-ink; }
   .tab[aria-selected="true"], .tab[aria-current="page"] { @apply border-ink font-medium text-ink; }
 
-  .chip { @apply inline-flex items-center rounded-full border border-control bg-surface px-3.5 whitespace-nowrap text-ink; min-height: 40px; font-size: 15px; }
+  .chip { @apply inline-flex items-center rounded-full border border-control bg-surface px-3.5 whitespace-nowrap text-ink; min-height: 40px; font-size: 14px; }
   .chip[aria-current="true"] { @apply border-ink bg-ink text-white; }
-
-  /* Language switch: UZ / EN / RU segmented control */
-  .lang-switch { @apply inline-flex rounded-[6px] border border-control bg-surface p-0.5; }
-  .lang-option {
-    @apply rounded-[4px] px-2.5 font-semibold text-muted tabular-nums;
-    min-height: 30px; min-width: 40px; font-size: 13px; letter-spacing: 0.02em;
-  }
-  .lang-option:hover { @apply text-ink bg-raised; }
-  .lang-option[aria-pressed="true"] { @apply bg-ink text-white; }
 
   /* Stock track: quantity against its minimum (the restock strip) */
   .track { @apply relative h-1.5 rounded-full bg-raised; }

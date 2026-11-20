@@ -1,17 +1,16 @@
 {% extends "base.html" %}
-{% load i18n %}
-{% block title %}{% translate "Ruxsat yo'q" %}{% endblock %}
+{% block title %}Ruxsat yo'q{% endblock %}
 {% block content %}
 <div class="panel max-w-[600px] p-6">
-  <h1 class="font-bold" style="font-size:26px;line-height:34px">{% translate "Bu sahifaga ruxsatingiz yo'q" %}</h1>
-  <p class="mt-2 text-muted">{% translate "Bu bo'lim boshqa kasb yoki administrator uchun. Kerak bo'lsa, administratorga murojaat qiling." %}</p>
-  <a href="{% url 'inventory:home' %}" class="btn btn-secondary mt-5">{% translate "Omborga qaytish" %}</a>
+  <h1 class="font-bold" style="font-size:24px;line-height:32px">Bu sahifaga ruxsatingiz yo'q</h1>
+  <p class="mt-2 text-muted">Bu bo'lim boshqa kasb yoki administrator uchun. Kerak bo'lsa, administratorga murojaat qiling.</p>
+  <a href="{% url 'inventory:home' %}" class="btn btn-secondary mt-5">Omborga qaytish</a>
 </div>
 {% endblock %}
 {% block auth %}
 <div class="mx-auto max-w-[400px] px-4 py-16">
-  <h1 class="font-bold" style="font-size:26px;line-height:34px">{% translate "Ruxsat yo'q" %}</h1>
-  <p class="mt-2 text-muted">{% translate "Davom etish uchun tizimga kiring." %}</p>
-  <a href="{% url 'users:login' %}" class="btn btn-primary mt-5">{% translate "Kirish" %}</a>
+  <h1 class="font-bold" style="font-size:24px;line-height:32px">Ruxsat yo'q</h1>
+  <p class="mt-2 text-muted">Davom etish uchun tizimga kiring.</p>
+  <a href="{% url 'users:login' %}" class="btn btn-primary mt-5">Kirish</a>
 </div>
 {% endblock %}

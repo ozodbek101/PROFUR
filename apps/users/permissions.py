@@ -1,7 +1,6 @@
 """Role-based access control for both the HTML views and the DRF API."""
 
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.utils.translation import gettext_lazy as _
 from rest_framework.permissions import BasePermission
 
 
@@ -30,14 +29,14 @@ class WarehouseAdminRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
 
 # --- DRF permission classes ----------------------------------------------------
 class IsApprovedUser(BasePermission):
-    message = _("Hisobingiz administrator tomonidan tasdiqlanmagan.")
+    message = "Hisobingiz administrator tomonidan tasdiqlanmagan."
 
     def has_permission(self, request, view) -> bool:
         return is_approved_user(request.user)
 
 
 class IsWarehouseAdmin(BasePermission):
-    message = _("Bu amal faqat administratorlar uchun.")
+    message = "Bu amal faqat administratorlar uchun."
 
     def has_permission(self, request, view) -> bool:
         return is_warehouse_admin(request.user)

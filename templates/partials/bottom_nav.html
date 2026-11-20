@@ -1,11 +1,11 @@
-{% load wms i18n %}{% with cls="flex flex-col items-center justify-center gap-0.5 text-muted aria-[current=page]:text-accent-ink" %}
-<a href="{% url 'inventory:home' %}" class="{{ cls }}" style="height:60px;font-size:13px" {% if nav_section == "home" %}aria-current="page"{% endif %}>{% icon "box" 22 %}<span>{% translate "Ombor" %}</span></a>
+{% load wms %}{% with cls="flex flex-col items-center justify-center gap-0.5 text-muted aria-[current=page]:text-accent-ink" %}
+<a href="{% url 'inventory:home' %}" class="{{ cls }}" style="height:60px;font-size:12px" {% if nav_section == "home" %}aria-current="page"{% endif %}>{% icon "box" 22 %}<span>Ombor</span></a>
 {% if user.is_warehouse_admin %}
-<a href="{% url 'inventory:dashboard' %}" class="{{ cls }}" style="height:60px;font-size:13px" {% if nav_section == "dashboard" %}aria-current="page"{% endif %}>{% icon "dashboard" 22 %}<span>{% translate "Panel" %}</span></a>
-<a href="{% url 'inventory:kirim' %}" class="{{ cls }}" style="height:60px;font-size:13px" {% if nav_section == "kirim" %}aria-current="page"{% endif %}>{% icon "arrival" 22 %}<span>{% translate "Kirim" %}</span></a>
+<a href="{% url 'inventory:dashboard' %}" class="{{ cls }}" style="height:60px;font-size:12px" {% if nav_section == "dashboard" %}aria-current="page"{% endif %}>{% icon "dashboard" 22 %}<span>Panel</span></a>
+<a href="{% url 'inventory:kirim' %}" class="{{ cls }}" style="height:60px;font-size:12px" {% if nav_section == "kirim" %}aria-current="page"{% endif %}>{% icon "arrival" 22 %}<span>Kirim</span></a>
 {% else %}
-<a href="{% url 'inventory:offcut_add' %}" class="{{ cls }}" style="height:60px;font-size:13px" {% if nav_section == "offcut_add" %}aria-current="page"{% endif %}>{% icon "offcut" 22 %}<span>{% translate "Qoldiq +" %}</span></a>
-<a href="{% url 'inventory:my_history' %}" class="{{ cls }}" style="height:60px;font-size:13px" {% if nav_section == "my_history" %}aria-current="page"{% endif %}>{% icon "clock" 22 %}<span>{% translate "Tarix" %}</span></a>
+<a href="{% url 'inventory:offcut_add' %}" class="{{ cls }}" style="height:60px;font-size:12px" {% if nav_section == "offcut_add" %}aria-current="page"{% endif %}>{% icon "offcut" 22 %}<span>Qoldiq +</span></a>
+<a href="{% url 'inventory:my_history' %}" class="{{ cls }}" style="height:60px;font-size:12px" {% if nav_section == "my_history" %}aria-current="page"{% endif %}>{% icon "clock" 22 %}<span>Tarix</span></a>
 {% endif %}
-<button type="button" class="{{ cls }}" style="height:60px;font-size:13px" @click="menu = true">{% icon "menu" 22 %}<span>{% translate "Menyu" %}{% if nav_pending_users %} ({{ nav_pending_users }}){% endif %}</span></button>
+<button type="button" class="{{ cls }}" style="height:60px;font-size:12px" @click="menu = true">{% icon "menu" 22 %}<span>Menyu{% if nav_pending_users %} ({{ nav_pending_users }}){% endif %}</span></button>
 {% endwith %}

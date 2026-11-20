@@ -1,9 +1,0 @@
-{% load i18n %}{% get_current_language as current_lang %}{% get_available_languages as languages %}
-{# Interface language: UZ / EN / RU. Posts to Django's set_language, which stores a cookie. #}
-<form action="{% url 'set_language' %}" method="post" class="lang-switch" role="group" aria-label="{% translate 'Til' %}">{% csrf_token %}
-  <input type="hidden" name="next" value="{{ request.get_full_path }}">
-  {% for code, name in languages %}{% get_language_info for code as info %}
-    <button type="submit" name="language" value="{{ code }}" class="lang-option" lang="{{ code }}" title="{{ info.name_local }}"
-            aria-pressed="{% if code == current_lang %}true{% else %}false{% endif %}">{{ code|upper }}</button>
-  {% endfor %}
-</form>

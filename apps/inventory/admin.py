@@ -1,16 +1,6 @@
 from django.contrib import admin
 
-from .models import BaseMaterial, Category, InventoryTransaction, LeftoverOffcut, WholeMaterial
-
-
-@admin.register(Category)
-class CategoryAdmin(admin.ModelAdmin):
-    list_display = ("code", "name_uz", "name_en", "name_ru", "supports_offcuts", "sort_order", "is_active")
-    list_editable = ("sort_order", "is_active")
-    readonly_fields = ("code",)
-
-    def has_delete_permission(self, request, obj=None):
-        return False  # materials refer to categories by code; deactivate instead
+from .models import BaseMaterial, InventoryTransaction, LeftoverOffcut, WholeMaterial
 
 
 class WholeMaterialInline(admin.StackedInline):

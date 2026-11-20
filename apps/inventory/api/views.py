@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 from apps.users.permissions import IsWarehouseAdmin
 
 from .. import selectors, services
-from ..models import BaseMaterial, Category, InventoryTransaction, TransactionType
+from ..models import BaseMaterial, InventoryTransaction, MaterialCategory, TransactionType
 from .serializers import (
     BaseMaterialSerializer,
     KirimSerializer,
@@ -24,7 +24,7 @@ def _search_params(request) -> dict:
     category = request.query_params.get("category", "")
     return {
         "query": request.query_params.get("q", "").strip(),
-        "category": category if Category.objects.filter(code=category).exists() else "",
+        "category": category if category in MaterialCategory.values else "",
     }
 
 
@@ -130,7 +130,7 @@ class TransactionViewSet(viewsets.ReadOnlyModelViewSet):
         return selectors.filter_transactions(
             base,
             month=month,
-            category=category if Category.objects.filter(code=category).exists() else "",
+            category=category if category in MaterialCategory.values else "",
             transaction_type=transaction_type if transaction_type in TransactionType.values else "",
             material_id=int(params["material"]) if params.get("material", "").isdigit() else None,
             user_id=int(params["user"]) if user.is_warehouse_admin and params.get("user", "").isdigit() else None,

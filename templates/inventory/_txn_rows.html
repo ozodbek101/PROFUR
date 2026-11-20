@@ -1,21 +1,21 @@
-{% load wms i18n %}{# Ledger rows. Expects `transactions`; `show_user` and `show_price` flags. #}
+{% load wms %}{# Ledger rows. Expects `transactions`; `show_user` and `show_price` flags. #}
 <ul>
   {% for t in transactions %}
-  <li class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 border-t border-rule px-4 py-2.5 md:px-5 {% if show_price %}md:grid-cols-[120px_minmax(0,1fr)_120px_110px_110px]{% else %}md:grid-cols-[120px_minmax(0,1fr)_120px]{% endif %}" style="min-height:52px">
+  <li class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 border-t border-rule px-4 py-2.5 md:px-5 {% if show_price %}md:grid-cols-[110px_minmax(0,1fr)_120px_110px_110px]{% else %}md:grid-cols-[110px_minmax(0,1fr)_120px]{% endif %}" style="min-height:52px">
     <div class="hidden md:block">
-      {% if t.transaction_type == "KIRIM" %}<span class="pill pill-accent">{% translate "Kirim" %}</span>
-      {% elif t.transaction_type == "CHIQIM" %}<span class="pill pill-neutral">{% translate "Chiqim" %}{% if t.is_offcut %} · {% translate "qoldiq" %}{% endif %}</span>
-      {% else %}<span class="pill pill-pos">{% translate "Qoldiq qo'shildi" %}</span>{% endif %}
+      {% if t.transaction_type == "KIRIM" %}<span class="pill pill-accent">Kirim</span>
+      {% elif t.transaction_type == "CHIQIM" %}<span class="pill pill-neutral">Chiqim{% if t.is_offcut %} · qoldiq{% endif %}</span>
+      {% else %}<span class="pill pill-pos">Qoldiq qo'shildi</span>{% endif %}
     </div>
     <div class="min-w-0">
       <p class="truncate font-medium">{{ t.material.name }}{% if t.is_offcut %} <span class="num font-normal text-muted">{{ t.offcut_length_mm }}×{{ t.offcut_width_mm }} mm</span>{% endif %}</p>
-      <p class="truncate text-muted" style="font-size:14px">
-        <span class="md:hidden">{% if t.transaction_type == "KIRIM" %}{% translate "Kirim" %}{% elif t.transaction_type == "CHIQIM" %}{% translate "Chiqim" %}{% else %}{% translate "Qoldiq qo'shildi" %}{% endif %} · </span>{{ t.created_at|date:"j E, H:i" }}{% if show_user %} · {{ t.user.display_name }}{% endif %}{% if t.notes %} · {{ t.notes }}{% endif %}
+      <p class="truncate text-muted" style="font-size:13px">
+        <span class="md:hidden">{% if t.transaction_type == "KIRIM" %}Kirim{% elif t.transaction_type == "CHIQIM" %}Chiqim{% else %}Qoldiq qo'shildi{% endif %} · </span>{{ t.created_at|date:"j E, H:i" }}{% if show_user %} · {{ t.user.display_name }}{% endif %}{% if t.notes %} · {{ t.notes }}{% endif %}
       </p>
     </div>
     <div class="num text-right">
-      <span class="font-semibold">{% if t.quantity_changed > 0 %}+{% else %}−{% endif %}{{ t.quantity_changed|absval|qty }}</span> <span class="text-muted">{% if t.is_offcut %}{% translate "dona" %}{% else %}{{ t.material.unit_short }}{% endif %}</span>
-      {% if show_price %}<p class="text-muted md:hidden" style="font-size:13px">{% if t.total_price_usd %}{{ t.total_price_usd|usd }}{% else %}—{% endif %}</p>{% endif %}
+      <span class="font-semibold">{% if t.quantity_changed > 0 %}+{% else %}−{% endif %}{{ t.quantity_changed|absval|qty }}</span> <span class="text-muted">{% if t.is_offcut %}dona{% else %}{{ t.material.unit_short }}{% endif %}</span>
+      {% if show_price %}<p class="text-muted md:hidden" style="font-size:12px">{% if t.total_price_usd %}{{ t.total_price_usd|usd }}{% else %}—{% endif %}</p>{% endif %}
     </div>
     {% if show_price %}
     <div class="num hidden text-right text-muted md:block">{% if t.unit_price_usd %}{{ t.unit_price_usd|usd:4 }}{% else %}—{% endif %}</div>

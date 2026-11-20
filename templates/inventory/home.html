@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% load wms i18n %}
-{% block title %}{% translate "Ombor" %}{% endblock %}
+{% load wms %}
+{% block title %}Ombor{% endblock %}
 {% block content %}
 {% with whole_count=whole_stock|length offcut_count=offcuts|length %}
 <div x-data="{ tab: '{{ tab }}' }">
@@ -8,15 +8,15 @@
   {# ---- Title row ---- #}
   <div class="flex flex-wrap items-end justify-between gap-4">
     <div class="min-w-0">
-      <h1 class="font-bold text-[26px] leading-8 lg:text-[34px] lg:leading-10">{% translate "Ombor" %}</h1>
-      <p class="mt-1 text-muted" style="font-size:16px">
-        {% if user.is_warehouse_admin %}{% translate "Barcha materiallar" %}{% else %}{% translate "Kasbingiz uchun materiallar" %}: {% for r in user.worker_roles %}{{ r|short_role }}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}
-        · {% blocktranslate count n=whole_count %}<span class="num">{{ n }}</span> material{% plural %}<span class="num">{{ n }}</span> material{% endblocktranslate %}, {% blocktranslate count n=offcut_count %}<span class="num">{{ n }}</span> qoldiq{% plural %}<span class="num">{{ n }}</span> qoldiq{% endblocktranslate %}
+      <h1 class="font-bold text-[24px] leading-8 lg:text-[32px] lg:leading-10">Ombor</h1>
+      <p class="mt-1 text-muted" style="font-size:15px">
+        {% if user.is_warehouse_admin %}Barcha materiallar{% else %}{% for r in user.worker_roles %}{{ r|short_role }}{% if not forloop.last %}, {% endif %}{% endfor %} uchun materiallar{% endif %}
+        · <span class="num">{{ whole_count }}</span> material, <span class="num">{{ offcut_count }}</span> qoldiq
       </p>
     </div>
     <div class="flex gap-2">
-      {% if user.is_warehouse_admin %}<a href="{% url 'inventory:kirim' %}" class="btn btn-secondary">{% icon "arrival" %} {% translate "Kirim" %}</a>{% endif %}
-      {% if can_add_offcut %}<a href="{% url 'inventory:offcut_add' %}" class="btn btn-primary">{% icon "plus" %} {% translate "Qoldiq qo'shish" %}</a>{% endif %}
+      {% if user.is_warehouse_admin %}<a href="{% url 'inventory:kirim' %}" class="btn btn-secondary">{% icon "arrival" %} Kirim</a>{% endif %}
+      {% if can_add_offcut %}<a href="{% url 'inventory:offcut_add' %}" class="btn btn-primary">{% icon "plus" %} Qoldiq qo'shish</a>{% endif %}
     </div>
   </div>
 
@@ -26,14 +26,13 @@
     {% if category %}<input type="hidden" name="category" value="{{ category }}">{% endif %}
     <div class="relative md:w-[316px]">
       <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted">{% icon "search" 16 %}</span>
-      {% translate "Nomi bo'yicha qidirish" as search_label %}
-      <input type="search" name="q" value="{{ query }}" placeholder="{{ search_label }}" aria-label="{{ search_label }}" class="control !pl-9">
+      <input type="search" name="q" value="{{ query }}" placeholder="Nomi bo'yicha qidirish" aria-label="Nomi bo'yicha qidirish" class="control !pl-9">
     </div>
     {% if categories|length > 1 %}
     <div class="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 md:mx-0 md:px-0 md:pb-0">
-      <a class="chip" href="{% query_with category='' %}" {% if not category %}aria-current="true"{% endif %}>{% translate "Hammasi" %}</a>
+      <a class="chip" href="{% query_with category='' %}" {% if not category %}aria-current="true"{% endif %}>Hammasi</a>
       {% for c in categories %}
-        <a class="chip" href="{% query_with category=c.code %}" {% if category == c.code %}aria-current="true"{% endif %}>{{ c.name }}</a>
+        <a class="chip" href="{% query_with category=c.value %}" {% if category == c.value %}aria-current="true"{% endif %}>{{ c.value|cat_label }}</a>
       {% endfor %}
     </div>
     {% endif %}
@@ -41,44 +40,44 @@
 
   {# ---- Tabs (phone and tablet); on desktop both sections are shown, whole above offcuts ---- #}
   <div class="mt-5 flex gap-6 border-b border-line lg:hidden" role="tablist">
-    <a href="{% query_with tab='whole' %}" class="tab" role="tab" :aria-selected="tab === 'whole'" aria-selected="{% if tab == 'whole' %}true{% else %}false{% endif %}" @click.prevent="tab = 'whole'">{% translate "Butun materiallar" %} <span class="num text-muted">{{ whole_count }}</span></a>
-    <a href="{% query_with tab='offcuts' %}" class="tab" role="tab" :aria-selected="tab === 'offcuts'" aria-selected="{% if tab == 'offcuts' %}true{% else %}false{% endif %}" @click.prevent="tab = 'offcuts'">{% translate "Qoldiqlar" %} <span class="num text-muted">{{ offcut_count }}</span></a>
+    <a href="{% query_with tab='whole' %}" class="tab" role="tab" :aria-selected="tab === 'whole'" aria-selected="{% if tab == 'whole' %}true{% else %}false{% endif %}" @click.prevent="tab = 'whole'">Butun materiallar <span class="num text-muted">{{ whole_count }}</span></a>
+    <a href="{% query_with tab='offcuts' %}" class="tab" role="tab" :aria-selected="tab === 'offcuts'" aria-selected="{% if tab == 'offcuts' %}true{% else %}false{% endif %}" @click.prevent="tab = 'offcuts'">Qoldiqlar <span class="num text-muted">{{ offcut_count }}</span></a>
   </div>
 
   {# ================= Butun materiallar ================= #}
   <section class="{% if tab == 'whole' %}block{% else %}hidden lg:block{% endif %} lg:mt-6" :class="tab === 'whole' ? 'block' : 'hidden lg:block'" aria-labelledby="whole-title">
     <div class="panel mt-4 overflow-hidden lg:mt-0">
       <div class="panel-head hidden lg:flex">
-        <h2 id="whole-title" class="panel-title">{% translate "Butun materiallar" %} <span class="num font-normal text-muted">{{ whole_count }}</span></h2>
-        <p class="text-muted" style="font-size:13px">{% translate "Miqdor omborda turgan to'liq birliklarda" %}</p>
+        <h2 id="whole-title" class="panel-title">Butun materiallar <span class="num font-normal text-muted">{{ whole_count }}</span></h2>
+        <p class="text-muted" style="font-size:12px">Miqdor omborda turgan to'liq birliklarda</p>
       </div>
       {% if whole_stock %}
-      <div class="hidden {% if user.is_warehouse_admin %}grid-cols-[minmax(0,1fr)_150px_110px_120px_120px]{% else %}grid-cols-[minmax(0,1fr)_150px_110px_120px]{% endif %} gap-x-4 px-5 pb-2 text-muted md:grid" style="font-size:13px" aria-hidden="true">
-        <span>{% translate "Material" %}</span><span class="text-right">{% translate "Omborda" %}</span><span class="text-right">{% translate "Minimal" %}</span>{% if user.is_warehouse_admin %}<span class="text-right">{% translate "Qiymati" %}</span>{% endif %}<span></span>
+      <div class="hidden {% if user.is_warehouse_admin %}grid-cols-[minmax(0,1fr)_150px_110px_120px_112px]{% else %}grid-cols-[minmax(0,1fr)_150px_110px_112px]{% endif %} gap-x-4 px-5 pb-2 text-muted md:grid" style="font-size:12px" aria-hidden="true">
+        <span>Material</span><span class="text-right">Omborda</span><span class="text-right">Minimal</span>{% if user.is_warehouse_admin %}<span class="text-right">Qiymati</span>{% endif %}<span></span>
       </div>
       <ul>
         {% for stock in whole_stock %}{% with m=stock.material %}
-        <li class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 border-t border-rule px-4 py-3 {% if user.is_warehouse_admin %}md:grid-cols-[minmax(0,1fr)_150px_110px_120px_120px]{% else %}md:grid-cols-[minmax(0,1fr)_150px_110px_120px]{% endif %} md:px-5 md:py-0" style="min-height:58px">
+        <li class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 border-t border-rule px-4 py-3 {% if user.is_warehouse_admin %}md:grid-cols-[minmax(0,1fr)_150px_110px_120px_112px]{% else %}md:grid-cols-[minmax(0,1fr)_150px_110px_112px]{% endif %} md:px-5 md:py-0" style="min-height:56px">
           <div class="min-w-0">
-            <p class="truncate font-medium" style="font-size:16px">{{ m.name }}</p>
-            <p class="truncate text-muted" style="font-size:14px">{{ m.category|cat_label }}{% if stock.length_mm %} · {{ stock.length_mm }}×{{ stock.width_mm }} mm{% endif %}<span class="md:hidden"> · min {{ m.minimum_threshold|qty }}</span></p>
+            <p class="truncate font-medium" style="font-size:15px">{{ m.name }}</p>
+            <p class="truncate text-muted" style="font-size:13px">{{ m.category|cat_label }}{% if stock.length_mm %} · {{ stock.length_mm }}×{{ stock.width_mm }} mm{% endif %}<span class="md:hidden"> · min {{ m.minimum_threshold|qty }}</span></p>
             <p class="mt-1 flex items-center gap-2 md:hidden">
-              <span class="num font-semibold" style="font-size:18px">{{ stock.quantity|qty }}</span><span class="text-muted">{{ m.unit_short }}</span>
-              {% if stock.container_count %}<span class="num text-muted" style="font-size:14px">{% blocktranslate with n=stock.container_count|qty %}≈ {{ n }} idish{% endblocktranslate %}</span>{% endif %}
-              {% if stock.is_below_threshold %}<span class="pill pill-neg">{% translate "Kam qoldi" %}</span>{% endif %}
+              <span class="num font-semibold" style="font-size:17px">{{ stock.quantity|qty }}</span><span class="text-muted">{{ m.unit_short }}</span>
+              {% if stock.container_count %}<span class="num text-muted" style="font-size:13px">≈ {{ stock.container_count|qty }} idish</span>{% endif %}
+              {% if stock.is_below_threshold %}<span class="pill pill-neg">Kam qoldi</span>{% endif %}
             </p>
           </div>
           <div class="hidden text-right md:block">
-            <span class="num font-semibold" style="font-size:16px">{{ stock.quantity|qty }}</span> <span class="text-muted">{{ m.unit_short }}</span>
-            {% if stock.is_below_threshold %}<p><span class="pill pill-neg">{% translate "Kam qoldi" %}</span></p>{% elif stock.container_count %}<p class="num text-muted" style="font-size:13px">{% blocktranslate with n=stock.container_count|qty %}≈ {{ n }} idish{% endblocktranslate %}</p>{% endif %}
+            <span class="num font-semibold" style="font-size:15px">{{ stock.quantity|qty }}</span> <span class="text-muted">{{ m.unit_short }}</span>
+            {% if stock.is_below_threshold %}<p><span class="pill pill-neg">Kam qoldi</span></p>{% elif stock.container_count %}<p class="num text-muted" style="font-size:12px">≈ {{ stock.container_count|qty }} idish</p>{% endif %}
           </div>
           <div class="num hidden text-right text-muted md:block">{{ m.minimum_threshold|qty }} {{ m.unit_short }}</div>
           {% if user.is_warehouse_admin %}<div class="num hidden text-right md:block">{{ stock.total_value_usd|usd }}</div>{% endif %}
           <div class="text-right">
             {% if stock.quantity > 0 %}
-              <a href="{% url 'inventory:withdraw_whole' stock.pk %}" class="btn btn-secondary min-h-11 md:min-h-9" aria-label="{{ m.name }} — {% translate 'oldim' %}">{% icon "take" %} {% translate "Oldim" %}</a>
+              <a href="{% url 'inventory:withdraw_whole' stock.pk %}" class="btn btn-secondary min-h-11 md:min-h-9" aria-label="{{ m.name }} — oldim">{% icon "take" %} Oldim</a>
             {% else %}
-              <span class="pill pill-neutral">{% translate "Tugagan" %}</span>
+              <span class="pill pill-neutral">Tugagan</span>
             {% endif %}
           </div>
         </li>
@@ -86,8 +85,8 @@
       </ul>
       {% else %}
         <div class="border-t border-rule px-5 py-8">
-          <p class="font-medium">{% if query or category %}{% translate "Qidiruv bo'yicha material topilmadi." %}{% else %}{% translate "Kasbingiz uchun hali material qo'shilmagan." %}{% endif %}</p>
-          <p class="mt-1 text-muted">{% if query or category %}<a class="underline underline-offset-4" href="?tab=whole">{% translate "Filtrni tozalash" %}</a>{% elif user.is_warehouse_admin %}<a class="underline underline-offset-4" href="{% url 'inventory:material_create' %}">{% translate "Birinchi materialni qo'shing" %}</a>{% else %}{% translate "Administrator material qo'shgach, shu yerda ko'rinadi." %}{% endif %}</p>
+          <p class="font-medium">{% if query or category %}Qidiruv bo'yicha material topilmadi.{% else %}Kasbingiz uchun hali material qo'shilmagan.{% endif %}</p>
+          <p class="mt-1 text-muted">{% if query or category %}<a class="underline underline-offset-4" href="?tab=whole">Filtrni tozalash</a>{% elif user.is_warehouse_admin %}<a class="underline underline-offset-4" href="{% url 'inventory:material_create' %}">Birinchi materialni qo'shing</a>{% else %}Administrator material qo'shgach, shu yerda ko'rinadi.{% endif %}</p>
         </div>
       {% endif %}
     </div>
@@ -97,37 +96,37 @@
   <section class="{% if tab == 'offcuts' %}block{% else %}hidden lg:block{% endif %} lg:mt-6" :class="tab === 'offcuts' ? 'block' : 'hidden lg:block'" aria-labelledby="offcut-title">
     <div class="panel mt-4 overflow-hidden lg:mt-0">
       <div class="panel-head hidden lg:flex">
-        <h2 id="offcut-title" class="panel-title">{% translate "Qoldiq materiallar" %} <span class="num font-normal text-muted">{{ offcut_count }}</span></h2>
-        <p class="text-muted" style="font-size:13px">{% translate "Kesishdan qolgan, qayta ishlatsa bo'ladigan bo'laklar · rasm list o'lchamiga nisbatan" %}</p>
+        <h2 id="offcut-title" class="panel-title">Qoldiq materiallar <span class="num font-normal text-muted">{{ offcut_count }}</span></h2>
+        <p class="text-muted" style="font-size:12px">Kesishdan qolgan, qayta ishlatsa bo'ladigan bo'laklar · rasm list o'lchamiga nisbatan</p>
       </div>
       {% if offcuts %}
-      <div class="hidden grid-cols-[64px_minmax(0,1fr)_100px_170px_120px] gap-x-4 px-5 pb-2 text-muted md:grid" style="font-size:13px" aria-hidden="true">
-        <span></span><span>{% translate "Material va o'lcham" %}</span><span class="text-right">{% translate "Soni" %}</span><span>{% translate "Kim qo'shgan" %}</span><span></span>
+      <div class="hidden grid-cols-[64px_minmax(0,1fr)_100px_170px_112px] gap-x-4 px-5 pb-2 text-muted md:grid" style="font-size:12px" aria-hidden="true">
+        <span></span><span>Material va o'lcham</span><span class="text-right">Soni</span><span>Kim qo'shgan</span><span></span>
       </div>
       <ul>
         {% for offcut in offcuts %}{% with m=offcut.material %}
-        <li class="grid grid-cols-[64px_minmax(0,1fr)_auto] items-center gap-x-3 border-t border-rule px-4 py-3 md:grid-cols-[64px_minmax(0,1fr)_100px_170px_120px] md:gap-x-4 md:px-5" style="min-height:64px">
+        <li class="grid grid-cols-[64px_minmax(0,1fr)_auto] items-center gap-x-3 border-t border-rule px-4 py-3 md:grid-cols-[64px_minmax(0,1fr)_100px_170px_112px] md:gap-x-4 md:px-5" style="min-height:64px">
           <div class="flex-none">{% offcut_figure offcut.length_mm offcut.width_mm m.whole_stock.length_mm m.whole_stock.width_mm %}</div>
           <div class="min-w-0">
-            <p class="truncate font-medium" style="font-size:16px">{{ m.name }}</p>
-            <p class="num" style="font-size:15px"><span class="whitespace-nowrap">{{ offcut.length_mm }} × {{ offcut.width_mm }} mm</span><span class="whitespace-nowrap text-muted md:hidden"> · {{ offcut.quantity }} {% translate "dona" %}</span></p>
-            {% if offcut.notes %}<p class="truncate text-muted" style="font-size:14px">{{ offcut.notes }}</p>{% endif %}
+            <p class="truncate font-medium" style="font-size:15px">{{ m.name }}</p>
+            <p class="num" style="font-size:14px"><span class="whitespace-nowrap">{{ offcut.length_mm }} × {{ offcut.width_mm }} mm</span><span class="whitespace-nowrap text-muted md:hidden"> · {{ offcut.quantity }} dona</span></p>
+            {% if offcut.notes %}<p class="truncate text-muted" style="font-size:13px">{{ offcut.notes }}</p>{% endif %}
           </div>
-          <div class="num hidden text-right md:block"><span class="font-semibold">{{ offcut.quantity }}</span> <span class="text-muted">{% translate "dona" %}</span></div>
+          <div class="num hidden text-right md:block"><span class="font-semibold">{{ offcut.quantity }}</span> <span class="text-muted">dona</span></div>
           <div class="hidden min-w-0 md:block">
             <p class="truncate">{{ offcut.created_by.display_name|default:"—" }}</p>
-            <p class="text-muted" style="font-size:13px">{{ offcut.created_at|date:"j E, H:i" }}</p>
+            <p class="text-muted" style="font-size:12px">{{ offcut.created_at|date:"j E, H:i" }}</p>
           </div>
           <div class="text-right">
-            <a href="{% url 'inventory:offcut_withdraw' offcut.pk %}" class="btn btn-secondary min-h-11 md:min-h-9" aria-label="{{ m.name }} {{ offcut.length_mm }}×{{ offcut.width_mm }} — {% translate 'oldim' %}">{% icon "take" %} {% translate "Oldim" %}</a>
+            <a href="{% url 'inventory:offcut_withdraw' offcut.pk %}" class="btn btn-secondary min-h-11 md:min-h-9" aria-label="{{ m.name }} {{ offcut.length_mm }}×{{ offcut.width_mm }} — oldim">{% icon "take" %} Oldim</a>
           </div>
         </li>
         {% endwith %}{% endfor %}
       </ul>
       {% else %}
         <div class="border-t border-rule px-5 py-8">
-          <p class="font-medium">{% if query or category %}{% translate "Qidiruv bo'yicha qoldiq topilmadi." %}{% else %}{% translate "Hozircha qoldiq yo'q." %}{% endif %}</p>
-          <p class="mt-1 text-muted">{% translate "List kesgandan keyin ishlatsa bo'ladigan bo'lak qolsa, uni qo'shing — keyingi buyurtmada shu yerdan topasiz." %}{% if can_add_offcut %} <a class="font-medium text-ink underline underline-offset-4" href="{% url 'inventory:offcut_add' %}">{% translate "Qoldiq qo'shish" %}</a>{% endif %}</p>
+          <p class="font-medium">{% if query or category %}Qidiruv bo'yicha qoldiq topilmadi.{% else %}Hozircha qoldiq yo'q.{% endif %}</p>
+          <p class="mt-1 text-muted">List kesgandan keyin ishlatsa bo'ladigan bo'lak qolsa, uni qo'shing — keyingi buyurtmada shu yerdan topasiz.{% if can_add_offcut %} <a class="font-medium text-ink underline underline-offset-4" href="{% url 'inventory:offcut_add' %}">Qoldiq qo'shish</a>{% endif %}</p>
         </div>
       {% endif %}
     </div>

@@ -1,46 +1,46 @@
 {% extends "base.html" %}
-{% load static wms i18n %}
-{% block title %}{% translate "Panel" %}{% endblock %}
+{% load static wms %}
+{% block title %}Panel{% endblock %}
 {% block content %}
 {% with low_count=low_stock|length %}
-{# Grid (xl+): canvas 1440 − 240 sidebar − 2×29 gutters = 1142 = 734 main + 24 gap + 384 rail. The KPI strip goes 2×2 when the main column is narrower than 42rem. #}
+{# Grid: canvas 1440 − 230 sidebar − 2×29 gutters = 1152 = 744 main + 24 gap + 384 rail #}
 
 <div class="flex flex-wrap items-end justify-between gap-4">
   <div class="min-w-0">
-    <h1 class="font-bold text-[26px] leading-8 lg:text-[34px] lg:leading-10">{% translate "Panel" %}</h1>
-    <p class="mt-1" style="font-size:16px">
-      {% if low_count %}<span class="font-medium text-negative">{% blocktranslate count n=low_count %}{{ n }} ta material minimal qoldiqdan kam{% plural %}{{ n }} ta material minimal qoldiqdan kam{% endblocktranslate %}</span> <span class="text-muted">— {% translate "xarid ro'yxati pastda." %}</span>
-      {% else %}<span class="text-muted">{% translate "Barcha materiallar minimal qoldiqdan yuqori." %}</span>{% endif %}
+    <h1 class="font-bold text-[24px] leading-8 lg:text-[32px] lg:leading-10">Panel</h1>
+    <p class="mt-1" style="font-size:15px">
+      {% if low_count %}<span class="font-medium text-negative">{{ low_count }} ta material minimal qoldiqdan kam</span> <span class="text-muted">— xarid ro'yxati pastda.</span>
+      {% else %}<span class="text-muted">Barcha materiallar minimal qoldiqdan yuqori.</span>{% endif %}
     </p>
   </div>
-  <a href="{% url 'inventory:kirim' %}" class="btn btn-primary">{% icon "arrival" %} {% translate "Kirim qo'shish" %}</a>
+  <a href="{% url 'inventory:kirim' %}" class="btn btn-primary">{% icon "arrival" %} Kirim qo'shish</a>
 </div>
 
-<div class="mt-6 grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_384px]">
+<div class="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_384px]">
   {# ===================== Main column ===================== #}
-  <div class="@container grid min-w-0 gap-6">
+  <div class="grid min-w-0 gap-6">
 
     {# KPI strip: one container split by dividers #}
-    <section class="panel grid grid-cols-2 @2xl:grid-cols-[1.35fr_1fr_1fr_1fr]" aria-label="{% translate "Asosiy ko'rsatkichlar" %}">
-      <div class="col-span-2 border-b border-line p-5 @2xl:col-span-1 @2xl:border-b-0 @2xl:border-r">
-        <p class="text-muted">{% translate "Ombor qiymati" %}</p>
-        <p class="num mt-1 font-semibold whitespace-nowrap" style="font-size:clamp(26px, 2.4vw, 34px);line-height:40px">{{ valuation_usd|usd }}</p>
-        <p class="mt-1 text-muted" style="font-size:13px">{% blocktranslate count n=material_count %}<span class="num">{{ n }}</span> material, o'rtacha xarid narxida{% plural %}<span class="num">{{ n }}</span> material, o'rtacha xarid narxida{% endblocktranslate %}</p>
+    <section class="panel grid grid-cols-2 md:grid-cols-[1.35fr_1fr_1fr_1fr]" aria-label="Asosiy ko'rsatkichlar">
+      <div class="col-span-2 border-b border-line p-5 md:col-span-1 md:border-b-0 md:border-r">
+        <p class="text-muted">Ombor qiymati</p>
+        <p class="num mt-1 font-semibold whitespace-nowrap" style="font-size:clamp(24px, 2.4vw, 32px);line-height:40px">{{ valuation_usd|usd }}</p>
+        <p class="mt-1 text-muted" style="font-size:12px"><span class="num">{{ material_count }}</span> material, o'rtacha xarid narxida</p>
       </div>
       <div class="border-r border-line p-5">
-        <p class="text-muted">{% blocktranslate with month=current_flow.month|uz_month %}Kirim, {{ month }}{% endblocktranslate %}</p>
-        <p class="num mt-1 font-semibold" style="font-size:26px;line-height:34px">{{ current_flow.kirim_usd|usd }}</p>
-        <p class="mt-1 text-muted" style="font-size:13px">{% blocktranslate count n=current_flow.kirim_count %}<span class="num">{{ n }}</span> ta yozuv{% plural %}<span class="num">{{ n }}</span> ta yozuv{% endblocktranslate %}{% if previous_flow %} · {{ previous_flow.month|uz_month }}: <span class="num">{{ previous_flow.kirim_usd|usd }}</span>{% endif %}</p>
+        <p class="text-muted">Kirim, {{ current_flow.month|uz_month }}</p>
+        <p class="num mt-1 font-semibold" style="font-size:24px;line-height:32px">{{ current_flow.kirim_usd|usd }}</p>
+        <p class="mt-1 text-muted" style="font-size:12px"><span class="num">{{ current_flow.kirim_count }}</span> ta yozuv{% if previous_flow %} · {{ previous_flow.month|uz_month }}: <span class="num">{{ previous_flow.kirim_usd|usd }}</span>{% endif %}</p>
       </div>
-      <div class="p-5 @2xl:border-r @2xl:border-line">
-        <p class="text-muted">{% blocktranslate with month=current_flow.month|uz_month %}Chiqim, {{ month }}{% endblocktranslate %}</p>
-        <p class="num mt-1 font-semibold" style="font-size:26px;line-height:34px">{{ current_flow.chiqim_usd|usd }}</p>
-        <p class="mt-1 text-muted" style="font-size:13px">{% blocktranslate count n=current_flow.chiqim_count %}<span class="num">{{ n }}</span> ta yozuv{% plural %}<span class="num">{{ n }}</span> ta yozuv{% endblocktranslate %}{% if previous_flow %} · {{ previous_flow.month|uz_month }}: <span class="num">{{ previous_flow.chiqim_usd|usd }}</span>{% endif %}</p>
+      <div class="p-5 md:border-r md:border-line">
+        <p class="text-muted">Chiqim, {{ current_flow.month|uz_month }}</p>
+        <p class="num mt-1 font-semibold" style="font-size:24px;line-height:32px">{{ current_flow.chiqim_usd|usd }}</p>
+        <p class="mt-1 text-muted" style="font-size:12px"><span class="num">{{ current_flow.chiqim_count }}</span> ta yozuv{% if previous_flow %} · {{ previous_flow.month|uz_month }}: <span class="num">{{ previous_flow.chiqim_usd|usd }}</span>{% endif %}</p>
       </div>
-      <div class="col-span-2 border-t border-line p-5 @2xl:col-span-1 @2xl:border-t-0">
-        <p class="text-muted">{% translate "Qoldiqlar" %}</p>
-        <p class="num mt-1 font-semibold" style="font-size:26px;line-height:34px">{{ offcut_count }} <span class="font-normal text-muted" style="font-size:15px">{% blocktranslate count n=offcut_count %}bo'lak{% plural %}bo'lak{% endblocktranslate %}</span></p>
-        <p class="mt-1 text-muted" style="font-size:13px">{% if offcut_value_usd %}{% blocktranslate with value=offcut_value_usd|usd %}taxminan <span class="num">{{ value }}</span>, qiymatga kirmaydi{% endblocktranslate %}{% else %}{% translate "qiymatga kirmaydi" %}{% endif %}</p>
+      <div class="col-span-2 border-t border-line p-5 md:col-span-1 md:border-t-0">
+        <p class="text-muted">Qoldiqlar</p>
+        <p class="num mt-1 font-semibold" style="font-size:24px;line-height:32px">{{ offcut_count }} <span class="font-normal text-muted" style="font-size:14px">bo'lak</span></p>
+        <p class="mt-1 text-muted" style="font-size:12px">{% if offcut_value_usd %}taxminan <span class="num">{{ offcut_value_usd|usd }}</span>, qiymatga kirmaydi{% else %}qiymatga kirmaydi{% endif %}</p>
       </div>
     </section>
 
@@ -48,16 +48,16 @@
     <section class="panel" aria-labelledby="flow-title">
       <div class="panel-head">
         <div>
-          <h2 id="flow-title" class="panel-title">{% translate "Kirim va chiqim" %}</h2>
-          <p class="text-muted" style="font-size:13px">{% blocktranslate with month=current_flow.month|uz_month %}oxirgi 6 oy, USD · {{ month }} hali tugamagan{% endblocktranslate %}</p>
+          <h2 id="flow-title" class="panel-title">Kirim va chiqim</h2>
+          <p class="text-muted" style="font-size:12px">oxirgi 6 oy, USD · {{ current_flow.month|uz_month }} hali tugamagan</p>
         </div>
-        <div id="flow-legend" class="text-muted" style="font-size:13px"></div>
+        <div id="flow-legend" class="text-muted" style="font-size:12px"></div>
       </div>
       <div class="px-5 pb-5">
         <div id="flow-chart" class="min-h-[220px]"></div>
         {{ flow_chart|json_script:"flow-data" }}
         <noscript>
-          <table class="data-table mt-2"><thead><tr><th>{% translate "Oy" %}</th><th class="num">{% translate "Kirim" %}</th><th class="num">{% translate "Chiqim" %}</th></tr></thead>
+          <table class="data-table mt-2"><thead><tr><th>Oy</th><th class="num">Kirim</th><th class="num">Chiqim</th></tr></thead>
             <tbody>{% for f in month_flows %}<tr><td>{{ f.month|uz_month|capfirst }}</td><td class="num">{{ f.kirim_usd|usd }}</td><td class="num">{{ f.chiqim_usd|usd }}</td></tr>{% endfor %}</tbody></table>
         </noscript>
       </div>
@@ -66,8 +66,8 @@
     {# Restock strip: quantity against minimum #}
     <section class="panel" aria-labelledby="low-title">
       <div class="panel-head">
-        <h2 id="low-title" class="panel-title">{% translate "Xarid ro'yxati" %} {% if low_count %}<span class="num font-normal text-muted">{{ low_count }}</span>{% endif %}</h2>
-        <p class="text-muted" style="font-size:13px">{% translate "omborda / minimal qoldiq" %}</p>
+        <h2 id="low-title" class="panel-title">Xarid ro'yxati {% if low_count %}<span class="num font-normal text-muted">{{ low_count }}</span>{% endif %}</h2>
+        <p class="text-muted" style="font-size:12px">omborda / minimal qoldiq</p>
       </div>
       {% if low_stock %}
       <ul>
@@ -75,7 +75,7 @@
         <li class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 border-t border-rule px-5 py-3 md:grid-cols-[minmax(0,1fr)_200px_150px_auto]">
           <div class="min-w-0">
             <p class="truncate font-medium">{{ m.name }}</p>
-            <p class="text-muted" style="font-size:14px"><span class="text-negative whitespace-nowrap">{% blocktranslate with qty=stock.shortfall|qty unit=m.unit_short %}{{ qty }} {{ unit }} yetishmaydi{% endblocktranslate %}</span> · {{ m.category|cat_label }}</p>
+            <p class="text-muted" style="font-size:13px"><span class="text-negative whitespace-nowrap">{{ stock.shortfall|qty }} {{ m.unit_short }} yetishmaydi</span> · {{ m.category|cat_label }}</p>
           </div>
           <div class="order-3 col-span-2 md:order-none md:col-span-1">
             <div class="track" role="img" aria-label="{{ stock.quantity|qty }} / {{ m.minimum_threshold|qty }} {{ m.unit_short }}">
@@ -84,12 +84,12 @@
             </div>
           </div>
           <p class="num text-right"><span class="font-semibold">{{ stock.quantity|qty }}</span> <span class="text-muted">/ {{ m.minimum_threshold|qty }} {{ m.unit_short }}</span></p>
-          <a class="btn btn-secondary hidden md:inline-flex" href="{% url 'inventory:kirim' %}?material={{ m.pk }}">{% translate "Kirim" %}</a>
+          <a class="btn btn-secondary hidden md:inline-flex" href="{% url 'inventory:kirim' %}?material={{ m.pk }}">Kirim</a>
         </li>
         {% endwith %}{% endfor %}
       </ul>
       {% else %}
-        <p class="border-t border-rule px-5 py-6 text-muted">{% translate "Hozir hech narsa minimal qoldiqdan kam emas. Material kamayganda shu yerda ko'rinadi." %}</p>
+        <p class="border-t border-rule px-5 py-6 text-muted">Hozir hech narsa minimal qoldiqdan kam emas. Material kamayganda shu yerda ko'rinadi.</p>
       {% endif %}
     </section>
   </div>
@@ -99,7 +99,7 @@
     <section aria-labelledby="pending-title">
       <div class="panel">
         <div class="panel-head">
-          <h2 id="pending-title" class="panel-title">{% translate "Tasdiq kutayotgan ishchilar" %} {% if nav_pending_users %}<span class="num font-normal text-muted">{{ nav_pending_users }}</span>{% endif %}</h2>
+          <h2 id="pending-title" class="panel-title">Tasdiq kutayotgan ishchilar {% if nav_pending_users %}<span class="num font-normal text-muted">{{ nav_pending_users }}</span>{% endif %}</h2>
         </div>
         {% if pending_users %}
         <ul>
@@ -107,37 +107,37 @@
           <li class="flex items-center gap-3 border-t border-rule px-5 py-2.5">
             <div class="min-w-0 flex-1">
               <p class="truncate font-medium">{{ p.display_name }}</p>
-              <p class="truncate text-muted" style="font-size:14px">{% for r in p.roles %}{{ r|short_role }}{% if not forloop.last %}, {% endif %}{% endfor %} · {{ p.date_joined|date:"j E" }}</p>
+              <p class="truncate text-muted" style="font-size:13px">{% for r in p.roles %}{{ r|short_role }}{% if not forloop.last %}, {% endif %}{% endfor %} · {{ p.date_joined|date:"j E" }}</p>
             </div>
-            <a class="btn btn-secondary" href="{% url 'users:pending_user_review' p.pk %}">{% translate "Ko'rish" %}</a>
+            <a class="btn btn-secondary" href="{% url 'users:pending_user_review' p.pk %}">Ko'rish</a>
           </li>
           {% endfor %}
         </ul>
-        <div class="border-t border-rule px-5 py-3"><a class="btn btn-ghost -ml-3.5" href="{% url 'users:pending_users' %}">{% translate "Barcha so'rovlar" %}</a></div>
+        <div class="border-t border-rule px-5 py-3"><a class="btn btn-ghost -ml-3.5" href="{% url 'users:pending_users' %}">Barcha so'rovlar</a></div>
         {% else %}
-          <p class="border-t border-rule px-5 py-5 text-muted">{% translate "Yangi so'rov yo'q." %}</p>
+          <p class="border-t border-rule px-5 py-5 text-muted">Yangi so'rov yo'q.</p>
         {% endif %}
       </div>
     </section>
 
     <section aria-labelledby="recent-title">
       <div class="panel overflow-hidden">
-        <div class="panel-head"><h2 id="recent-title" class="panel-title">{% translate "Oxirgi harakatlar" %}</h2></div>
+        <div class="panel-head"><h2 id="recent-title" class="panel-title">Oxirgi harakatlar</h2></div>
         {% if recent_transactions %}
         <ul>
           {% for t in recent_transactions|slice:":6" %}
           <li class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 border-t border-rule px-5 py-2.5">
             <div class="min-w-0">
               <p class="truncate font-medium">{{ t.material.name }}</p>
-              <p class="truncate text-muted" style="font-size:14px">{% if t.transaction_type == "KIRIM" %}{% translate "Kirim" %}{% elif t.transaction_type == "CHIQIM" %}{% translate "Chiqim" %}{% else %}{% translate "Qoldiq" %}{% endif %} · {{ t.user.display_name }} · {{ t.created_at|date:"j E, H:i" }}</p>
+              <p class="truncate text-muted" style="font-size:13px">{% if t.transaction_type == "KIRIM" %}Kirim{% elif t.transaction_type == "CHIQIM" %}Chiqim{% else %}Qoldiq{% endif %} · {{ t.user.display_name }} · {{ t.created_at|date:"j E, H:i" }}</p>
             </div>
-            <p class="num text-right"><span class="font-semibold">{% if t.quantity_changed > 0 %}+{% else %}−{% endif %}{{ t.quantity_changed|absval|qty }}</span> <span class="text-muted">{% if t.is_offcut %}{% translate "dona" %}{% else %}{{ t.material.unit_short }}{% endif %}</span></p>
+            <p class="num text-right"><span class="font-semibold">{% if t.quantity_changed > 0 %}+{% else %}−{% endif %}{{ t.quantity_changed|absval|qty }}</span> <span class="text-muted">{% if t.is_offcut %}dona{% else %}{{ t.material.unit_short }}{% endif %}</span></p>
           </li>
           {% endfor %}
         </ul>
-        <div class="border-t border-rule px-5 py-3"><a class="btn btn-ghost -ml-3.5" href="{% url 'inventory:reports' %}">{% translate "Oylik hisobot" %}</a></div>
+        <div class="border-t border-rule px-5 py-3"><a class="btn btn-ghost -ml-3.5" href="{% url 'inventory:reports' %}">Oylik hisobot</a></div>
         {% else %}
-          <p class="border-t border-rule px-5 py-5 text-muted">{% translate "Hali harakat yo'q. Birinchi kirimni kiriting." %}</p>
+          <p class="border-t border-rule px-5 py-5 text-muted">Hali harakat yo'q. Birinchi kirimni kiriting.</p>
         {% endif %}
       </div>
     </section>
@@ -147,8 +147,6 @@
 {% endblock %}
 
 {% block scripts %}
-{% translate "Kirim" as label_up %}{% translate "Chiqim" as label_down %}
-{% translate "Oylik kirim (chiziq ustida) va chiqim (chiziq ostida)" as chart_label %}
 <script src="{% static 'vendor/charts.js' %}"></script>
 <script>
   (function () {
@@ -158,11 +156,11 @@
     var draw = function () {
       Charts.diverging(el, {
         labels: data.labels, up: data.up, down: data.down,
-        above: '{{ label_up|escapejs }}', below: '{{ label_down|escapejs }}', format: usd, height: 220, partial: data.labels.length - 1,
+        above: 'Kirim', below: 'Chiqim', format: usd, height: 220, partial: data.labels.length - 1,
         captions: false, legend: '#flow-legend'
       });
       var svg = el.querySelector('svg');
-      if (svg) svg.setAttribute('aria-label', '{{ chart_label|escapejs }}, ' + data.labels[0] + ' – ' + data.labels[data.labels.length - 1] + ', USD');
+      if (svg) svg.setAttribute('aria-label', 'Oylik kirim (chiziq ustida) va chiqim (chiziq ostida), ' + data.labels[0] + ' – ' + data.labels[data.labels.length - 1] + ', USD');
     };
     if (document.fonts && document.fonts.ready) { document.fonts.ready.then(draw); } else { draw(); }
   })();
