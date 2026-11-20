@@ -5,12 +5,13 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from django.views import View
 from django.views.generic import CreateView, ListView, TemplateView, UpdateView
 
 from . import services
-from .forms import LoginForm, RoleAssignmentForm, UserAdminEditForm, WorkerRegistrationForm
-from .models import User
+from .forms import LoginForm, RoleAssignmentForm, UserAdminEditForm, WorkerRegistrationForm, WorkerRoleForm
+from .models import User, WorkerRole
 from .permissions import WarehouseAdminRequiredMixin
 
 
@@ -63,7 +64,7 @@ class PendingUserReviewView(WarehouseAdminRequiredMixin, UpdateView):
     def form_valid(self, form):
         user = form.save(commit=False)
         services.approve_user(user, approved_by=self.request.user, roles=form.cleaned_data["roles"])
-        messages.success(self.request, f"{user.display_name} tasdiqlandi va tizimga kira oladi.")
+        messages.success(self.request, _("%(name)s tasdiqlandi va tizimga kira oladi.") % {"name": user.display_name})
         return redirect("users:pending_users")
 
 
@@ -78,7 +79,7 @@ class RejectRegistrationView(WarehouseAdminRequiredMixin, View):
         except ValidationError as exc:
             messages.error(request, " ".join(exc.messages))
         else:
-            messages.info(request, f"{name} so'rovi rad etildi.")
+            messages.info(request, _("%(name)s so'rovi rad etildi.") % {"name": name})
         return redirect("users:pending_users")
 
 
@@ -117,5 +118,52 @@ class UserUpdateView(WarehouseAdminRequiredMixin, UpdateView):
             user.approved_at = timezone.now()
             user.approved_by = self.request.user
         user.save()
-        messages.success(self.request, f"{user.display_name} ma'lumotlari saqlandi.")
+        messages.success(self.request, _("%(name)s ma'lumotlari saqlandi.") % {"name": user.display_name})
         return redirect(reverse("users:user_list"))
+
+
+# ---------------------------------------------------------------------------
+# Admin dashboard: worker types (trades)
+# ---------------------------------------------------------------------------
+class WorkerRoleListView(WarehouseAdminRequiredMixin, ListView):
+    template_name = "users/worker_role_list.html"
+    context_object_name = "roles"
+
+    def get_queryset(self):
+        return WorkerRole.objects.all()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        counts: dict[str, int] = {}
+        for roles in User.objects.filter(is_active=True).values_list("roles", flat=True):
+            for code in roles or []:
+                counts[code] = counts.get(code, 0) + 1
+        for role in context["roles"]:
+            role.user_count = counts.get(role.code, 0)
+        return context
+
+
+class WorkerRoleCreateView(WarehouseAdminRequiredMixin, CreateView):
+    form_class = WorkerRoleForm
+    template_name = "users/worker_role_form.html"
+
+    def form_valid(self, form):
+        role = form.save()
+        messages.success(
+            self.request,
+            _("“%(name)s” kasbi qo'shildi. Endi materiallarda shu kasbni belgilang.") % {"name": role.name},
+        )
+        return redirect("users:worker_role_list")
+
+
+class WorkerRoleUpdateView(WarehouseAdminRequiredMixin, UpdateView):
+    model = WorkerRole
+    form_class = WorkerRoleForm
+    template_name = "users/worker_role_form.html"
+    context_object_name = "role"
+
+    def form_valid(self, form):
+        role = form.save()
+        messages.success(self.request, _("“%(name)s” saqlandi.") % {"name": role.name})
+        return redirect("users:worker_role_list")
+

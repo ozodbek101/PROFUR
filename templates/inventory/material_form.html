@@ -1,26 +1,28 @@
 {% extends "base.html" %}
-{% load wms %}
-{% block title %}{% if material %}{{ material.name }}{% else %}Yangi material{% endif %}{% endblock %}
+{% load wms i18n %}
+{% block title %}{% if material %}{{ material.name }}{% else %}{% translate "Yangi material" %}{% endif %}{% endblock %}
 {% block content %}
-<a href="{% url 'inventory:material_list' %}" class="inline-flex items-center gap-1.5 text-muted hover:text-ink">{% icon "back" %} Materiallar</a>
-<h1 class="mt-3 font-bold text-[24px] leading-8 lg:text-[32px] lg:leading-10">{% if material %}{{ material.name }}{% else %}Yangi material{% endif %}</h1>
-<p class="mt-1 text-muted" style="font-size:15px">{% if material %}Narx kirim orqali o'rtacha hisoblanadi: hozir {{ material.unit_price_usd|usd:4 }} / {{ material.unit_short }}{% else %}Kartani yarating, keyin kirim bilan miqdor va narxni kiriting.{% endif %}</p>
+<a href="{% url 'inventory:material_list' %}" class="inline-flex items-center gap-1.5 text-muted hover:text-ink">{% icon "back" %} {% translate "Materiallar" %}</a>
+<h1 class="mt-3 font-bold text-[26px] leading-8 lg:text-[34px] lg:leading-10">{% if material %}{{ material.name }}{% else %}{% translate "Yangi material" %}{% endif %}</h1>
+<p class="mt-1 text-muted" style="font-size:16px">{% if material %}{% blocktranslate with price=material.unit_price_usd|usd:4 unit=material.unit_short %}Narx kirim orqali o'rtacha hisoblanadi: hozir {{ price }} / {{ unit }}{% endblocktranslate %}{% else %}{% translate "Kartani yarating, keyin kirim bilan miqdor va narxni kiriting." %}{% endif %}</p>
 
+{{ offcut_categories|json_script:"offcut-categories" }}
 <form method="post" class="mt-6 grid max-w-[920px] gap-6" novalidate
-      x-data="{ category: '{{ form.category.value|default_if_none:''|escapejs }}' }">
+      x-data="{ category: '{{ form.category.value|default_if_none:''|escapejs }}', sized: JSON.parse(document.getElementById('offcut-categories').textContent) }">
   {% csrf_token %}
   {% include "partials/form_errors.html" %}
 
   <section class="panel grid gap-6 p-5 sm:p-6 md:grid-cols-[220px_minmax(0,1fr)]">
-    <div><h2 class="panel-title">Asosiy</h2><p class="mt-1 text-muted" style="font-size:13px">Nomi ishchilar ro'yxatda ko'radigan ko'rinishda bo'lsin: “MDF 16 mm oq”.</p></div>
+    <div><h2 class="panel-title">{% translate "Asosiy" %}</h2><p class="mt-1 text-muted" style="font-size:14px">{% translate "Nomi ishchilar ro'yxatda ko'radigan ko'rinishda bo'lsin: “MDF 16 mm oq”." %}</p></div>
     <div class="form-stack">
       {% include "partials/field.html" with field=form.name %}
       <div class="grid gap-4 sm:grid-cols-2">
         <div class="{% if form.category.errors %}has-error{% endif %}">
           <label class="field-label" for="{{ form.category.id_for_label }}">{{ form.category.label }}</label>
           <select name="{{ form.category.html_name }}" id="{{ form.category.id_for_label }}" x-model="category">
-            {% for value, label in form.category.field.choices %}<option value="{{ value }}" {% if form.category.value == value %}selected{% endif %}>{% if value %}{{ value|cat_label }}{% else %}Tanlang{% endif %}</option>{% endfor %}
+            {% for value, label in form.category.field.choices %}<option value="{{ value }}" {% if form.category.value == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
           </select>
+          <p class="field-help"><a class="underline underline-offset-4" href="{% url 'inventory:category_create' %}">{% translate "Yangi kategoriya qo'shish" %}</a></p>
           {% for e in form.category.errors %}<p class="field-error">{{ e }}</p>{% endfor %}
         </div>
         {% include "partials/field.html" with field=form.unit_of_measure %}
@@ -29,18 +31,18 @@
   </section>
 
   <section class="panel grid gap-6 p-5 sm:p-6 md:grid-cols-[220px_minmax(0,1fr)]">
-    <div><h2 class="panel-title">Kim ko'radi va oladi</h2><p class="mt-1 text-muted" style="font-size:13px">Belgilanmagan kasbdagi ishchilar bu materialni umuman ko'rmaydi.</p></div>
+    <div><h2 class="panel-title">{% translate "Kim ko'radi va oladi" %}</h2><p class="mt-1 text-muted" style="font-size:14px">{% translate "Belgilanmagan kasbdagi ishchilar bu materialni umuman ko'rmaydi." %}</p></div>
     <div class="form-stack">{% include "partials/field.html" with field=form.allowed_roles %}</div>
   </section>
 
   <section class="panel grid gap-6 p-5 sm:p-6 md:grid-cols-[220px_minmax(0,1fr)]">
-    <div><h2 class="panel-title">Hajm va o'lcham</h2><p class="mt-1 text-muted" style="font-size:13px">List o'lchami qoldiqlarni listga nisbatan ko'rsatish va tekshirish uchun kerak.</p></div>
+    <div><h2 class="panel-title">{% translate "Hajm va o'lcham" %}</h2><p class="mt-1 text-muted" style="font-size:14px">{% translate "List o'lchami qoldiqlarni listga nisbatan ko'rsatish va tekshirish uchun kerak." %}</p></div>
     <div class="form-stack">
       <div class="grid gap-4 sm:grid-cols-2">
         {% include "partials/field.html" with field=form.minimum_threshold %}
         {% include "partials/field.html" with field=form.container_size %}
       </div>
-      <div class="grid gap-4 sm:grid-cols-2" x-show="category === 'SHEET' || category === 'LINEAR' || {% if form.length_mm.value %}true{% else %}false{% endif %}">
+      <div class="grid gap-4 sm:grid-cols-2" x-show="sized.includes(category) || {% if form.length_mm.value %}true{% else %}false{% endif %}">
         {% include "partials/field.html" with field=form.length_mm %}
         {% include "partials/field.html" with field=form.width_mm %}
       </div>
@@ -49,14 +51,14 @@
 
   {% if form.is_active %}
   <section class="panel grid gap-6 p-5 sm:p-6 md:grid-cols-[220px_minmax(0,1fr)]">
-    <div><h2 class="panel-title">Holati</h2><p class="mt-1 text-muted" style="font-size:13px">Material o'chirilmaydi — tarix saqlanib qolishi uchun arxivlanadi.</p></div>
+    <div><h2 class="panel-title">{% translate "Holati" %}</h2><p class="mt-1 text-muted" style="font-size:14px">{% translate "Material o'chirilmaydi — tarix saqlanib qolishi uchun arxivlanadi." %}</p></div>
     <div class="form-stack">{% include "partials/field.html" with field=form.is_active %}</div>
   </section>
   {% endif %}
 
   <div class="flex justify-end gap-2">
-    <a href="{% url 'inventory:material_list' %}" class="btn btn-secondary btn-lg">Bekor qilish</a>
-    <button type="submit" class="btn btn-primary btn-lg">{% if material %}Saqlash{% else %}Yaratish va kirimga o'tish{% endif %}</button>
+    <a href="{% url 'inventory:material_list' %}" class="btn btn-secondary btn-lg">{% translate "Bekor qilish" %}</a>
+    <button type="submit" class="btn btn-primary btn-lg">{% if material %}{% translate "Saqlash" %}{% else %}{% translate "Yaratish va kirimga o'tish" %}{% endif %}</button>
   </div>
 </form>
 {% endblock %}

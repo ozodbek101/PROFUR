@@ -106,11 +106,13 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "apps.users.middleware.CookieLocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "apps.users.middleware.LabelCacheMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -125,6 +127,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "django.template.context_processors.i18n",
                 "apps.inventory.context_processors.navigation",
             ],
         },
@@ -160,9 +163,18 @@ SESSION_COOKIE_AGE = 60 * 60 * 24 * 14  # two weeks: workshop phones stay logged
 SESSION_COOKIE_HTTPONLY = True
 
 # ---------------------------------------------------------------------------
-# Internationalisation (UI copy is Uzbek Latin; money is always USD)
+# Internationalisation: Uzbek (Latin, the source language of all UI strings),
+# English and Russian. Users switch with the language menu; the choice is kept in
+# a cookie. Money is always USD. Translations live in locale/ (see scripts/i18n.py).
 # ---------------------------------------------------------------------------
 LANGUAGE_CODE = "uz"
+LANGUAGES = [
+    ("uz", "O'zbekcha"),
+    ("en", "English"),
+    ("ru", "Русский"),
+]
+LOCALE_PATHS = [BASE_DIR / "locale"]
+LANGUAGE_COOKIE_AGE = 60 * 60 * 24 * 365
 TIME_ZONE = env("DJANGO_TIME_ZONE", "Asia/Tashkent")
 USE_I18N = True
 USE_TZ = True

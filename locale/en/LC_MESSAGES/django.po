@@ -1,0 +1,1812 @@
+# English translation of Mebel Ombori. Source language: Uzbek (uz).
+# Edit msgstr values, then run: python scripts/i18n.py compile
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: mebel-ombori\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: apps/inventory/apps.py:10 templates/base.html:7 templates/inventory/home.html:3 templates/inventory/home.html:11
+#: templates/inventory/offcut_form.html:26 templates/inventory/withdraw_offcut.html:7 templates/inventory/withdraw_whole.html:15 templates/partials/bottom_nav.html:2
+#: templates/partials/nav.html:2
+msgid "Ombor"
+msgstr "Warehouse"
+
+#: apps/inventory/forms.py:106 apps/inventory/forms.py:186 apps/inventory/forms.py:231 apps/inventory/views.py:452
+#: templates/inventory/home.html:57 templates/inventory/material_list.html:39 templates/inventory/my_history.html:11
+msgid "Material"
+msgstr "Material"
+
+#: apps/inventory/forms.py:106 apps/inventory/forms.py:186 templates/inventory/kirim_form.html:39
+msgid "Materialni tanlang"
+msgstr "Select a material"
+
+#: apps/inventory/forms.py:109 templates/inventory/kirim_form.html:56
+msgid "Idishlar soni"
+msgstr "Number of containers"
+
+#: apps/inventory/forms.py:115
+msgid "Masalan, 5 chelak. Miqdor idish hajmiga ko'paytirib hisoblanadi."
+msgstr "For example, 5 buckets. The quantity is the count multiplied by the container size."
+
+#: apps/inventory/forms.py:118 apps/inventory/models.py:221 apps/inventory/views.py:454 templates/inventory/kirim_form.html:51
+#: templates/inventory/my_history.html:11 templates/inventory/reports.html:92
+msgid "Miqdor"
+msgstr "Quantity"
+
+#: apps/inventory/forms.py:121
+msgid "Narx turi"
+msgstr "Price type"
+
+#: apps/inventory/forms.py:122 templates/inventory/kirim_form.html:71
+msgid "Bir birlik narxi"
+msgstr "Unit price"
+
+#: apps/inventory/forms.py:122
+msgid "Umumiy partiya narxi"
+msgstr "Total batch price"
+
+#: apps/inventory/forms.py:127 templates/inventory/kirim_form.html:62
+msgid "Narx (USD $)"
+msgstr "Price (USD $)"
+
+#: apps/inventory/forms.py:130 apps/inventory/forms.py:167 apps/inventory/forms.py:208 apps/inventory/models.py:273
+#: apps/inventory/views.py:460
+msgid "Izoh"
+msgstr "Note"
+
+#: apps/inventory/forms.py:133
+msgid "Yetkazib beruvchi, faktura raqami..."
+msgstr "Supplier, invoice number..."
+
+#: apps/inventory/forms.py:143
+msgid "Bu material uchun idish hajmi belgilanmagan."
+msgstr "No container size is set for this material."
+
+#: apps/inventory/forms.py:148
+msgid "Miqdorni yoki idishlar sonini kiriting."
+msgstr "Enter the quantity or the number of containers."
+
+#: apps/inventory/forms.py:164
+msgid "Qancha oldingiz?"
+msgstr "How much did you take?"
+
+#: apps/inventory/forms.py:170
+msgid "Buyurtma yoki mijoz nomi"
+msgstr "Order or customer name"
+
+#: apps/inventory/forms.py:188 apps/inventory/models.py:227 apps/inventory/models.py:270
+msgid "Uzunligi (mm)"
+msgstr "Length (mm)"
+
+#: apps/inventory/forms.py:189 apps/inventory/models.py:228 apps/inventory/models.py:271
+msgid "Eni (mm)"
+msgstr "Width (mm)"
+
+#: apps/inventory/forms.py:190
+msgid "Soni (dona)"
+msgstr "Count (pcs)"
+
+#: apps/inventory/forms.py:192
+msgid "Joylashuvi / izoh"
+msgstr "Location / note"
+
+#: apps/inventory/forms.py:195
+msgid "Masalan: 2-stellaj, yuqori polka"
+msgstr "For example: rack 2, top shelf"
+
+#: apps/inventory/forms.py:207
+msgid "Necha dona oldingiz?"
+msgstr "How many pieces did you take?"
+
+#: apps/inventory/forms.py:220 templates/inventory/dashboard.html:60
+msgid "Oy"
+msgstr "Month"
+
+#: apps/inventory/forms.py:223
+msgid "Harakat turi"
+msgstr "Movement type"
+
+#: apps/inventory/forms.py:227 apps/inventory/views.py:459 templates/users/pending_users.html:11 templates/users/user_list.html:26
+msgid "Ishchi"
+msgstr "Worker"
+
+#: apps/inventory/forms.py:228 apps/inventory/forms.py:231 apps/inventory/forms.py:237 apps/inventory/forms.py:223
+msgid "Barchasi"
+msgstr "All"
+
+#: apps/inventory/forms.py:246
+msgid "Oyni YYYY-MM ko'rinishida kiriting."
+msgstr "Enter the month as YYYY-MM."
+
+#: apps/inventory/forms.py:265 apps/inventory/models.py:62
+msgid "Standart kasblar"
+msgstr "Default trades"
+
+#: apps/inventory/forms.py:269
+msgid "Shu kategoriyadagi yangi material uchun kasb belgilanmasa, shu kasblar ko'radi va oladi."
+msgstr "If a new material in this category has no trades selected, these trades see and take it."
+
+#: apps/inventory/forms.py:275 apps/users/forms.py:206
+msgid "Ro'yxatlarda kichik raqam oldinroq turadi."
+msgstr "Lower numbers come first in lists."
+
+#: apps/inventory/forms.py:33 apps/inventory/forms.py:225 apps/inventory/models.py:137 apps/inventory/views.py:453
+#: templates/inventory/category_list.html:15 templates/inventory/material_list.html:29
+msgid "Kategoriya"
+msgstr "Category"
+
+#: apps/inventory/forms.py:35
+msgid "Qaysi kasblar ko'ra oladi va oladi"
+msgstr "Which trades can see and take it"
+
+#: apps/inventory/forms.py:39
+msgid "Bo'sh qoldirilsa, kategoriya bo'yicha standart kasblar belgilanadi."
+msgstr "If left empty, the category's default trades are used."
+
+#: apps/inventory/forms.py:42
+msgid "List uzunligi (mm)"
+msgstr "Sheet length (mm)"
+
+#: apps/inventory/forms.py:43
+msgid "Faqat list materiallar uchun, masalan 2750."
+msgstr "Sheet materials only, for example 2750."
+
+#: apps/inventory/forms.py:46
+msgid "List eni (mm)"
+msgstr "Sheet width (mm)"
+
+#: apps/inventory/forms.py:47
+msgid "Masalan 1830."
+msgstr "For example 1830."
+
+#: apps/inventory/forms.py:62
+msgid "Masalan, 12 litrli chelak uchun 12. Kirimda idish soni bilan hisoblash uchun."
+msgstr "For example, 12 for a 12-litre bucket. Used to count stock in by containers."
+
+#: apps/inventory/forms.py:63
+msgid "Miqdor shundan kam bo'lsa, xarid ro'yxatida ko'rinadi."
+msgstr "When the quantity drops below this, it appears on the purchase list."
+
+#: apps/inventory/forms.py:64
+msgid "O'chirilsa, ishchilar materialni ko'rmaydi; tarix saqlanadi."
+msgstr "If turned off, workers no longer see the material; history is kept."
+
+#: apps/inventory/forms.py:70
+msgid "Tanlang"
+msgstr "Select"
+
+#: apps/inventory/forms.py:83
+msgid "Uzunlik va enni birga kiriting."
+msgstr "Enter both length and width."
+
+#: apps/inventory/forms.py:89
+msgid "Suyuqliklar uchun litr, kg yoki dona tanlang."
+msgstr "For liquids, choose litres, kg or pieces."
+
+#: apps/inventory/models.py:132
+#, python-format
+msgid "Noma'lum kategoriya: %(code)s"
+msgstr "Unknown category: %(code)s"
+
+#: apps/inventory/models.py:136 templates/inventory/category_form.html:13 templates/users/worker_role_form.html:13
+msgid "Nomi"
+msgstr "Name"
+
+#: apps/inventory/models.py:139
+msgid "Ruxsat etilgan kasblar"
+msgstr "Allowed trades"
+
+#: apps/inventory/models.py:145
+msgid "O'lchov birligi"
+msgstr "Unit of measure"
+
+#: apps/inventory/models.py:147
+msgid "Idish hajmi"
+msgstr "Container size"
+
+#: apps/inventory/models.py:158 templates/inventory/withdraw_whole.html:59
+msgid "Minimal qoldiq"
+msgstr "Minimum stock"
+
+#: apps/inventory/models.py:167 apps/inventory/views.py:456
+msgid "Birlik narxi (USD)"
+msgstr "Unit price (USD)"
+
+#: apps/inventory/models.py:183
+msgid "material"
+msgstr "material"
+
+#: apps/inventory/models.py:184
+msgid "materiallar"
+msgstr "materials"
+
+#: apps/inventory/models.py:233
+msgid "butun material"
+msgstr "whole material"
+
+#: apps/inventory/models.py:234
+msgid "butun materiallar"
+msgstr "whole materials"
+
+#: apps/inventory/models.py:272 templates/inventory/home.html:105 templates/inventory/offcut_form.html:64
+msgid "Soni"
+msgstr "Count"
+
+#: apps/inventory/models.py:281
+msgid "qoldiq material"
+msgstr "offcut"
+
+#: apps/inventory/models.py:282
+msgid "qoldiq materiallar"
+msgstr "offcuts"
+
+#: apps/inventory/models.py:315 templates/inventory/_txn_rows.html:6 templates/inventory/_txn_rows.html:13 templates/inventory/dashboard.html:60
+#: templates/inventory/dashboard.html:87 templates/inventory/dashboard.html:132 templates/inventory/dashboard.html:150 templates/inventory/home.html:18
+#: templates/inventory/kirim_form.html:3 templates/inventory/kirim_form.html:9 templates/inventory/material_list.html:54 templates/inventory/reports.html:28
+#: templates/partials/bottom_nav.html:5 templates/partials/nav.html:10
+msgid "Kirim"
+msgstr "Stock in"
+
+#: apps/inventory/models.py:316 templates/inventory/_txn_rows.html:7 templates/inventory/_txn_rows.html:13 templates/inventory/dashboard.html:60
+#: templates/inventory/dashboard.html:132 templates/inventory/dashboard.html:150
+msgid "Chiqim"
+msgstr "Stock out"
+
+#: apps/inventory/models.py:317 templates/inventory/_txn_rows.html:8 templates/inventory/_txn_rows.html:13 templates/inventory/reports.html:43
+msgid "Qoldiq qo'shildi"
+msgstr "Offcut added"
+
+#: apps/inventory/models.py:35
+msgid "Dona (list)"
+msgstr "Pieces (sheet)"
+
+#: apps/inventory/models.py:36
+msgid "Litr (L)"
+msgstr "Litre (L)"
+
+#: apps/inventory/models.py:37
+msgid "Kilogramm (kg)"
+msgstr "Kilogram (kg)"
+
+#: apps/inventory/models.py:375
+msgid "ombor harakati"
+msgstr "stock movement"
+
+#: apps/inventory/models.py:376
+msgid "ombor harakatlari"
+msgstr "stock movements"
+
+#: apps/inventory/models.py:38
+msgid "Metr (m)"
+msgstr "Metre (m)"
+
+#: apps/inventory/models.py:39
+msgid "Santimetr (sm)"
+msgstr "Centimetre (cm)"
+
+#: apps/inventory/models.py:40
+msgid "Dona"
+msgstr "Pieces"
+
+#: apps/inventory/models.py:45 apps/inventory/models.py:50 templates/inventory/_txn_rows.html:17 templates/inventory/dashboard.html:134
+#: templates/inventory/home.html:113 templates/inventory/home.html:116 templates/inventory/offcut_form.html:5 templates/inventory/withdraw_offcut.html:17
+msgid "dona"
+msgstr "pcs"
+
+#: apps/inventory/models.py:49
+msgid "sm"
+msgstr "cm"
+
+#: apps/inventory/models.py:60 apps/users/models.py:58
+msgid "Kod"
+msgstr "Code"
+
+#: apps/inventory/models.py:66
+msgid "Yangi material uchun kasb belgilanmasa, shu kasblar ko'radi va oladi."
+msgstr "If a new material has no trades selected, these trades see and take it."
+
+#: apps/inventory/models.py:69
+msgid "Qoldiq yoziladi"
+msgstr "Track offcuts"
+
+#: apps/inventory/models.py:71
+msgid "List yoki lenta kabi kesiladigan materiallar uchun: qoldiq (uzunlik × eni) qayd etiladi."
+msgstr "For materials that are cut, like sheets or tape: offcuts (length × width) are recorded."
+
+#: apps/inventory/models.py:74 apps/inventory/models.py:175 apps/users/models.py:60 templates/inventory/material_list.html:17
+#: templates/users/user_list.html:38
+msgid "Faol"
+msgstr "Active"
+
+#: apps/inventory/models.py:74
+msgid "O'chirilsa, yangi material uchun tanlab bo'lmaydi; mavjudlari qoladi."
+msgstr "If turned off, it can't be chosen for new materials; existing ones stay."
+
+#: apps/inventory/models.py:76 apps/users/models.py:64
+msgid "Tartib"
+msgstr "Order"
+
+#: apps/inventory/models.py:81
+msgid "kategoriya"
+msgstr "category"
+
+#: apps/inventory/models.py:82
+msgid "kategoriyalar"
+msgstr "categories"
+
+#: apps/inventory/services.py:128
+msgid "Birlik narxi yoki umumiy partiya narxidan bittasini kiriting."
+msgstr "Enter either the unit price or the total batch price."
+
+#: apps/inventory/services.py:132 apps/inventory/services.py:137
+msgid "Narx manfiy bo'lishi mumkin emas."
+msgstr "The price can't be negative."
+
+#: apps/inventory/services.py:146
+msgid "Arxivlangan materialga kirim qilib bo'lmaydi. Avval uni faollashtiring."
+msgstr "You can't add stock to an archived material. Reactivate it first."
+
+#: apps/inventory/services.py:187
+msgid "Bu material arxivlangan."
+msgstr "This material is archived."
+
+#: apps/inventory/services.py:190
+#, python-format
+msgid "Omborda faqat %(qty)s %(unit)s bor."
+msgstr "Only %(qty)s %(unit)s in stock."
+
+#: apps/inventory/services.py:215
+msgid "Butun son kiriting."
+msgstr "Enter a whole number."
+
+#: apps/inventory/services.py:217
+msgid "Kamida 1 dona (butun son) kiriting."
+msgstr "Enter at least 1 piece (a whole number)."
+
+#: apps/inventory/services.py:222
+msgid "Bu qoldiq allaqachon olingan."
+msgstr "This offcut has already been taken."
+
+#: apps/inventory/services.py:225
+#, python-format
+msgid "Bu qoldiqdan faqat %(qty)s dona bor."
+msgstr "Only %(qty)s pcs of this offcut left."
+
+#: apps/inventory/services.py:264
+msgid "Bu turdagi material uchun qoldiq qayd etilmaydi."
+msgstr "Offcuts aren't tracked for this kind of material."
+
+#: apps/inventory/services.py:269
+msgid "Musbat butun son kiriting."
+msgstr "Enter a positive whole number."
+
+#: apps/inventory/services.py:279
+#, python-format
+msgid "Qoldiq o'lchami to'liq listdan (%(l)sx%(w)s mm) katta bo'lishi mumkin emas."
+msgstr "An offcut can't be larger than the full sheet (%(l)sx%(w)s mm)."
+
+#: apps/inventory/services.py:43 apps/inventory/services.py:41
+msgid "Noto'g'ri raqam."
+msgstr "Invalid number."
+
+#: apps/inventory/services.py:50
+msgid "Miqdor 0 dan katta bo'lishi kerak."
+msgstr "The quantity must be greater than 0."
+
+#: apps/inventory/services.py:52
+msgid "Miqdor ko'pi bilan 2 xonali kasr bo'lishi mumkin."
+msgstr "The quantity can have at most 2 decimal places."
+
+#: apps/inventory/services.py:54
+#, python-format
+msgid "%(name)s faqat butun sonda hisoblanadi (%(unit)s)."
+msgstr "%(name)s is counted in whole numbers only (%(unit)s)."
+
+#: apps/inventory/services.py:60 apps/users/permissions.py:40
+msgid "Bu amal faqat administratorlar uchun."
+msgstr "Only administrators can do this."
+
+#: apps/inventory/services.py:65
+msgid "Bu material sizning kasbingiz uchun ruxsat etilmagan."
+msgstr "This material isn't allowed for your trade."
+
+#: apps/inventory/templatetags/wms.py:185
+#, python-format
+msgid "%(l)s × %(w)s mm qoldiq"
+msgstr "%(l)s × %(w)s mm offcut"
+
+#: apps/inventory/templatetags/wms.py:187
+#, python-format
+msgid "list %(l)s × %(w)s mm"
+msgstr "sheet %(l)s × %(w)s mm"
+
+#: apps/inventory/templatetags/wms.py:62
+msgctxt "month"
+msgid "fevral"
+msgstr "February"
+
+#: apps/inventory/templatetags/wms.py:62
+msgctxt "month"
+msgid "mart"
+msgstr "March"
+
+#: apps/inventory/templatetags/wms.py:62
+msgctxt "month"
+msgid "yanvar"
+msgstr "January"
+
+#: apps/inventory/templatetags/wms.py:63
+msgctxt "month"
+msgid "aprel"
+msgstr "April"
+
+#: apps/inventory/templatetags/wms.py:63
+msgctxt "month"
+msgid "iyun"
+msgstr "June"
+
+#: apps/inventory/templatetags/wms.py:63
+msgctxt "month"
+msgid "may"
+msgstr "May"
+
+#: apps/inventory/templatetags/wms.py:64
+msgctxt "month"
+msgid "avgust"
+msgstr "August"
+
+#: apps/inventory/templatetags/wms.py:64
+msgctxt "month"
+msgid "iyul"
+msgstr "July"
+
+#: apps/inventory/templatetags/wms.py:64
+msgctxt "month"
+msgid "sentabr"
+msgstr "September"
+
+#: apps/inventory/templatetags/wms.py:65
+msgctxt "month"
+msgid "dekabr"
+msgstr "December"
+
+#: apps/inventory/templatetags/wms.py:65
+msgctxt "month"
+msgid "noyabr"
+msgstr "November"
+
+#: apps/inventory/templatetags/wms.py:65
+msgctxt "month"
+msgid "oktabr"
+msgstr "October"
+
+#: apps/inventory/views.py:123
+#, python-format
+msgid "Chiqim yozildi: %(name)s — %(qty)s %(unit)s. Omborda qoldi: %(left)s %(unit)s."
+msgstr "Stock out recorded: %(name)s — %(qty)s %(unit)s. Left in stock: %(left)s %(unit)s."
+
+#: apps/inventory/views.py:176
+#, python-format
+msgid "Qoldiq qo'shildi: %(name)s %(l)s×%(w)s mm — %(qty)s dona."
+msgstr "Offcut added: %(name)s %(l)s×%(w)s mm — %(qty)s pcs."
+
+#: apps/inventory/views.py:210
+#, python-format
+msgid "Qoldiq olindi: %(name)s %(l)s×%(w)s mm — %(qty)s dona."
+msgstr "Offcut taken: %(name)s %(l)s×%(w)s mm — %(qty)s pcs."
+
+#: apps/inventory/views.py:325
+#, python-format
+msgid "“%(name)s” qo'shildi. Endi kirimni kiriting."
+msgstr "“%(name)s” added. Now enter the stock in."
+
+#: apps/inventory/views.py:341 apps/inventory/views.py:520 apps/users/views.py:167
+#, python-format
+msgid "“%(name)s” saqlandi."
+msgstr "“%(name)s” saved."
+
+#: apps/inventory/views.py:384
+#, python-format
+msgid "Kirim yozildi: %(name)s +%(qty)s %(unit)s, %(total)s. Yangi o'rtacha narx: %(avg)s."
+msgstr "Stock in recorded: %(name)s +%(qty)s %(unit)s, %(total)s. New average price: %(avg)s."
+
+#: apps/inventory/views.py:450
+msgid "Sana"
+msgstr "Date"
+
+#: apps/inventory/views.py:451 templates/inventory/my_history.html:11 templates/inventory/reports.html:92
+msgid "Turi"
+msgstr "Type"
+
+#: apps/inventory/views.py:455
+msgid "Birlik"
+msgstr "Unit"
+
+#: apps/inventory/views.py:457
+msgid "Jami (USD)"
+msgstr "Total (USD)"
+
+#: apps/inventory/views.py:458
+msgid "Qoldiq o'lchami (mm)"
+msgstr "Offcut size (mm)"
+
+#: apps/inventory/views.py:508
+#, python-format
+msgid "“%(name)s” kategoriyasi qo'shildi."
+msgstr "Category “%(name)s” added."
+
+#: apps/users/api.py:49
+msgid "Bu login band. Boshqasini tanlang."
+msgstr "This username is taken. Choose another one."
+
+#: apps/users/api.py:81
+msgid "Ro'yxatdan o'tdingiz. Administrator tasdiqlagach tizimga kira olasiz."
+msgstr "You're registered. You can sign in once an administrator approves you."
+
+#: apps/users/apps.py:10
+msgid "Foydalanuvchilar"
+msgstr "Users"
+
+#: apps/users/forms.py:100
+msgid "Kamida bitta rol belgilang."
+msgstr "Select at least one role."
+
+#: apps/users/forms.py:122
+msgid "Yangi parol"
+msgstr "New password"
+
+#: apps/users/forms.py:126
+msgid "Ishchi parolini unutgan bo'lsa, shu yerda yangisini o'rnating."
+msgstr "If a worker forgot their password, set a new one here."
+
+#: apps/users/forms.py:132
+msgid "Faol hisob"
+msgstr "Active account"
+
+#: apps/users/forms.py:132
+msgid "Tasdiqlangan"
+msgstr "Approved"
+
+#: apps/users/forms.py:149
+msgid "O'zingizdan administrator rolini olib tashlay olmaysiz."
+msgstr "You can't remove the administrator role from yourself."
+
+#: apps/users/forms.py:151
+msgid "O'z hisobingizni o'chira yoki tasdiqdan chiqara olmaysiz."
+msgstr "You can't deactivate or unapprove your own account."
+
+#: apps/users/forms.py:153
+msgid "Tasdiqlangan foydalanuvchida kamida bitta rol bo'lishi kerak."
+msgstr "An approved user must have at least one role."
+
+#: apps/users/forms.py:182 apps/users/forms.py:183
+msgid "Bo'sh qolsa, o'zbekcha nomi ko'rsatiladi."
+msgstr "If left empty, the Uzbek name is shown."
+
+#: apps/users/forms.py:23
+msgid "Login yoki parol noto'g'ri."
+msgstr "Wrong username or password."
+
+#: apps/users/forms.py:24
+msgid "Bu hisob o'chirilgan. Administratorga murojaat qiling."
+msgstr "This account is disabled. Contact an administrator."
+
+#: apps/users/forms.py:25
+msgid "Hisobingiz hali tasdiqlanmagan. Administrator so'rovingizni ko'rib chiqqach, tizimga kira olasiz."
+msgstr "Your account isn't approved yet. You can sign in once an administrator reviews your request."
+
+#: apps/users/forms.py:33 apps/users/forms.py:74
+msgid "Login"
+msgstr "Username"
+
+#: apps/users/forms.py:37 apps/users/forms.py:77
+msgid "Parol"
+msgstr "Password"
+
+#: apps/users/forms.py:58
+msgid "To'liq ism (F.I.Sh.)"
+msgstr "Full name"
+
+#: apps/users/forms.py:60
+msgid "Kasbingiz"
+msgstr "Your trade"
+
+#: apps/users/forms.py:63
+msgid "Bir nechta kasbni tanlashingiz mumkin."
+msgstr "You can choose more than one trade."
+
+#: apps/users/forms.py:64 apps/users/services.py:14
+msgid "Kamida bitta kasbni tanlang."
+msgstr "Select at least one trade."
+
+#: apps/users/forms.py:75
+msgid "Faqat lotin harflari, raqamlar va @/./+/-/_ belgilar."
+msgstr "Latin letters, digits and @/./+/-/_ only."
+
+#: apps/users/forms.py:78
+msgid "Kamida 8 ta belgi; faqat raqamlardan iborat bo'lmasin."
+msgstr "At least 8 characters; not digits only."
+
+#: apps/users/forms.py:79
+msgid "Parolni takrorlang"
+msgstr "Repeat the password"
+
+#: apps/users/forms.py:97 apps/users/forms.py:116
+msgid "Rollar"
+msgstr "Roles"
+
+#: apps/users/models.py:101 apps/users/models.py:122
+msgid "Administrator"
+msgstr "Administrator"
+
+#: apps/users/models.py:136
+msgid "Rollar ro'yxat (list) ko'rinishida bo'lishi kerak."
+msgstr "Roles must be a list."
+
+#: apps/users/models.py:140
+#, python-format
+msgid "Noma'lum rol(lar): %(roles)s"
+msgstr "Unknown role(s): %(roles)s"
+
+#: apps/users/models.py:145
+msgid "Ruxsat etilgan kasblar ro'yxat (list) bo'lishi kerak."
+msgstr "Allowed trades must be a list."
+
+#: apps/users/models.py:149
+#, python-format
+msgid "Noma'lum kasb(lar): %(roles)s"
+msgstr "Unknown trade(s): %(roles)s"
+
+#: apps/users/models.py:168
+msgid "To'liq ism"
+msgstr "Full name"
+
+#: apps/users/models.py:187
+msgid "foydalanuvchi"
+msgstr "user"
+
+#: apps/users/models.py:188
+msgid "foydalanuvchilar"
+msgstr "users"
+
+#: apps/users/models.py:30
+msgid "Kod lotin bosh harflari, raqamlar va _ dan iborat bo'lsin (masalan, PARDOZCHI)."
+msgstr "The code must use capital Latin letters, digits and _ (for example, PARDOZCHI)."
+
+#: apps/users/models.py:37
+msgid "Nomi (o'zbekcha)"
+msgstr "Name (Uzbek)"
+
+#: apps/users/models.py:38
+msgid "Nomi (inglizcha)"
+msgstr "Name (English)"
+
+#: apps/users/models.py:39
+msgid "Nomi (ruscha)"
+msgstr "Name (Russian)"
+
+#: apps/users/models.py:62
+msgid "O'chirilsa, ro'yxatdan o'tishda tanlab bo'lmaydi; mavjud ishchilar kasbini saqlaydi."
+msgstr "If turned off, it can't be chosen when registering; current workers keep it."
+
+#: apps/users/models.py:69
+msgid "kasb"
+msgstr "trade"
+
+#: apps/users/models.py:70
+msgid "kasblar"
+msgstr "trades"
+
+#: apps/users/permissions.py:33
+msgid "Hisobingiz administrator tomonidan tasdiqlanmagan."
+msgstr "Your account hasn't been approved by an administrator."
+
+#: apps/users/services.py:27
+msgid "Tasdiqlashdan oldin kamida bitta rol belgilang."
+msgstr "Select at least one role before approving."
+
+#: apps/users/services.py:40
+msgid "Faqat tasdiqlanmagan so'rovlarni rad etish mumkin."
+msgstr "Only unapproved requests can be rejected."
+
+#: apps/users/views.py:121
+#, python-format
+msgid "%(name)s ma'lumotlari saqlandi."
+msgstr "%(name)s's details were saved."
+
+#: apps/users/views.py:154
+#, python-format
+msgid "“%(name)s” kasbi qo'shildi. Endi materiallarda shu kasbni belgilang."
+msgstr "Trade “%(name)s” added. Now select it on materials."
+
+#: apps/users/views.py:67
+#, python-format
+msgid "%(name)s tasdiqlandi va tizimga kira oladi."
+msgstr "%(name)s is approved and can sign in."
+
+#: apps/users/views.py:82
+#, python-format
+msgid "%(name)s so'rovi rad etildi."
+msgstr "%(name)s's request was rejected."
+
+#: templates/403.html:14
+msgid "Davom etish uchun tizimga kiring."
+msgstr "Sign in to continue."
+
+#: templates/403.html:15 templates/users/login.html:3 templates/users/login.html:14 templates/users/register.html:21
+msgid "Kirish"
+msgstr "Sign in"
+
+#: templates/403.html:3 templates/403.html:13
+msgid "Ruxsat yo'q"
+msgstr "No access"
+
+#: templates/403.html:6
+msgid "Bu sahifaga ruxsatingiz yo'q"
+msgstr "You don't have access to this page"
+
+#: templates/403.html:7
+msgid "Bu bo'lim boshqa kasb yoki administrator uchun. Kerak bo'lsa, administratorga murojaat qiling."
+msgstr "This section is for another trade or for administrators. Contact an administrator if you need it."
+
+#: templates/403.html:8 templates/404.html:8
+msgid "Omborga qaytish"
+msgstr "Back to the warehouse"
+
+#: templates/404.html:14
+msgid "Kirish sahifasi"
+msgstr "Sign-in page"
+
+#: templates/404.html:3
+msgid "Topilmadi"
+msgstr "Not found"
+
+#: templates/404.html:6 templates/404.html:13
+msgid "Sahifa topilmadi"
+msgstr "Page not found"
+
+#: templates/404.html:7
+msgid "Bu material yoki qoldiq allaqachon olingan bo'lishi, yoki sizning kasbingiz uchun ko'rinmasligi mumkin."
+msgstr "This material or offcut may already be taken, or may not be visible to your trade."
+
+#: templates/base.html:24
+msgid "Asosiy menyu"
+msgstr "Main menu"
+
+#: templates/base.html:29
+msgid "Rol yo'q"
+msgstr "No role"
+
+#: templates/base.html:32 templates/base.html:96
+msgid "Chiqish"
+msgstr "Sign out"
+
+#: templates/base.html:46
+msgid "Material qidirish"
+msgstr "Search materials"
+
+#: templates/base.html:52
+msgid "Ombordagi butun materiallarning joriy qiymati"
+msgstr "Current value of all whole materials in stock"
+
+#: templates/base.html:53 templates/inventory/dashboard.html:26
+msgid "Ombor qiymati"
+msgstr "Stock value"
+
+#: templates/base.html:63
+msgid "Menyuni ochish"
+msgstr "Open menu"
+
+#: templates/base.html:74
+msgid "Tezkor menyu"
+msgstr "Quick menu"
+
+#: templates/base.html:80 templates/base.html:82 templates/partials/bottom_nav.html:10
+msgid "Menyu"
+msgstr "Menu"
+
+#: templates/base.html:83
+msgid "Yopish"
+msgstr "Close"
+
+#: templates/inventory/_txn_rows.html:7
+msgid "qoldiq"
+msgstr "offcut"
+
+#: templates/inventory/category_form.html:13
+msgid "Uch tilda. Foydalanuvchi qaysi tilni tanlasa, shu tildagi nom ko'rinadi."
+msgstr "In three languages. Each user sees the name in the language they choose."
+
+#: templates/inventory/category_form.html:23
+msgid "Kim ishlatadi"
+msgstr "Who uses it"
+
+#: templates/inventory/category_form.html:23
+msgid "Yangi materialda shu kasblar oldindan belgilanadi. Har bir materialda alohida o'zgartirish mumkin."
+msgstr "These trades are preselected on a new material. You can change them on each material."
+
+#: templates/inventory/category_form.html:3 templates/inventory/category_form.html:6 templates/inventory/category_list.html:10
+msgid "Yangi kategoriya"
+msgstr "New category"
+
+#: templates/inventory/category_form.html:30 templates/users/worker_role_form.html:23
+msgid "Ko'rinishi"
+msgstr "Display"
+
+#: templates/inventory/category_form.html:37 templates/inventory/material_form.html:60 templates/users/user_edit.html:20 templates/users/worker_role_form.html:30
+msgid "Bekor qilish"
+msgstr "Cancel"
+
+#: templates/inventory/category_form.html:38
+msgid "Kategoriyani qo'shish"
+msgstr "Add category"
+
+#: templates/inventory/category_form.html:38 templates/inventory/material_form.html:61 templates/users/user_edit.html:21 templates/users/worker_role_form.html:31
+msgid "Saqlash"
+msgstr "Save"
+
+#: templates/inventory/category_form.html:5 templates/inventory/category_list.html:3 templates/inventory/category_list.html:7 templates/inventory/material_list.html:11
+#: templates/partials/nav.html:12
+msgid "Kategoriyalar"
+msgstr "Categories"
+
+#: templates/inventory/category_form.html:7
+#, python-format
+msgid "Kod: %(code)s — o'zgarmaydi, materiallar shu kod bilan bog'langan."
+msgstr "Code: %(code)s — it doesn't change; materials are linked by this code."
+
+#: templates/inventory/category_form.html:7
+msgid "Qo'shilgach, material yaratishda shu kategoriyani tanlash mumkin."
+msgstr "Once added, you can choose this category when creating a material."
+
+#: templates/inventory/category_list.html:15 templates/inventory/material_form.html:5 templates/inventory/material_list.html:3 templates/inventory/material_list.html:7
+#: templates/partials/nav.html:11
+msgid "Materiallar"
+msgstr "Materials"
+
+#: templates/inventory/category_list.html:15
+msgid "Odatdagi kasblar"
+msgstr "Default trades"
+
+#: templates/inventory/category_list.html:15 templates/inventory/dashboard.html:132 templates/inventory/withdraw_offcut.html:9
+msgid "Qoldiq"
+msgstr "Offcuts"
+
+#: templates/inventory/category_list.html:21 templates/users/user_list.html:37 templates/users/worker_role_list.html:21
+msgid "O'chirilgan"
+msgstr "Disabled"
+
+#: templates/inventory/category_list.html:23
+#, python-format
+msgid "%(n)s material"
+msgid_plural "%(n)s material"
+msgstr[0] "%(n)s material"
+msgstr[1] "%(n)s materials"
+
+#: templates/inventory/category_list.html:26
+msgid "Ha"
+msgstr "Yes"
+
+#: templates/inventory/category_list.html:28 templates/inventory/material_list.html:55 templates/users/user_list.html:41 templates/users/worker_role_list.html:26
+msgid "Tahrirlash"
+msgstr "Edit"
+
+#: templates/inventory/category_list.html:31
+msgid "Hali kategoriya qo'shilmagan."
+msgstr "No categories yet."
+
+#: templates/inventory/category_list.html:8
+msgid "Material turlari. Yangi material qo'shilganda kategoriya bo'yicha kasblar avtomatik belgilanadi."
+msgstr "Kinds of material. When a material is added, trades are preselected from its category."
+
+#: templates/inventory/dashboard.html:102
+msgid "Tasdiq kutayotgan ishchilar"
+msgstr "Workers awaiting approval"
+
+#: templates/inventory/dashboard.html:112
+msgid "Ko'rish"
+msgstr "View"
+
+#: templates/inventory/dashboard.html:116
+msgid "Barcha so'rovlar"
+msgstr "All requests"
+
+#: templates/inventory/dashboard.html:118
+msgid "Yangi so'rov yo'q."
+msgstr "No new requests."
+
+#: templates/inventory/dashboard.html:12
+#, python-format
+msgid "%(n)s ta material minimal qoldiqdan kam"
+msgid_plural "%(n)s ta material minimal qoldiqdan kam"
+msgstr[0] "%(n)s material is below minimum stock"
+msgstr[1] "%(n)s materials are below minimum stock"
+
+#: templates/inventory/dashboard.html:12
+msgid "xarid ro'yxati pastda."
+msgstr "the purchase list is below."
+
+#: templates/inventory/dashboard.html:125
+msgid "Oxirgi harakatlar"
+msgstr "Recent activity"
+
+#: templates/inventory/dashboard.html:13
+msgid "Barcha materiallar minimal qoldiqdan yuqori."
+msgstr "All materials are above minimum stock."
+
+#: templates/inventory/dashboard.html:138 templates/inventory/reports.html:3 templates/inventory/reports.html:8 templates/partials/nav.html:13
+msgid "Oylik hisobot"
+msgstr "Monthly report"
+
+#: templates/inventory/dashboard.html:140
+msgid "Hali harakat yo'q. Birinchi kirimni kiriting."
+msgstr "No activity yet. Enter the first stock in."
+
+#: templates/inventory/dashboard.html:151
+msgid "Oylik kirim (chiziq ustida) va chiqim (chiziq ostida)"
+msgstr "Monthly stock in (above the line) and stock out (below the line)"
+
+#: templates/inventory/dashboard.html:16
+msgid "Kirim qo'shish"
+msgstr "Add stock in"
+
+#: templates/inventory/dashboard.html:24
+msgid "Asosiy ko'rsatkichlar"
+msgstr "Key figures"
+
+#: templates/inventory/dashboard.html:28
+#, python-format
+msgid "<span class=\"num\">%(n)s</span> material, o'rtacha xarid narxida"
+msgid_plural "<span class=\"num\">%(n)s</span> material, o'rtacha xarid narxida"
+msgstr[0] "<span class=\"num\">%(n)s</span> material, at average purchase price"
+msgstr[1] "<span class=\"num\">%(n)s</span> materials, at average purchase price"
+
+#: templates/inventory/dashboard.html:3 templates/inventory/dashboard.html:10 templates/partials/bottom_nav.html:4 templates/partials/nav.html:9
+msgid "Panel"
+msgstr "Dashboard"
+
+#: templates/inventory/dashboard.html:31
+#, python-format
+msgid "Kirim, %(month)s"
+msgstr "Stock in, %(month)s"
+
+#: templates/inventory/dashboard.html:33 templates/inventory/dashboard.html:38 templates/inventory/reports.html:30 templates/inventory/reports.html:35
+#, python-format
+msgid "<span class=\"num\">%(n)s</span> ta yozuv"
+msgid_plural "<span class=\"num\">%(n)s</span> ta yozuv"
+msgstr[0] "<span class=\"num\">%(n)s</span> entry"
+msgstr[1] "<span class=\"num\">%(n)s</span> entries"
+
+#: templates/inventory/dashboard.html:36
+#, python-format
+msgid "Chiqim, %(month)s"
+msgstr "Stock out, %(month)s"
+
+#: templates/inventory/dashboard.html:41 templates/inventory/home.html:45
+msgid "Qoldiqlar"
+msgstr "Offcuts"
+
+#: templates/inventory/dashboard.html:42
+msgid "bo'lak"
+msgid_plural "bo'lak"
+msgstr[0] "piece"
+msgstr[1] "pieces"
+
+#: templates/inventory/dashboard.html:43
+msgid "qiymatga kirmaydi"
+msgstr "not included in value"
+
+#: templates/inventory/dashboard.html:43
+#, python-format
+msgid "taxminan <span class=\"num\">%(value)s</span>, qiymatga kirmaydi"
+msgstr "about <span class=\"num\">%(value)s</span>, not included in value"
+
+#: templates/inventory/dashboard.html:51
+msgid "Kirim va chiqim"
+msgstr "Stock in and stock out"
+
+#: templates/inventory/dashboard.html:52
+#, python-format
+msgid "oxirgi 6 oy, USD · %(month)s hali tugamagan"
+msgstr "last 6 months, USD · %(month)s isn't over yet"
+
+#: templates/inventory/dashboard.html:69
+msgid "Xarid ro'yxati"
+msgstr "Purchase list"
+
+#: templates/inventory/dashboard.html:70
+msgid "omborda / minimal qoldiq"
+msgstr "in stock / minimum"
+
+#: templates/inventory/dashboard.html:78
+#, python-format
+msgid "%(qty)s %(unit)s yetishmaydi"
+msgstr "%(qty)s %(unit)s short"
+
+#: templates/inventory/dashboard.html:92
+msgid "Hozir hech narsa minimal qoldiqdan kam emas. Material kamayganda shu yerda ko'rinadi."
+msgstr "Nothing is below minimum stock right now. Materials running low will show up here."
+
+#: templates/inventory/home.html:100
+msgid "Qoldiq materiallar"
+msgstr "Offcut materials"
+
+#: templates/inventory/home.html:101
+msgid "Kesishdan qolgan, qayta ishlatsa bo'ladigan bo'laklar · rasm list o'lchamiga nisbatan"
+msgstr "Reusable pieces left over from cutting · drawing to scale against the sheet"
+
+#: templates/inventory/home.html:105
+msgid "Kim qo'shgan"
+msgstr "Added by"
+
+#: templates/inventory/home.html:105
+msgid "Material va o'lcham"
+msgstr "Material and size"
+
+#: templates/inventory/home.html:129
+msgid "Hozircha qoldiq yo'q."
+msgstr "No offcuts yet."
+
+#: templates/inventory/home.html:129
+msgid "Qidiruv bo'yicha qoldiq topilmadi."
+msgstr "No offcuts match your search."
+
+#: templates/inventory/home.html:13
+msgid "Barcha materiallar"
+msgstr "All materials"
+
+#: templates/inventory/home.html:13
+msgid "Kasbingiz uchun materiallar"
+msgstr "Materials for your trade"
+
+#: templates/inventory/home.html:130
+msgid "List kesgandan keyin ishlatsa bo'ladigan bo'lak qolsa, uni qo'shing — keyingi buyurtmada shu yerdan topasiz."
+msgstr "If a usable piece is left after cutting a sheet, add it — you'll find it here for the next order."
+
+#: templates/inventory/home.html:14
+#, python-format
+msgid "<span class=\"num\">%(n)s</span> material"
+msgid_plural "<span class=\"num\">%(n)s</span> material"
+msgstr[0] "<span class=\"num\">%(n)s</span> material"
+msgstr[1] "<span class=\"num\">%(n)s</span> materials"
+
+#: templates/inventory/home.html:14
+#, python-format
+msgid "<span class=\"num\">%(n)s</span> qoldiq"
+msgid_plural "<span class=\"num\">%(n)s</span> qoldiq"
+msgstr[0] "<span class=\"num\">%(n)s</span> offcut"
+msgstr[1] "<span class=\"num\">%(n)s</span> offcuts"
+
+#: templates/inventory/home.html:19 templates/inventory/home.html:130 templates/inventory/offcut_form.html:3 templates/inventory/offcut_form.html:27
+#: templates/partials/nav.html:3
+msgid "Qoldiq qo'shish"
+msgstr "Add offcut"
+
+#: templates/inventory/home.html:29 templates/inventory/material_list.html:26
+msgid "Nomi bo'yicha qidirish"
+msgstr "Search by name"
+
+#: templates/inventory/home.html:34 templates/inventory/material_list.html:19
+msgid "Hammasi"
+msgstr "All"
+
+#: templates/inventory/home.html:44 templates/inventory/home.html:52
+msgid "Butun materiallar"
+msgstr "Whole materials"
+
+#: templates/inventory/home.html:53
+msgid "Miqdor omborda turgan to'liq birliklarda"
+msgstr "Quantity in whole units in stock"
+
+#: templates/inventory/home.html:57
+msgid "Minimal"
+msgstr "Minimum"
+
+#: templates/inventory/home.html:57 templates/inventory/kirim_form.html:43 templates/inventory/material_list.html:39
+msgid "Omborda"
+msgstr "In stock"
+
+#: templates/inventory/home.html:57 templates/inventory/material_list.html:39
+msgid "Qiymati"
+msgstr "Value"
+
+#: templates/inventory/home.html:67 templates/inventory/home.html:73
+#, python-format
+msgid "≈ %(n)s idish"
+msgstr "≈ %(n)s containers"
+
+#: templates/inventory/home.html:68 templates/inventory/home.html:73
+msgid "Kam qoldi"
+msgstr "Running low"
+
+#: templates/inventory/home.html:79 templates/inventory/home.html:122 templates/inventory/withdraw_whole.html:3
+msgid "Oldim"
+msgstr "Take"
+
+#: templates/inventory/home.html:79 templates/inventory/home.html:122
+msgid "oldim"
+msgstr "take"
+
+#: templates/inventory/home.html:81
+msgid "Tugagan"
+msgstr "Out of stock"
+
+#: templates/inventory/home.html:89
+msgid "Kasbingiz uchun hali material qo'shilmagan."
+msgstr "No materials have been added for your trade yet."
+
+#: templates/inventory/home.html:89 templates/inventory/material_list.html:63
+msgid "Qidiruv bo'yicha material topilmadi."
+msgstr "No materials match your search."
+
+#: templates/inventory/home.html:90
+msgid "Administrator material qo'shgach, shu yerda ko'rinadi."
+msgstr "They'll appear here once an administrator adds materials."
+
+#: templates/inventory/home.html:90
+msgid "Birinchi materialni qo'shing"
+msgstr "Add the first material"
+
+#: templates/inventory/home.html:90
+msgid "Filtrni tozalash"
+msgstr "Clear filter"
+
+#: templates/inventory/kirim_form.html:10
+msgid "Kelgan materialni USD narxi bilan kiriting. O'rtacha narx avtomatik qayta hisoblanadi."
+msgstr "Enter received material with its USD price. The average price is recalculated automatically."
+
+#: templates/inventory/kirim_form.html:12 templates/inventory/material_form.html:3 templates/inventory/material_form.html:6 templates/inventory/material_list.html:12
+msgid "Yangi material"
+msgstr "New material"
+
+#: templates/inventory/kirim_form.html:43
+msgid "o'rtacha narx"
+msgstr "average price"
+
+#: templates/inventory/kirim_form.html:5
+msgid "Bir birlik narxi (USD $)"
+msgstr "Unit price (USD $)"
+
+#: templates/inventory/kirim_form.html:5
+msgid "Partiyaning umumiy narxi (USD $)"
+msgstr "Total batch price (USD $)"
+
+#: templates/inventory/kirim_form.html:72
+msgid "Partiya jami"
+msgstr "Batch total"
+
+#: templates/inventory/kirim_form.html:73
+msgid "Kirimdan keyin omborda"
+msgstr "In stock after stock in"
+
+#: templates/inventory/kirim_form.html:74
+msgid "Yangi o'rtacha narx"
+msgstr "New average price"
+
+#: templates/inventory/kirim_form.html:78
+msgid "Kirimni saqlash"
+msgstr "Save stock in"
+
+#: templates/inventory/kirim_form.html:82
+msgid "Oxirgi kirimlar"
+msgstr "Recent stock in"
+
+#: templates/inventory/kirim_form.html:99
+msgid "Hali kirim yozilmagan."
+msgstr "No stock in recorded yet."
+
+#: templates/inventory/material_form.html:16
+msgid "Asosiy"
+msgstr "Basics"
+
+#: templates/inventory/material_form.html:16
+msgid "Nomi ishchilar ro'yxatda ko'radigan ko'rinishda bo'lsin: “MDF 16 mm oq”."
+msgstr "Use the name workers will see in the list: “MDF 16 mm white”."
+
+#: templates/inventory/material_form.html:25
+msgid "Yangi kategoriya qo'shish"
+msgstr "Add a new category"
+
+#: templates/inventory/material_form.html:34
+msgid "Belgilanmagan kasbdagi ishchilar bu materialni umuman ko'rmaydi."
+msgstr "Workers in unselected trades don't see this material at all."
+
+#: templates/inventory/material_form.html:34
+msgid "Kim ko'radi va oladi"
+msgstr "Who sees and takes it"
+
+#: templates/inventory/material_form.html:39
+msgid "Hajm va o'lcham"
+msgstr "Volume and size"
+
+#: templates/inventory/material_form.html:39
+msgid "List o'lchami qoldiqlarni listga nisbatan ko'rsatish va tekshirish uchun kerak."
+msgstr "The sheet size is used to draw offcuts against the sheet and to check them."
+
+#: templates/inventory/material_form.html:54 templates/users/user_list.html:26
+msgid "Holati"
+msgstr "Status"
+
+#: templates/inventory/material_form.html:54
+msgid "Material o'chirilmaydi — tarix saqlanib qolishi uchun arxivlanadi."
+msgstr "Materials aren't deleted — they're archived so history is kept."
+
+#: templates/inventory/material_form.html:61
+msgid "Yaratish va kirimga o'tish"
+msgstr "Create and go to stock in"
+
+#: templates/inventory/material_form.html:7
+msgid "Kartani yarating, keyin kirim bilan miqdor va narxni kiriting."
+msgstr "Create the card, then enter quantity and price with a stock in."
+
+#: templates/inventory/material_form.html:7
+#, python-format
+msgid "Narx kirim orqali o'rtacha hisoblanadi: hozir %(price)s / %(unit)s"
+msgstr "The price is averaged from stock in: now %(price)s / %(unit)s"
+
+#: templates/inventory/material_list.html:18
+msgid "Arxiv"
+msgstr "Archive"
+
+#: templates/inventory/material_list.html:30
+msgid "Barcha kategoriyalar"
+msgstr "All categories"
+
+#: templates/inventory/material_list.html:33
+#, python-format
+msgid "%(n)s ta material"
+msgid_plural "%(n)s ta material"
+msgstr[0] "%(n)s material"
+msgstr[1] "%(n)s materials"
+
+#: templates/inventory/material_list.html:39
+msgid "Kim oladi"
+msgstr "Who takes it"
+
+#: templates/inventory/material_list.html:39
+msgid "O'rtacha narx"
+msgstr "Average price"
+
+#: templates/inventory/material_list.html:45
+msgid "Arxivda"
+msgstr "Archived"
+
+#: templates/inventory/material_list.html:47
+msgid "Kam"
+msgstr "Low"
+
+#: templates/inventory/material_list.html:55
+msgid "tahrirlash"
+msgstr "edit"
+
+#: templates/inventory/material_list.html:63
+msgid "Arxivda material yo'q."
+msgstr "No archived materials."
+
+#: templates/inventory/material_list.html:63
+msgid "Hali material qo'shilmagan."
+msgstr "No materials added yet."
+
+#: templates/inventory/material_list.html:64
+msgid "Yangi material qo'shish"
+msgstr "Add a new material"
+
+#: templates/inventory/material_list.html:8
+msgid "Material kartalari, ruxsat etilgan kasblar va minimal qoldiq"
+msgstr "Material cards, allowed trades and minimum stock"
+
+#: templates/inventory/my_history.html:17
+msgid "Hali yozuv yo'q."
+msgstr "No entries yet."
+
+#: templates/inventory/my_history.html:18
+msgid "Ombordan material olganingizda yoki qoldiq qo'shganingizda shu yerda ko'rinadi."
+msgstr "Materials you take from the warehouse and offcuts you add will show up here."
+
+#: templates/inventory/my_history.html:18
+msgid "Omborga o'tish"
+msgstr "Go to the warehouse"
+
+#: templates/inventory/my_history.html:3 templates/inventory/my_history.html:5 templates/partials/nav.html:4
+msgid "Mening tarixim"
+msgstr "My history"
+
+#: templates/inventory/my_history.html:6
+#, python-format
+msgid "Siz olgan materiallar va qo'shgan qoldiqlar · jami <span class=\"num\">%(n)s</span> ta yozuv"
+msgid_plural "Siz olgan materiallar va qo'shgan qoldiqlar · jami <span class=\"num\">%(n)s</span> ta yozuv"
+msgstr[0] "Materials you took and offcuts you added · <span class=\"num\">%(n)s</span> entry in total"
+msgstr[1] "Materials you took and offcuts you added · <span class=\"num\">%(n)s</span> entries in total"
+
+#: templates/inventory/offcut_form.html:28
+msgid "Kesishdan qolgan, yana ishlatsa bo'ladigan bo'lakni yozib qo'ying."
+msgstr "Record a reusable piece left over from cutting."
+
+#: templates/inventory/offcut_form.html:32
+msgid "Kasbingiz uchun qoldiq yoziladigan material yo'q."
+msgstr "No materials with offcut tracking for your trade."
+
+#: templates/inventory/offcut_form.html:33
+msgid "Qoldiq faqat qoldiq yoziladigan kategoriyadagi materiallar uchun yoziladi."
+msgstr "Offcuts are recorded only for materials in categories that track offcuts."
+
+#: templates/inventory/offcut_form.html:45
+msgid "Bo'lak to'liq listdan katta bo'lishi mumkin emas"
+msgstr "A piece can't be larger than the full sheet"
+
+#: templates/inventory/offcut_form.html:48
+msgid "Qoldiqni saqlash"
+msgstr "Save offcut"
+
+#: templates/inventory/offcut_form.html:51
+msgid "Qoldiq ko'rinishi"
+msgstr "Offcut preview"
+
+#: templates/inventory/offcut_form.html:52
+msgid "Listga nisbatan"
+msgstr "Against the sheet"
+
+#: templates/inventory/offcut_form.html:53
+msgid "To'liq list"
+msgstr "Full sheet"
+
+#: templates/inventory/offcut_form.html:54
+msgid "Bu material uchun list o'lchami kiritilmagan."
+msgstr "No sheet size is set for this material."
+
+#: templates/inventory/offcut_form.html:55
+msgid "Qoldiq bo'lagi to'liq list ichida"
+msgstr "Offcut piece inside the full sheet"
+
+#: templates/inventory/offcut_form.html:61
+msgid "Bo'lak"
+msgstr "Piece"
+
+#: templates/inventory/offcut_form.html:62
+msgid "Maydoni"
+msgstr "Area"
+
+#: templates/inventory/offcut_form.html:63
+msgid "List ulushi"
+msgstr "Share of sheet"
+
+#: templates/inventory/reports.html:11
+msgid "CSV yuklab olish"
+msgstr "Download CSV"
+
+#: templates/inventory/reports.html:14
+msgid "Filtrlar"
+msgstr "Filters"
+
+#: templates/inventory/reports.html:21
+msgid "Ko'rsatish"
+msgstr "Show"
+
+#: templates/inventory/reports.html:22
+msgid "Tozalash"
+msgstr "Clear"
+
+#: templates/inventory/reports.html:26
+msgid "Davr bo'yicha jami"
+msgstr "Totals for the period"
+
+#: templates/inventory/reports.html:33
+msgid "Chiqim (sarf)"
+msgstr "Stock out (usage)"
+
+#: templates/inventory/reports.html:38
+msgid "Farq"
+msgstr "Difference"
+
+#: templates/inventory/reports.html:40
+msgid "kirim − chiqim"
+msgstr "stock in − stock out"
+
+#: templates/inventory/reports.html:45
+msgid "ta yozuv, qiymati $0"
+msgstr "entries, value $0"
+
+#: templates/inventory/reports.html:51
+msgid "Sarf materiallar bo'yicha"
+msgstr "Usage by material"
+
+#: templates/inventory/reports.html:51
+msgid "eng qimmati birinchi"
+msgstr "most expensive first"
+
+#: templates/inventory/reports.html:62 templates/inventory/reports.html:77
+#, python-format
+msgid "%(n)s marta"
+msgid_plural "%(n)s marta"
+msgstr[0] "%(n)s time"
+msgstr[1] "%(n)s times"
+
+#: templates/inventory/reports.html:67 templates/inventory/reports.html:81
+msgid "Bu davrda chiqim yo'q."
+msgstr "No stock out in this period."
+
+#: templates/inventory/reports.html:71
+msgid "Sarf ishchilar bo'yicha"
+msgstr "Usage by worker"
+
+#: templates/inventory/reports.html:71
+msgid "USD, olingan materiallar qiymati"
+msgstr "USD, value of materials taken"
+
+#: templates/inventory/reports.html:87
+msgid "Barcha harakatlar"
+msgstr "All movements"
+
+#: templates/inventory/reports.html:88
+msgid "o'zgartirib bo'lmaydigan jurnal"
+msgstr "an unchangeable log"
+
+#: templates/inventory/reports.html:9
+msgid "Barcha davr"
+msgstr "All time"
+
+#: templates/inventory/reports.html:9
+msgid "kirim, chiqim va qoldiqlar, USD"
+msgstr "stock in, stock out and offcuts, USD"
+
+#: templates/inventory/reports.html:92
+msgid "Birlik narxi"
+msgstr "Unit price"
+
+#: templates/inventory/reports.html:92
+msgid "Jami"
+msgstr "Total"
+
+#: templates/inventory/reports.html:92
+msgid "Material · sana · ishchi"
+msgstr "Material · date · worker"
+
+#: templates/inventory/reports.html:97
+msgid "Tanlangan filtr bo'yicha harakat yo'q."
+msgstr "No movements match the selected filter."
+
+#: templates/inventory/withdraw_offcut.html:17
+msgid "Bor"
+msgstr "Available"
+
+#: templates/inventory/withdraw_offcut.html:18
+msgid "Qo'shgan"
+msgstr "Added by"
+
+#: templates/inventory/withdraw_offcut.html:19
+msgid "Joyi"
+msgstr "Location"
+
+#: templates/inventory/withdraw_offcut.html:26 templates/inventory/withdraw_whole.html:31
+msgid "Kamaytirish"
+msgstr "Decrease"
+
+#: templates/inventory/withdraw_offcut.html:28 templates/inventory/withdraw_whole.html:33
+msgid "Ko'paytirish"
+msgstr "Increase"
+
+#: templates/inventory/withdraw_offcut.html:3
+msgid "Qoldiqdan oldim"
+msgstr "Take from offcut"
+
+#: templates/inventory/withdraw_offcut.html:31
+msgid "Hammasi olinsa, bu qoldiq ro'yxatdan o'chadi."
+msgstr "If all are taken, this offcut leaves the list."
+
+#: templates/inventory/withdraw_offcut.html:34 templates/inventory/withdraw_whole.html:65
+msgid "Oldim — tasdiqlash"
+msgstr "Take — confirm"
+
+#: templates/inventory/withdraw_whole.html:17
+msgid "list"
+msgstr "sheet"
+
+#: templates/inventory/withdraw_whole.html:24
+msgid "Omborda hozir"
+msgstr "In stock now"
+
+#: templates/inventory/withdraw_whole.html:44
+msgid "1 idish"
+msgstr "1 container"
+
+#: templates/inventory/withdraw_whole.html:46
+msgid "Hammasini"
+msgstr "All of it"
+
+#: templates/inventory/withdraw_whole.html:52
+msgid "Olgandan keyin omborda"
+msgstr "In stock after taking"
+
+#: templates/inventory/withdraw_whole.html:60
+#, python-format
+msgid "Minimal qoldiqdan (%(qty)s %(unit)s) kam bo'ladi — administrator xarid ro'yxatida ko'radi."
+msgstr "It will go below minimum stock (%(qty)s %(unit)s) — the administrator will see it on the purchase list."
+
+#: templates/inventory/withdraw_whole.html:66
+msgid "Chiqim ombordan ayriladi va tarixingizga yoziladi."
+msgstr "Stock out is subtracted from the warehouse and written to your history."
+
+#: templates/partials/bottom_nav.html:7
+msgid "Qoldiq +"
+msgstr "Offcut +"
+
+#: templates/partials/bottom_nav.html:8
+msgid "Tarix"
+msgstr "History"
+
+#: templates/partials/field.html:15
+msgid "ixtiyoriy"
+msgstr "optional"
+
+#: templates/partials/field.html:18
+msgid "Parolni ko'rsatish"
+msgstr "Show password"
+
+#: templates/partials/field.html:18
+msgid "Parolni yashirish"
+msgstr "Hide password"
+
+#: templates/partials/lang_switch.html:3
+msgid "Til"
+msgstr "Language"
+
+#: templates/partials/nav.html:14
+#, python-format
+msgid "%(n)s ta tasdiq kutayotgan so'rov"
+msgid_plural "%(n)s ta tasdiq kutayotgan so'rov"
+msgstr[0] "%(n)s request awaiting approval"
+msgstr[1] "%(n)s requests awaiting approval"
+
+#: templates/partials/nav.html:14 templates/users/pending_user_review.html:5 templates/users/pending_users.html:3 templates/users/user_list.html:12
+msgid "So'rovlar"
+msgstr "Requests"
+
+#: templates/partials/nav.html:15 templates/users/user_edit.html:5 templates/users/user_list.html:3 templates/users/user_list.html:7
+#: templates/users/worker_role_list.html:15
+msgid "Ishchilar"
+msgstr "Workers"
+
+#: templates/partials/nav.html:16 templates/users/user_list.html:11 templates/users/worker_role_form.html:5 templates/users/worker_role_list.html:3
+#: templates/users/worker_role_list.html:7
+msgid "Kasblar"
+msgstr "Trades"
+
+#: templates/partials/nav.html:7
+msgid "Boshqaruv"
+msgstr "Admin"
+
+#: templates/partials/pagination.html:2
+msgid "Sahifalar"
+msgstr "Pages"
+
+#: templates/partials/pagination.html:5
+msgid "Oldingi"
+msgstr "Previous"
+
+#: templates/partials/pagination.html:6
+msgid "Keyingi"
+msgstr "Next"
+
+#: templates/users/login.html:17
+msgid "Ro'yxatdan o'ting"
+msgstr "Register"
+
+#: templates/users/login.html:17
+msgid "Yangi ishchimisiz?"
+msgstr "New worker?"
+
+#: templates/users/login.html:6
+msgid "Tizimga kirish"
+msgstr "Sign in"
+
+#: templates/users/login.html:7
+msgid "Sex omboriga login va parolingiz bilan kiring."
+msgstr "Sign in to the workshop warehouse with your username and password."
+
+#: templates/users/pending_user_review.html:13
+msgid "Ishchi o'zi tanlagan kasblar belgilangan. Kerak bo'lsa o'zgartiring — u faqat shu kasblarga tegishli materiallarni ko'radi va oladi."
+msgstr "The trades the worker chose are selected. Change them if needed — they will only see and take materials for these trades."
+
+#: templates/users/pending_user_review.html:16
+msgid "Tasdiqlash"
+msgstr "Approve"
+
+#: templates/users/pending_user_review.html:20
+msgid "Rad etish"
+msgstr "Reject"
+
+#: templates/users/pending_user_review.html:21
+msgid "So'rov o'chiriladi. Ishchi qaytadan ro'yxatdan o'tishi mumkin."
+msgstr "The request is deleted. The worker can register again."
+
+#: templates/users/pending_user_review.html:22
+#, python-format
+msgid "%(name)s so'rovini rad etasizmi? Bu amalni qaytarib bo'lmaydi."
+msgstr "Reject the request from %(name)s? This can't be undone."
+
+#: templates/users/pending_user_review.html:26
+msgid "So'rovni rad etish"
+msgstr "Reject request"
+
+#: templates/users/pending_user_review.html:3
+#, python-format
+msgid "%(name)s — so'rov"
+msgstr "%(name)s — request"
+
+#: templates/users/pending_user_review.html:7
+#, python-format
+msgid "%(date)s da so'rov yuborgan"
+msgstr "requested on %(date)s"
+
+#: templates/users/pending_users.html:11
+msgid "Tanlagan kasbi"
+msgstr "Chosen trade"
+
+#: templates/users/pending_users.html:11
+msgid "Yuborilgan"
+msgstr "Sent"
+
+#: templates/users/pending_users.html:22
+msgid "Ko'rib chiqish"
+msgstr "Review"
+
+#: templates/users/pending_users.html:28
+msgid "Hammasi ko'rib chiqilgan."
+msgstr "Everything has been reviewed."
+
+#: templates/users/pending_users.html:29
+msgid "Barcha ishchilar"
+msgstr "All workers"
+
+#: templates/users/pending_users.html:29
+msgid "Ishchi <span class=\"font-medium text-ink\">/accounts/register/</span> sahifasida ro'yxatdan o'tganda so'rovi shu yerda paydo bo'ladi."
+msgstr "When a worker registers on the <span class=\"font-medium text-ink\">/accounts/register/</span> page, their request appears here."
+
+#: templates/users/pending_users.html:5
+msgid "Ro'yxatdan o'tish so'rovlari"
+msgstr "Registration requests"
+
+#: templates/users/pending_users.html:6
+#, python-format
+msgid "<span class=\"num\">%(n)s</span> ta ishchi tasdiq kutmoqda. Kasbini tekshirib, tasdiqlang."
+msgid_plural "<span class=\"num\">%(n)s</span> ta ishchi tasdiq kutmoqda. Kasbini tekshirib, tasdiqlang."
+msgstr[0] "<span class=\"num\">%(n)s</span> worker is awaiting approval. Check their trade and approve."
+msgstr[1] "<span class=\"num\">%(n)s</span> workers are awaiting approval. Check their trades and approve."
+
+#: templates/users/pending_users.html:6
+msgid "Tasdiq kutayotgan so'rov yo'q."
+msgstr "No requests awaiting approval."
+
+#: templates/users/register.html:18
+msgid "So'rov yuborish"
+msgstr "Send request"
+
+#: templates/users/register.html:21
+msgid "Hisobingiz bormi?"
+msgstr "Already have an account?"
+
+#: templates/users/register.html:3 templates/users/register.html:8
+msgid "Ro'yxatdan o'tish"
+msgstr "Register"
+
+#: templates/users/register.html:9
+msgid "Kasbingizni tanlang. Administrator tasdiqlagach, faqat kasbingizga tegishli materiallarni ko'rasiz va olasiz."
+msgstr "Choose your trade. Once an administrator approves you, you'll see and take only the materials for your trade."
+
+#: templates/users/register_done.html:10
+msgid "Kirish sahifasiga qaytish"
+msgstr "Back to the sign-in page"
+
+#: templates/users/register_done.html:3
+msgid "So'rov yuborildi"
+msgstr "Request sent"
+
+#: templates/users/register_done.html:6
+msgid "Tasdiq kutilmoqda"
+msgstr "Awaiting approval"
+
+#: templates/users/register_done.html:7
+msgid "So'rovingiz yuborildi"
+msgstr "Your request has been sent"
+
+#: templates/users/register_done.html:8
+msgid "Administrator so'rovingizni ko'rib chiqib, kasbingizni tasdiqlaydi. Shundan keyin shu login va parol bilan tizimga kira olasiz."
+msgstr "An administrator will review your request and confirm your trade. After that you can sign in with this username and password."
+
+#: templates/users/register_done.html:9
+msgid "Uzoq kutib qolsangiz, sex boshlig'iga ayting."
+msgstr "If it takes too long, tell the workshop manager."
+
+#: templates/users/user_edit.html:7
+#, python-format
+msgid "ro'yxatdan o'tgan %(date)s"
+msgstr "registered %(date)s"
+
+#: templates/users/user_edit.html:7
+#, python-format
+msgid "tasdiqlangan %(date)s"
+msgstr "approved %(date)s"
+
+#: templates/users/user_list.html:19
+msgid "Ism yoki login"
+msgstr "Name or username"
+
+#: templates/users/user_list.html:26
+msgid "Kasblari"
+msgstr "Trades"
+
+#: templates/users/user_list.html:32
+msgid "siz"
+msgstr "you"
+
+#: templates/users/user_list.html:33
+msgid "rol yo'q"
+msgstr "no role"
+
+#: templates/users/user_list.html:39
+msgid "Tasdiq kutmoqda"
+msgstr "Awaiting approval"
+
+#: templates/users/user_list.html:44
+msgid "Hech kim topilmadi."
+msgstr "No one found."
+
+#: templates/users/user_list.html:8
+#, python-format
+msgid "<span class=\"num\">%(n)s</span> ta hisob"
+msgid_plural "<span class=\"num\">%(n)s</span> ta hisob"
+msgstr[0] "<span class=\"num\">%(n)s</span> account"
+msgstr[1] "<span class=\"num\">%(n)s</span> accounts"
+
+#: templates/users/user_list.html:8
+msgid "Hisoblar, kasblar va kirish huquqi"
+msgstr "Accounts, trades and access"
+
+#: templates/users/worker_role_form.html:13
+msgid "Uch tilda. Ishchi qaysi tilni tanlasa, shu tildagi nom ko'rinadi."
+msgstr "In three languages. Each worker sees the name in the language they choose."
+
+#: templates/users/worker_role_form.html:3 templates/users/worker_role_form.html:6 templates/users/worker_role_list.html:10
+msgid "Yangi kasb"
+msgstr "New trade"
+
+#: templates/users/worker_role_form.html:31
+msgid "Kasbni qo'shish"
+msgstr "Add trade"
+
+#: templates/users/worker_role_form.html:7
+#, python-format
+msgid "Kod: %(code)s — o'zgarmaydi, materiallar va ishchilar shu kod bilan bog'langan."
+msgstr "Code: %(code)s — it doesn't change; materials and workers are linked by this code."
+
+#: templates/users/worker_role_form.html:7
+msgid "Qo'shilgach, ishchilar ro'yxatdan o'tishda tanlay oladi. Materiallarda ham shu kasbni belgilang."
+msgstr "Once added, workers can choose it when registering. Select this trade on materials too."
+
+#: templates/users/worker_role_list.html:15
+msgid "Boshqa tillarda"
+msgstr "In other languages"
+
+#: templates/users/worker_role_list.html:15
+msgid "Kasb"
+msgstr "Trade"
+
+#: templates/users/worker_role_list.html:22
+#, python-format
+msgid "%(n)s ishchi"
+msgid_plural "%(n)s ishchi"
+msgstr[0] "%(n)s worker"
+msgstr[1] "%(n)s workers"
+
+#: templates/users/worker_role_list.html:29
+msgid "Hali kasb qo'shilmagan."
+msgstr "No trades yet."
+
+#: templates/users/worker_role_list.html:8
+msgid "Ishchi turlari. Ishchi ro'yxatdan o'tishda kasbini tanlaydi, material esa faqat belgilangan kasblarga ko'rinadi."
+msgstr "Kinds of workers. A worker picks their trade when registering, and a material is visible only to the trades selected on it."

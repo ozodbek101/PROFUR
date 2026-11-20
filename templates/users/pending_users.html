@@ -1,32 +1,32 @@
 {% extends "base.html" %}
-{% load wms %}
-{% block title %}So'rovlar{% endblock %}
+{% load wms i18n %}
+{% block title %}{% translate "So'rovlar" %}{% endblock %}
 {% block content %}
-<h1 class="font-bold text-[24px] leading-8 lg:text-[32px] lg:leading-10">Ro'yxatdan o'tish so'rovlari</h1>
-<p class="mt-1 text-muted" style="font-size:15px">{% if pending_users %}<span class="num">{{ pending_users|length }}</span> ta ishchi tasdiq kutmoqda. Kasbini tekshirib, tasdiqlang.{% else %}Tasdiq kutayotgan so'rov yo'q.{% endif %}</p>
+<h1 class="font-bold text-[26px] leading-8 lg:text-[34px] lg:leading-10">{% translate "Ro'yxatdan o'tish so'rovlari" %}</h1>
+<p class="mt-1 text-muted" style="font-size:16px">{% if pending_users %}{% blocktranslate count n=pending_users|length %}<span class="num">{{ n }}</span> ta ishchi tasdiq kutmoqda. Kasbini tekshirib, tasdiqlang.{% plural %}<span class="num">{{ n }}</span> ta ishchi tasdiq kutmoqda. Kasbini tekshirib, tasdiqlang.{% endblocktranslate %}{% else %}{% translate "Tasdiq kutayotgan so'rov yo'q." %}{% endif %}</p>
 
 <div class="panel mt-6 max-w-[920px] overflow-hidden">
   {% if pending_users %}
-  <div class="hidden grid-cols-[minmax(0,1fr)_220px_120px_auto] gap-x-4 px-5 pb-2 pt-4 text-muted md:grid" style="font-size:12px" aria-hidden="true">
-    <span>Ishchi</span><span>Tanlagan kasbi</span><span class="text-right">Yuborilgan</span><span></span>
+  <div class="hidden grid-cols-[minmax(0,1fr)_220px_120px_auto] gap-x-4 px-5 pb-2 pt-4 text-muted md:grid" style="font-size:13px" aria-hidden="true">
+    <span>{% translate "Ishchi" %}</span><span>{% translate "Tanlagan kasbi" %}</span><span class="text-right">{% translate "Yuborilgan" %}</span><span></span>
   </div>
   <ul>
     {% for p in pending_users %}
     <li class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 border-t border-rule px-4 py-3 md:grid-cols-[minmax(0,1fr)_220px_120px_auto] md:px-5">
       <div class="min-w-0">
         <p class="truncate font-medium">{{ p.display_name }}</p>
-        <p class="truncate text-muted" style="font-size:13px">@{{ p.username }}<span class="md:hidden"> · {% for r in p.roles %}{{ r|short_role }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></p>
+        <p class="truncate text-muted" style="font-size:14px">@{{ p.username }}<span class="md:hidden"> · {% for r in p.roles %}{{ r|short_role }}{% if not forloop.last %}, {% endif %}{% endfor %}</span></p>
       </div>
       <p class="hidden truncate md:block">{% for r in p.roles %}{{ r|short_role }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
       <p class="num hidden text-right text-muted md:block">{{ p.date_joined|date:"Y-m-d" }}</p>
-      <a href="{% url 'users:pending_user_review' p.pk %}" class="btn btn-primary min-h-11 md:min-h-9">Ko'rib chiqish</a>
+      <a href="{% url 'users:pending_user_review' p.pk %}" class="btn btn-primary min-h-11 md:min-h-9">{% translate "Ko'rib chiqish" %}</a>
     </li>
     {% endfor %}
   </ul>
   {% else %}
     <div class="px-5 py-8">
-      <p class="font-medium">Hammasi ko'rib chiqilgan.</p>
-      <p class="mt-1 text-muted">Ishchi <span class="font-medium text-ink">/accounts/register/</span> sahifasida ro'yxatdan o'tganda so'rovi shu yerda paydo bo'ladi. <a class="font-medium text-ink underline underline-offset-4" href="{% url 'users:user_list' %}">Barcha ishchilar</a></p>
+      <p class="font-medium">{% translate "Hammasi ko'rib chiqilgan." %}</p>
+      <p class="mt-1 text-muted">{% blocktranslate trimmed %}Ishchi <span class="font-medium text-ink">/accounts/register/</span> sahifasida ro'yxatdan o'tganda so'rovi shu yerda paydo bo'ladi.{% endblocktranslate %} <a class="font-medium text-ink underline underline-offset-4" href="{% url 'users:user_list' %}">{% translate "Barcha ishchilar" %}</a></p>
     </div>
   {% endif %}
 </div>

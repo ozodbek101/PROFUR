@@ -24,6 +24,12 @@ NAV_SECTIONS = {
     "pending_user_review": "pending_users",
     "user_list": "users",
     "user_edit": "users",
+    "category_list": "categories",
+    "category_create": "categories",
+    "category_edit": "categories",
+    "worker_role_list": "worker_roles",
+    "worker_role_create": "worker_roles",
+    "worker_role_edit": "worker_roles",
 }
 
 

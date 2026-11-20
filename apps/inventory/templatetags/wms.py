@@ -6,9 +6,11 @@ from django import template
 from django.utils.html import format_html
 from django.utils.http import urlencode
 from django.utils.safestring import mark_safe
+from django.utils.translation import gettext as _
+from django.utils.translation import pgettext
 
-from apps.inventory.models import CATEGORY_SHORT_LABELS, UNIT_SHORT_LABELS
-from apps.users.models import UserRole
+from apps.inventory.models import UNIT_SHORT_LABELS, category_label
+from apps.users.models import role_label as _role_label
 
 register = template.Library()
 
@@ -54,38 +56,38 @@ def absval(value):
     return abs(number) if number is not None else value
 
 
-UZ_MONTHS = (
-    "yanvar", "fevral", "mart", "aprel", "may", "iyun",
-    "iyul", "avgust", "sentabr", "oktabr", "noyabr", "dekabr",
-)
+def _month_names() -> tuple[str, ...]:
+    # Lower case as in running text ("Kirim, noyabr"); context keeps "may" apart.
+    return (
+        pgettext("month", "yanvar"), pgettext("month", "fevral"), pgettext("month", "mart"),
+        pgettext("month", "aprel"), pgettext("month", "may"), pgettext("month", "iyun"),
+        pgettext("month", "iyul"), pgettext("month", "avgust"), pgettext("month", "sentabr"),
+        pgettext("month", "oktabr"), pgettext("month", "noyabr"), pgettext("month", "dekabr"),
+    )
 
 
 @register.filter
 def uz_month(value) -> str:
-    """date -> 'noyabr' (Uzbek month names, lower case as in running text)."""
+    """date -> month name in the active language ('noyabr', 'November', 'ноябрь')."""
     try:
-        return UZ_MONTHS[value.month - 1]
+        return _month_names()[value.month - 1]
     except (AttributeError, IndexError, TypeError):
         return ""
 
 
 @register.filter
 def cat_label(value: str) -> str:
-    return CATEGORY_SHORT_LABELS.get(value, value)
+    return category_label(value)
 
 
 @register.filter
 def role_label(value: str) -> str:
-    try:
-        return UserRole(value).label
-    except ValueError:
-        return value
+    return _role_label(value)
 
 
 @register.filter
 def short_role(value: str) -> str:
-    """'Arrachi (Sawyer)' -> 'Arrachi'."""
-    return role_label(value).split(" (")[0]
+    return _role_label(value)
 
 
 @register.filter
@@ -135,6 +137,10 @@ _ICON_PATHS = {
     "dashboard": '<path d="M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z"/>',
     "take": '<path d="M12 21V9"/><path d="m7 14 5-5 5 5"/><path d="M4 3h16"/>',
     "edit": '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 1 1 3 3L7 19l-4 1 1-4z"/>',
+    "eye": '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+    "eye-off": '<path d="M9.9 5.2A10 10 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-2.6 3.6M6.6 6.6A17 17 0 0 0 2 12s3.5 7 10 7a9.7 9.7 0 0 0 5.4-1.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2M2 2l20 20"/>',
+    "tag": '<path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/>',
+    "tool": '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.8-3.8a6 6 0 0 1-7.9 7.9l-6.9 6.9a2.1 2.1 0 0 1-3-3l6.9-6.9a6 6 0 0 1 7.9-7.9z"/>',
 }
 
 
@@ -176,7 +182,9 @@ def offcut_figure(length_mm, width_mm, sheet_length=None, sheet_width=None, box_
         if has_sheet
         else ""
     )
-    label = f"{piece[0]} × {piece[1]} mm qoldiq" + (f", list {sheet[0]} × {sheet[1]} mm" if has_sheet else "")
+    label = _("%(l)s × %(w)s mm qoldiq") % {"l": piece[0], "w": piece[1]}
+    if has_sheet:
+        label += ", " + _("list %(l)s × %(w)s mm") % {"l": sheet[0], "w": sheet[1]}
     return format_html(
         '<svg width="{}" height="{}" viewBox="0 0 {} {}" role="img" aria-label="{}">{}'
         '<rect x="{}" y="{}" width="{}" height="{}" fill="#f1e2cf" stroke="#9a5b22" stroke-width="1"/></svg>',

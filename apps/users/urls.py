@@ -22,5 +22,8 @@ urlpatterns = [
         name="pending_user_reject",
     ),
     path("admin-dashboard/users/", views.UserListView.as_view(), name="user_list"),
+    path("admin-dashboard/worker-types/", views.WorkerRoleListView.as_view(), name="worker_role_list"),
+    path("admin-dashboard/worker-types/new/", views.WorkerRoleCreateView.as_view(), name="worker_role_create"),
+    path("admin-dashboard/worker-types/<int:pk>/edit/", views.WorkerRoleUpdateView.as_view(), name="worker_role_edit"),
     path("admin-dashboard/users/<int:pk>/edit/", views.UserUpdateView.as_view(), name="user_edit"),
 ]

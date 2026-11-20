@@ -10,6 +10,7 @@ from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
+from django.utils.translation import gettext as _
 
 from .models import (
     BaseMaterial,
@@ -37,31 +38,31 @@ def _decimal(value, field: str) -> Decimal:
     try:
         number = value if isinstance(value, Decimal) else Decimal(str(value))
     except (InvalidOperation, TypeError, ValueError) as exc:
-        raise ValidationError({field: "Noto'g'ri raqam."}) from exc
+        raise ValidationError({field: _("Noto'g'ri raqam.")}) from exc
     if not number.is_finite():
-        raise ValidationError({field: "Noto'g'ri raqam."})
+        raise ValidationError({field: _("Noto'g'ri raqam.")})
     return number
 
 
 def _positive_quantity(material: BaseMaterial, value, field: str = "quantity") -> Decimal:
     quantity = _decimal(value, field)
     if quantity <= 0:
-        raise ValidationError({field: "Miqdor 0 dan katta bo'lishi kerak."})
+        raise ValidationError({field: _("Miqdor 0 dan katta bo'lishi kerak.")})
     if quantity != quantity.quantize(CENTS):
-        raise ValidationError({field: "Miqdor ko'pi bilan 2 xonali kasr bo'lishi mumkin."})
+        raise ValidationError({field: _("Miqdor ko'pi bilan 2 xonali kasr bo'lishi mumkin.")})
     if material.requires_integer_quantity and quantity != quantity.to_integral_value():
-        raise ValidationError({field: f"{material.name} faqat butun sonda hisoblanadi ({material.unit_short})."})
+        raise ValidationError({field: _("%(name)s faqat butun sonda hisoblanadi (%(unit)s).") % {"name": material.name, "unit": material.unit_short}})
     return quantity.quantize(CENTS)
 
 
 def _require_admin(user) -> None:
     if not (getattr(user, "can_use_system", False) and user.is_warehouse_admin):
-        raise PermissionDenied("Bu amal faqat administratorlar uchun.")
+        raise PermissionDenied(_("Bu amal faqat administratorlar uchun."))
 
 
 def _require_access(user, material: BaseMaterial) -> None:
     if not user_can_access_material(user, material):
-        raise PermissionDenied("Bu material sizning kasbingiz uchun ruxsat etilmagan.")
+        raise PermissionDenied(_("Bu material sizning kasbingiz uchun ruxsat etilmagan."))
 
 
 def _locked_stock(material: BaseMaterial) -> WholeMaterial:
@@ -124,16 +125,16 @@ def record_kirim(
     quantity = _positive_quantity(material, quantity)
 
     if (unit_price_usd is None) == (total_price_usd is None):
-        raise ValidationError("Birlik narxi yoki umumiy partiya narxidan bittasini kiriting.")
+        raise ValidationError(_("Birlik narxi yoki umumiy partiya narxidan bittasini kiriting."))
     if total_price_usd is not None:
         batch_total = _decimal(total_price_usd, "total_price_usd")
         if batch_total < 0:
-            raise ValidationError({"total_price_usd": "Narx manfiy bo'lishi mumkin emas."})
+            raise ValidationError({"total_price_usd": _("Narx manfiy bo'lishi mumkin emas.")})
         unit_price = (batch_total / quantity).quantize(PRICE_PLACES, rounding=ROUND_HALF_UP)
     else:
         unit_price = _decimal(unit_price_usd, "unit_price_usd")
         if unit_price < 0:
-            raise ValidationError({"unit_price_usd": "Narx manfiy bo'lishi mumkin emas."})
+            raise ValidationError({"unit_price_usd": _("Narx manfiy bo'lishi mumkin emas.")})
         unit_price = unit_price.quantize(PRICE_PLACES, rounding=ROUND_HALF_UP)
         batch_total = unit_price * quantity
     batch_total = batch_total.quantize(CENTS, rounding=ROUND_HALF_UP)
@@ -142,7 +143,7 @@ def record_kirim(
         stock = _locked_stock(material)
         base = BaseMaterial.objects.select_for_update().get(pk=material.pk)
         if not base.is_active:
-            raise ValidationError("Arxivlangan materialga kirim qilib bo'lmaydi. Avval uni faollashtiring.")
+            raise ValidationError(_("Arxivlangan materialga kirim qilib bo'lmaydi. Avval uni faollashtiring."))
 
         old_quantity = stock.quantity
         new_quantity = old_quantity + quantity
@@ -183,10 +184,10 @@ def withdraw_whole_material(*, material: BaseMaterial, user, quantity, notes: st
         stock = _locked_stock(material)
         base = BaseMaterial.objects.get(pk=material.pk)
         if not base.is_active:
-            raise ValidationError("Bu material arxivlangan.")
+            raise ValidationError(_("Bu material arxivlangan."))
         if quantity > stock.quantity:
             raise InsufficientStockError(
-                {"quantity": f"Omborda faqat {stock.quantity.normalize():f} {base.unit_short} bor."},
+                {"quantity": _("Omborda faqat %(qty)s %(unit)s bor.") % {"qty": f"{stock.quantity.normalize():f}", "unit": base.unit_short}},
                 code="insufficient_stock",
             )
         stock.quantity -= quantity
@@ -211,17 +212,17 @@ def withdraw_offcut(*, offcut: LeftoverOffcut, user, quantity: int = 1, notes: s
     try:
         pieces = int(quantity)
     except (TypeError, ValueError) as exc:
-        raise ValidationError({"quantity": "Butun son kiriting."}) from exc
+        raise ValidationError({"quantity": _("Butun son kiriting.")}) from exc
     if pieces < 1 or Decimal(str(quantity)) != pieces:
-        raise ValidationError({"quantity": "Kamida 1 dona (butun son) kiriting."})
+        raise ValidationError({"quantity": _("Kamida 1 dona (butun son) kiriting.")})
 
     with transaction.atomic():
         locked = LeftoverOffcut.objects.select_for_update().filter(pk=offcut.pk).first()
         if locked is None:
-            raise InsufficientStockError("Bu qoldiq allaqachon olingan.", code="offcut_gone")
+            raise InsufficientStockError(_("Bu qoldiq allaqachon olingan."), code="offcut_gone")
         if pieces > locked.quantity:
             raise InsufficientStockError(
-                {"quantity": f"Bu qoldiqdan faqat {locked.quantity} dona bor."}, code="insufficient_stock"
+                {"quantity": _("Bu qoldiqdan faqat %(qty)s dona bor.") % {"qty": locked.quantity}}, code="insufficient_stock"
             )
         length_mm, width_mm, material_id = locked.length_mm, locked.width_mm, locked.material_id
         remaining = locked.quantity - pieces
@@ -260,12 +261,12 @@ def register_offcut(
     """Log a reusable leftover piece after cutting a sheet."""
     _require_access(user, material)
     if not material.supports_offcuts:
-        raise ValidationError({"material": "Bu turdagi material uchun qoldiq qayd etilmaydi."})
+        raise ValidationError({"material": _("Bu turdagi material uchun qoldiq qayd etilmaydi.")})
 
     errors = {}
     for field, value in (("length_mm", length_mm), ("width_mm", width_mm), ("quantity", quantity)):
         if not isinstance(value, int) or isinstance(value, bool) or value < 1:
-            errors[field] = "Musbat butun son kiriting."
+            errors[field] = _("Musbat butun son kiriting.")
     if errors:
         raise ValidationError(errors)
 
@@ -275,7 +276,8 @@ def register_offcut(
         sheet = sorted((stock.length_mm, stock.width_mm))
         if piece[0] > sheet[0] or piece[1] > sheet[1]:
             raise ValidationError(
-                f"Qoldiq o'lchami to'liq listdan ({stock.length_mm}x{stock.width_mm} mm) katta bo'lishi mumkin emas."
+                _("Qoldiq o'lchami to'liq listdan (%(l)sx%(w)s mm) katta bo'lishi mumkin emas.")
+                % {"l": stock.length_mm, "w": stock.width_mm}
             )
 
     with transaction.atomic():

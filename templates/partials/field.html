@@ -1,4 +1,4 @@
-{# Renders one bound form field: label above, control, help, errors. #}
+{% load i18n wms %}{# Renders one bound form field: label above, control, help, errors. #}
 <div class="{% if field.errors %}has-error{% endif %}{% if wrapper_class %} {{ wrapper_class }}{% endif %}">
   {% if field.widget_type == "checkboxselectmultiple" or field.widget_type == "radioselect" %}
     <fieldset>
@@ -12,8 +12,23 @@
   {% elif field.widget_type == "checkbox" %}
     <label class="choice-tile">{{ field }}<span>{{ field.label }}</span></label>
   {% else %}
-    <label class="field-label" for="{{ field.id_for_label }}">{{ field.label }}{% if not field.field.required %} <span class="font-normal text-muted">(ixtiyoriy)</span>{% endif %}</label>
-    {{ field }}
+    <label class="field-label" for="{{ field.id_for_label }}">{{ field.label }}{% if not field.field.required %} <span class="font-normal text-muted">({% translate "ixtiyoriy" %})</span>{% endif %}</label>
+    {% if field.widget_type == "password" %}
+      {# Eye button shows what is being typed; the field goes back to dots on the next tap. #}
+      {% translate "Parolni ko'rsatish" as show_label %}{% translate "Parolni yashirish" as hide_label %}
+      <div class="pw-field" x-data="{ show: false }" x-effect="$el.querySelector('input').type = show ? 'text' : 'password'">
+        {{ field }}
+        <button type="button" class="pw-toggle" @click="show = !show; $nextTick(() => $el.parentElement.querySelector('input').focus())"
+                :aria-pressed="show.toString()" aria-pressed="false" aria-controls="{{ field.id_for_label }}"
+                :aria-label="show ? '{{ hide_label|escapejs }}' : '{{ show_label|escapejs }}'" aria-label="{{ show_label }}"
+                :title="show ? '{{ hide_label|escapejs }}' : '{{ show_label|escapejs }}'" title="{{ show_label }}">
+          <span x-show="!show">{% icon "eye" 20 %}</span>
+          <span x-show="show" x-cloak>{% icon "eye-off" 20 %}</span>
+        </button>
+      </div>
+    {% else %}
+      {{ field }}
+    {% endif %}
   {% endif %}
   {% if field.help_text %}<p class="field-help" id="{{ field.auto_id }}_helptext">{{ field.help_text }}</p>{% endif %}
   {% for error in field.errors %}<p class="field-error">{{ error }}</p>{% endfor %}

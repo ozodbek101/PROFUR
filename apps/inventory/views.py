@@ -6,7 +6,9 @@ from django.core.exceptions import ValidationError
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
+from django.db.models import Count
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from django.views import View
 from django.views.generic import CreateView, FormView, ListView, TemplateView, UpdateView
 
@@ -16,6 +18,7 @@ from apps.users.permissions import ApprovedUserRequiredMixin, WarehouseAdminRequ
 from . import selectors, services
 from .templatetags.wms import uz_month
 from .forms import (
+    CategoryForm,
     KirimForm,
     MaterialForm,
     OffcutForm,
@@ -26,9 +29,11 @@ from .forms import (
 from .models import (
     BaseMaterial,
     InventoryTransaction,
+    Category,
     LeftoverOffcut,
-    MaterialCategory,
+    category_label,
     default_roles_for_category,
+    offcut_category_codes,
 )
 
 
@@ -61,7 +66,7 @@ class HomeView(ApprovedUserRequiredMixin, TemplateView):
         user = self.request.user
         query = self.request.GET.get("q", "").strip()
         category = self.request.GET.get("category", "")
-        if category not in MaterialCategory.values:
+        if category and not Category.objects.filter(code=category).exists():
             category = ""
         tab = self.request.GET.get("tab", "whole")
 
@@ -76,7 +81,7 @@ class HomeView(ApprovedUserRequiredMixin, TemplateView):
                 "query": query,
                 "category": category,
                 "tab": tab if tab in ("whole", "offcuts") else "whole",
-                "categories": [c for c in MaterialCategory if c.value in visible_categories],
+                "categories": [c for c in Category.objects.all() if c.code in visible_categories],
                 "can_add_offcut": selectors.offcut_capable_materials(user).exists(),
             }
         )
@@ -115,8 +120,13 @@ class WithdrawWholeView(ApprovedUserRequiredMixin, FormView):
         unit = self.stock.material.unit_short
         messages.success(
             self.request,
-            f"Chiqim yozildi: {self.stock.material.name} — {fmt_qty(entry.quantity_abs)} {unit}. "
-            f"Omborda qoldi: {fmt_qty(entry.stock_after)} {unit}.",
+            _("Chiqim yozildi: %(name)s — %(qty)s %(unit)s. Omborda qoldi: %(left)s %(unit)s.")
+            % {
+                "name": self.stock.material.name,
+                "qty": fmt_qty(entry.quantity_abs),
+                "unit": unit,
+                "left": fmt_qty(entry.stock_after),
+            },
         )
         return redirect(reverse("inventory:home") + "?tab=whole")
 
@@ -163,7 +173,8 @@ class OffcutCreateView(ApprovedUserRequiredMixin, FormView):
             return self.form_invalid(form)
         messages.success(
             self.request,
-            f"Qoldiq qo'shildi: {offcut.material.name} {offcut.length_mm}×{offcut.width_mm} mm — {offcut.quantity} dona.",
+            _("Qoldiq qo'shildi: %(name)s %(l)s×%(w)s mm — %(qty)s dona.")
+            % {"name": offcut.material.name, "l": offcut.length_mm, "w": offcut.width_mm, "qty": offcut.quantity},
         )
         return redirect(reverse("inventory:home") + "?tab=offcuts")
 
@@ -196,8 +207,13 @@ class OffcutWithdrawView(ApprovedUserRequiredMixin, FormView):
             return self.form_invalid(form)
         messages.success(
             self.request,
-            f"Qoldiq olindi: {self.offcut.material.name} {self.offcut.length_mm}×{self.offcut.width_mm} mm — "
-            f"{form.cleaned_data['quantity']} dona.",
+            _("Qoldiq olindi: %(name)s %(l)s×%(w)s mm — %(qty)s dona.")
+            % {
+                "name": self.offcut.material.name,
+                "l": self.offcut.length_mm,
+                "w": self.offcut.width_mm,
+                "qty": form.cleaned_data["quantity"],
+            },
         )
         return redirect(reverse("inventory:home") + "?tab=offcuts")
 
@@ -259,7 +275,7 @@ class MaterialListView(WarehouseAdminRequiredMixin, ListView):
         status = self.request.GET.get("status", "active")
         if query:
             qs = qs.filter(name__icontains=query)
-        if category in MaterialCategory.values:
+        if category:
             qs = qs.filter(category=category)
         if status == "active":
             qs = qs.filter(is_active=True)
@@ -274,13 +290,19 @@ class MaterialListView(WarehouseAdminRequiredMixin, ListView):
                 "query": self.request.GET.get("q", ""),
                 "category": self.request.GET.get("category", ""),
                 "status": self.request.GET.get("status", "active"),
-                "categories": MaterialCategory,
+                "categories": Category.objects.all(),
             }
         )
         return context
 
 
-class MaterialCreateView(WarehouseAdminRequiredMixin, CreateView):
+class MaterialFormContextMixin:
+    def get_context_data(self, **kwargs):
+        # Category codes whose materials have a standard sheet size (offcuts are logged against it).
+        return super().get_context_data(offcut_categories=offcut_category_codes(), **kwargs)
+
+
+class MaterialCreateView(WarehouseAdminRequiredMixin, MaterialFormContextMixin, CreateView):
     form_class = MaterialForm
     template_name = "inventory/material_form.html"
 
@@ -300,11 +322,11 @@ class MaterialCreateView(WarehouseAdminRequiredMixin, CreateView):
         except ValidationError as exc:
             apply_service_errors(form, exc)
             return self.form_invalid(form)
-        messages.success(self.request, f"“{material.name}” qo'shildi. Endi kirimni kiriting.")
+        messages.success(self.request, _("“%(name)s” qo'shildi. Endi kirimni kiriting.") % {"name": material.name})
         return redirect(reverse("inventory:kirim") + f"?material={material.pk}")
 
 
-class MaterialUpdateView(WarehouseAdminRequiredMixin, UpdateView):
+class MaterialUpdateView(WarehouseAdminRequiredMixin, MaterialFormContextMixin, UpdateView):
     model = BaseMaterial
     form_class = MaterialForm
     template_name = "inventory/material_form.html"
@@ -316,7 +338,7 @@ class MaterialUpdateView(WarehouseAdminRequiredMixin, UpdateView):
             material.allowed_roles = default_roles_for_category(material.category)
         material.save()
         form.save_stock_dimensions(material)
-        messages.success(self.request, f"“{material.name}” saqlandi.")
+        messages.success(self.request, _("“%(name)s” saqlandi.") % {"name": material.name})
         return redirect("inventory:material_list")
 
 
@@ -359,8 +381,14 @@ class KirimView(WarehouseAdminRequiredMixin, FormView):
             return self.form_invalid(form)
         messages.success(
             self.request,
-            f"Kirim yozildi: {entry.material.name} +{fmt_qty(entry.quantity_changed)} {entry.material.unit_short}, "
-            f"${entry.total_price_usd:,.2f}. Yangi o'rtacha narx: ${entry.material.unit_price_usd:,.4f}.",
+            _("Kirim yozildi: %(name)s +%(qty)s %(unit)s, %(total)s. Yangi o'rtacha narx: %(avg)s.")
+            % {
+                "name": entry.material.name,
+                "qty": fmt_qty(entry.quantity_changed),
+                "unit": entry.material.unit_short,
+                "total": f"${entry.total_price_usd:,.2f}",
+                "avg": f"${entry.material.unit_price_usd:,.4f}",
+            },
         )
         return redirect("inventory:kirim")
 
@@ -419,17 +447,17 @@ class ReportExportView(WarehouseAdminRequiredMixin, View):
         writer = csv.writer(response)
         writer.writerow(
             [
-                "Sana",
-                "Turi",
-                "Material",
-                "Kategoriya",
-                "Miqdor",
-                "Birlik",
-                "Birlik narxi (USD)",
-                "Jami (USD)",
-                "Qoldiq o'lchami (mm)",
-                "Ishchi",
-                "Izoh",
+                _("Sana"),
+                _("Turi"),
+                _("Material"),
+                _("Kategoriya"),
+                _("Miqdor"),
+                _("Birlik"),
+                _("Birlik narxi (USD)"),
+                _("Jami (USD)"),
+                _("Qoldiq o'lchami (mm)"),
+                _("Ishchi"),
+                _("Izoh"),
             ]
         )
         for txn in qs.iterator(chunk_size=500):
@@ -438,7 +466,7 @@ class ReportExportView(WarehouseAdminRequiredMixin, View):
                     timezone.localtime(txn.created_at).strftime("%Y-%m-%d %H:%M"),
                     txn.get_transaction_type_display(),
                     _csv_safe(txn.material.name),
-                    txn.material.get_category_display(),
+                    category_label(txn.material.category),
                     f"{txn.quantity_changed}",
                     txn.material.unit_short,
                     f"{txn.unit_price_usd}",
@@ -449,4 +477,46 @@ class ReportExportView(WarehouseAdminRequiredMixin, View):
                 ]
             )
         return response
+
+
+# ---------------------------------------------------------------------------
+# Admin: material categories
+# ---------------------------------------------------------------------------
+class CategoryListView(WarehouseAdminRequiredMixin, ListView):
+    template_name = "inventory/category_list.html"
+    context_object_name = "categories"
+
+    def get_queryset(self):
+        return Category.objects.all()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        counts = dict(
+            BaseMaterial.objects.filter(is_active=True).values_list("category").annotate(n=Count("id"))
+        )
+        for category in context["categories"]:
+            category.material_count = counts.get(category.code, 0)
+        return context
+
+
+class CategoryCreateView(WarehouseAdminRequiredMixin, CreateView):
+    form_class = CategoryForm
+    template_name = "inventory/category_form.html"
+
+    def form_valid(self, form):
+        category = form.save()
+        messages.success(self.request, _("“%(name)s” kategoriyasi qo'shildi.") % {"name": category.name})
+        return redirect("inventory:category_list")
+
+
+class CategoryUpdateView(WarehouseAdminRequiredMixin, UpdateView):
+    model = Category
+    form_class = CategoryForm
+    template_name = "inventory/category_form.html"
+    context_object_name = "category"
+
+    def form_valid(self, form):
+        category = form.save()
+        messages.success(self.request, _("“%(name)s” saqlandi.") % {"name": category.name})
+        return redirect("inventory:category_list")
 

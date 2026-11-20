@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load wms i18n %}
+{% block title %}{% translate "Kasblar" %}{% endblock %}
+{% block content %}
+<div class="flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <h1 class="font-bold text-[26px] leading-8 lg:text-[34px] lg:leading-10">{% translate "Kasblar" %}</h1>
+    <p class="mt-1 text-muted" style="font-size:16px">{% translate "Ishchi turlari. Ishchi ro'yxatdan o'tishda kasbini tanlaydi, material esa faqat belgilangan kasblarga ko'rinadi." %}</p>
+  </div>
+  <a href="{% url 'users:worker_role_create' %}" class="btn btn-primary">{% icon "plus" %} {% translate "Yangi kasb" %}</a>
+</div>
+
+<div class="panel mt-6 max-w-[920px] overflow-hidden">
+  <div class="hidden grid-cols-[minmax(0,1fr)_220px_110px_auto] gap-x-4 px-5 pb-2 pt-4 text-muted lg:grid" style="font-size:13px" aria-hidden="true">
+    <span>{% translate "Kasb" %}</span><span>{% translate "Boshqa tillarda" %}</span><span class="text-right">{% translate "Ishchilar" %}</span><span></span>
+  </div>
+  <ul>
+    {% for role in roles %}
+    <li class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 border-t border-rule px-4 py-3 lg:grid-cols-[minmax(0,1fr)_220px_110px_auto] md:px-5">
+      <div class="min-w-0">
+        <p class="truncate font-medium">{{ role.name }}{% if not role.is_active %} <span class="pill pill-neutral">{% translate "O'chirilgan" %}</span>{% endif %}</p>
+        <p class="truncate text-muted" style="font-size:14px"><span class="num">{{ role.code }}</span><span class="lg:hidden"> · {% blocktranslate count n=role.user_count %}{{ n }} ishchi{% plural %}{{ n }} ishchi{% endblocktranslate %}</span></p>
+      </div>
+      <p class="hidden truncate text-muted lg:block">{{ role.name_uz }}{% if role.name_en %} · {{ role.name_en }}{% endif %}{% if role.name_ru %} · {{ role.name_ru }}{% endif %}</p>
+      <p class="num hidden text-right lg:block">{{ role.user_count }}</p>
+      <a href="{% url 'users:worker_role_edit' role.pk %}" class="btn btn-secondary">{% translate "Tahrirlash" %}</a>
+    </li>
+    {% empty %}
+    <li class="border-t border-rule px-5 py-6 text-muted">{% translate "Hali kasb qo'shilmagan." %}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

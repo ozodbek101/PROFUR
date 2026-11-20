@@ -71,19 +71,41 @@ named volume.
 
 ### Front-end assets
 
-The built stylesheet (`static/css/app.css`), Alpine.js and the DM Sans font files are
-committed, so running the app needs no Node toolchain. Only when you change templates or
+The built stylesheet (`static/css/app.css`), Alpine.js and the font files (DM Sans, plus
+Inter's Cyrillic subset served under the same family for Russian) are committed, so running the app needs no Node toolchain. Only when you change templates or
 styles:
 
 ```bash
 npm install
 npm run build:css      # or: npm run watch:css
-npm run vendor         # re-copy Alpine.js and DM Sans from node_modules
+npm run vendor         # re-copy Alpine.js and the fonts from node_modules
 ```
 
 The Tailwind source is `frontend/app.css`. It is kept outside `static/` on purpose:
 `collectstatic` with the manifest storage would otherwise try to resolve its
 `@import "tailwindcss"` and fail.
+
+### Languages (UZ / EN / RU)
+
+Everyone can switch the interface between Uzbek, English and Russian with the UZ · EN · RU
+control (sidebar footer, mobile menu, and the login and registration pages). The choice is
+stored in a cookie for a year. Uzbek is the default for every new visitor; the browser's
+language is deliberately ignored.
+
+Uzbek is the source language: templates and Python code contain the Uzbek text, and the
+English and Russian translations live in `locale/<lang>/LC_MESSAGES/django.po`. The
+project does not need GNU gettext; `scripts/i18n.py` does the extract / compile work:
+
+```bash
+python scripts/i18n.py extract   # after changing UI text: add new strings, drop unused ones
+# fill in the empty msgstr entries in locale/en/... and locale/ru/...
+python scripts/i18n.py compile   # writes the .mo files (commit them with the .po files)
+python scripts/i18n.py check     # fails on untranslated strings, bad placeholders or stale .mo
+```
+
+The test suite runs `check`, so CI fails if a translation is missing. Category and trade
+names are data, not code: each has an Uzbek, English and Russian name, edited on their
+admin pages (an empty English or Russian name falls back to Uzbek).
 
 ---
 
@@ -97,6 +119,18 @@ The Tailwind source is `frontend/app.css`. It is kept outside `static/` on purpo
 | KRASKACHI | Kraskachi (painter) | Paints, lacquers, primers |
 | SHKURKACHI | Shkurkachi (sander) | Linear materials (edge tape, sandpaper rolls) |
 | SBORKACHI | Sborkachi (assembler) | Linear materials and hardware (hinges, screws, handles, legs) |
+
+These five trades are the starting set. The administrator can add more on
+**Admin → Kasblar** (`/admin-dashboard/worker-types/`), give each a name in three
+languages, and turn one off. A new trade appears on the registration form straight away
+and can be ticked on materials and categories. Trades are never deleted (users and
+materials refer to them by code); a turned-off trade can't be chosen on registration, but
+workers who have it keep it.
+
+Material categories work the same way (**Admin → Kategoriyalar**,
+`/admin-dashboard/categories/`). The four starting ones are sheets, paints and liquids,
+tapes and rolls, and hardware. A category sets the default trades for new materials and
+whether offcuts are tracked for it.
 
 A material's category gives it a default set of trades. The administrator can override
 `allowed_roles` per material (e.g. give veneer sheets to the painters). A worker with
@@ -123,7 +157,8 @@ hand plus the new batch; when the shelf was empty it restarts at the batch price
   are left. The ledger keeps the piece's dimensions.
 
 **Qoldiq (offcut logging) — "Qoldiq qo'shish".** Material, length mm, width mm, number of
-pieces. Only sheet and linear categories have offcuts. A piece cannot be larger than the
+pieces. Only categories with offcut tracking turned on (sheets and tapes to start with)
+have offcuts. A piece cannot be larger than the
 material's standard sheet (rotation allowed). The form shows the piece drawn to scale
 inside the sheet as you type.
 
@@ -153,6 +188,8 @@ to cents before summing so the total always equals the table it summarises.
 | `/admin-dashboard/` | admin | Valuation, this month's Kirim vs Chiqim, 6-month chart, purchase list, approvals, recent activity |
 | `/admin-dashboard/kirim/` | admin | Book an arrival with a live preview of the new average price |
 | `/admin-dashboard/materials/` | admin | Material catalogue (create, edit, archive) |
+| `/admin-dashboard/categories/` | admin | Material categories: names in three languages, default trades, offcut tracking |
+| `/admin-dashboard/worker-types/` | admin | Trades (kasblar) workers can register with, named in three languages |
 | `/admin-dashboard/reports/` | admin | Monthly history filtered by month, type, category, worker and material; CSV export |
 | `/admin-dashboard/pending-users/` | admin | Approve registrations (adjust roles first) or reject them |
 | `/admin-dashboard/users/` | admin | Edit roles, revoke approval, deactivate, reset a password |

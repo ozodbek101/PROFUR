@@ -1,10 +1,12 @@
 {% extends "users/auth_base.html" %}
-{% block title %}Ro'yxatdan o'tish{% endblock %}
+{% load i18n %}
+{% block title %}{% translate "Ro'yxatdan o'tish" %}{% endblock %}
 {% block auth_width %}max-w-[520px]{% endblock %}
+{% block auth_header_width %}max-w-[520px]{% endblock %}
 {% block auth_content %}
 <div class="panel p-6 sm:p-8">
-  <h1 class="font-bold" style="font-size:24px;line-height:32px">Ro'yxatdan o'tish</h1>
-  <p class="mt-1 text-muted">Kasbingizni tanlang. Administrator tasdiqlagach, faqat kasbingizga tegishli materiallarni ko'rasiz va olasiz.</p>
+  <h1 class="font-bold" style="font-size:26px;line-height:34px">{% translate "Ro'yxatdan o'tish" %}</h1>
+  <p class="mt-1 text-muted">{% translate "Kasbingizni tanlang. Administrator tasdiqlagach, faqat kasbingizga tegishli materiallarni ko'rasiz va olasiz." %}</p>
   <form method="post" class="form-stack mt-6" novalidate>
     {% csrf_token %}
     {% include "partials/form_errors.html" %}
@@ -13,8 +15,8 @@
     {% include "partials/field.html" with field=form.roles %}
     {% include "partials/field.html" with field=form.password1 %}
     {% include "partials/field.html" with field=form.password2 %}
-    <button type="submit" class="btn btn-primary btn-lg btn-block mt-2">So'rov yuborish</button>
+    <button type="submit" class="btn btn-primary btn-lg btn-block mt-2">{% translate "So'rov yuborish" %}</button>
   </form>
 </div>
-<p class="mt-6 text-center text-muted">Hisobingiz bormi? <a class="font-medium text-ink underline underline-offset-4" href="{% url 'users:login' %}">Kirish</a></p>
+<p class="mt-6 text-center text-muted">{% translate "Hisobingiz bormi?" %} <a class="font-medium text-ink underline underline-offset-4" href="{% url 'users:login' %}">{% translate "Kirish" %}</a></p>
 {% endblock %}

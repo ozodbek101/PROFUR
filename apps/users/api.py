@@ -1,6 +1,7 @@
 from django.contrib.auth import password_validation
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.exceptions import ValidationError as DjangoValidationError
+from django.utils.translation import gettext as _
 from rest_framework import generics, mixins, serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
@@ -9,7 +10,7 @@ from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
 from . import services
-from .models import WORKER_ROLE_CHOICES, User, UserRole
+from .models import User, all_role_choices, worker_role_choices
 from .permissions import IsWarehouseAdmin
 
 
@@ -37,11 +38,15 @@ class RegistrationSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150, validators=[UnicodeUsernameValidator()])
     full_name = serializers.CharField(max_length=255)
     password = serializers.CharField(write_only=True, style={"input_type": "password"})
-    roles = serializers.MultipleChoiceField(choices=WORKER_ROLE_CHOICES)
+    roles = serializers.MultipleChoiceField(choices=())
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["roles"].choices = worker_role_choices()
 
     def validate_username(self, value):
         if User.objects.filter(username__iexact=value).exists():
-            raise serializers.ValidationError("Bu login band. Boshqasini tanlang.")
+            raise serializers.ValidationError(_("Bu login band. Boshqasini tanlang."))
         return value
 
     def validate(self, attrs):
@@ -73,7 +78,7 @@ class RegistrationAPIView(generics.CreateAPIView):
         user = serializer.save()
         return Response(
             {
-                "detail": "Ro'yxatdan o'tdingiz. Administrator tasdiqlagach tizimga kira olasiz.",
+                "detail": _("Ro'yxatdan o'tdingiz. Administrator tasdiqlagach tizimga kira olasiz."),
                 "user": UserSerializer(user).data,
             },
             status=status.HTTP_201_CREATED,
@@ -86,7 +91,11 @@ class MeAPIView(APIView):
 
 
 class ApprovalSerializer(serializers.Serializer):
-    roles = serializers.MultipleChoiceField(choices=UserRole.choices, required=False)
+    roles = serializers.MultipleChoiceField(choices=(), required=False)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["roles"].choices = all_role_choices()
 
 
 class PendingUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
