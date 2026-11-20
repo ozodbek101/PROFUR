@@ -1,0 +1,14 @@
+{% load wms %}{% if messages %}
+<div class="mb-5 grid gap-2" role="status" aria-live="polite">
+  {% for message in messages %}
+    <div class="flex items-start gap-2.5 rounded-[8px] border px-4 py-3
+      {% if message.tags == 'success' %}border-[#bbe5c9] bg-pos-bg text-pos-ink
+      {% elif message.tags == 'error' %}border-[#f3c0ba] bg-neg-bg text-neg-ink
+      {% elif message.tags == 'warning' %}border-warn-line bg-warn-bg text-warn-ink
+      {% else %}border-line bg-surface text-ink{% endif %}">
+      <span class="mt-0.5 flex-none">{% if message.tags == 'success' %}{% icon "check" %}{% elif message.tags == 'error' or message.tags == 'warning' %}{% icon "alert" %}{% else %}{% icon "clock" %}{% endif %}</span>
+      <p>{{ message }}</p>
+    </div>
+  {% endfor %}
+</div>
+{% endif %}

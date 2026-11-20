@@ -1,0 +1,17 @@
+{% extends "users/auth_base.html" %}
+{% block title %}Kirish{% endblock %}
+{% block auth_content %}
+<div class="panel p-6 sm:p-8">
+  <h1 class="font-bold" style="font-size:24px;line-height:32px">Tizimga kirish</h1>
+  <p class="mt-1 text-muted">Sex omboriga login va parolingiz bilan kiring.</p>
+  <form method="post" class="form-stack mt-6" novalidate>
+    {% csrf_token %}
+    {% include "partials/form_errors.html" %}
+    {% include "partials/field.html" with field=form.username %}
+    {% include "partials/field.html" with field=form.password %}
+    <input type="hidden" name="next" value="{{ next }}">
+    <button type="submit" class="btn btn-primary btn-lg btn-block mt-2">Kirish</button>
+  </form>
+</div>
+<p class="mt-6 text-center text-muted">Yangi ishchimisiz? <a class="font-medium text-ink underline underline-offset-4" href="{% url 'users:register' %}">Ro'yxatdan o'ting</a></p>
+{% endblock %}

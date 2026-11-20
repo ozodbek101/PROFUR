@@ -1,0 +1,6 @@
+{% load wms %}{% if form.non_field_errors %}
+<div class="flex items-start gap-2.5 rounded-[8px] border border-[#f3c0ba] bg-neg-bg px-4 py-3 text-neg-ink" role="alert">
+  <span class="mt-0.5 flex-none">{% icon "alert" %}</span>
+  <div>{% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}</div>
+</div>
+{% endif %}

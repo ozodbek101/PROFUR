@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load wms %}
+{% block title %}Qoldiqdan oldim{% endblock %}
+{% block content %}
+{% with m=offcut.material %}
+<div class="max-w-[600px]" x-data="{ q: Number('{{ form.quantity.value|default_if_none:1|escapejs }}') || 1, max: {{ offcut.quantity }} }">
+  <a href="{% url 'inventory:home' %}?tab=offcuts" class="inline-flex items-center gap-1.5 text-muted hover:text-ink">{% icon "back" %} Ombor</a>
+  <h1 class="mt-3 font-bold text-[24px] leading-8 lg:text-[32px] lg:leading-10">{{ m.name }}</h1>
+  <p class="num mt-1" style="font-size:16px">Qoldiq {{ offcut.length_mm }} × {{ offcut.width_mm }} mm</p>
+
+  <form method="post" class="panel form-stack mt-6 p-5 sm:p-6" novalidate>
+    {% csrf_token %}
+    {% include "partials/form_errors.html" %}
+    <div class="flex items-center gap-4">
+      {% offcut_figure offcut.length_mm offcut.width_mm m.whole_stock.length_mm m.whole_stock.width_mm 96 60 %}
+      <dl class="grid flex-1 grid-cols-[auto_1fr] gap-x-4 gap-y-1" style="font-size:14px">
+        <dt class="text-muted">Bor</dt><dd class="num text-right font-semibold">{{ offcut.quantity }} dona</dd>
+        <dt class="text-muted">Qo'shgan</dt><dd class="truncate text-right">{{ offcut.created_by.display_name|default:"—" }}</dd>
+        {% if offcut.notes %}<dt class="text-muted">Joyi</dt><dd class="text-right">{{ offcut.notes }}</dd>{% endif %}
+      </dl>
+    </div>
+
+    <div class="{% if form.quantity.errors %}has-error{% endif %}">
+      <label class="field-label" for="{{ form.quantity.id_for_label }}">{{ form.quantity.label }}</label>
+      <div class="grid grid-cols-[52px_minmax(0,1fr)_52px] gap-2">
+        <button type="button" class="btn btn-secondary !min-h-[52px] !px-0" @click="q = Math.max(1, q - 1)" aria-label="Kamaytirish">{% icon "minus" 20 %}</button>
+        <div class="[&>input]:!min-h-[52px] [&>input]:text-center [&>input]:!text-[20px] [&>input]:font-semibold [&>input]:tabular-nums">{{ form.quantity }}</div>
+        <button type="button" class="btn btn-secondary !min-h-[52px] !px-0" @click="q = Math.min(max, q + 1)" aria-label="Ko'paytirish">{% icon "plus" 20 %}</button>
+      </div>
+      {% for error in form.quantity.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+      <p class="field-help" x-cloak x-show="q >= max">Hammasi olinsa, bu qoldiq ro'yxatdan o'chadi.</p>
+    </div>
+    {% include "partials/field.html" with field=form.notes %}
+    <button type="submit" class="btn btn-primary btn-lg btn-block">{% icon "take" 18 %} Oldim — tasdiqlash</button>
+  </form>
+</div>
+{% endwith %}
+{% endblock %}

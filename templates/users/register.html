@@ -1,0 +1,20 @@
+{% extends "users/auth_base.html" %}
+{% block title %}Ro'yxatdan o'tish{% endblock %}
+{% block auth_width %}max-w-[520px]{% endblock %}
+{% block auth_content %}
+<div class="panel p-6 sm:p-8">
+  <h1 class="font-bold" style="font-size:24px;line-height:32px">Ro'yxatdan o'tish</h1>
+  <p class="mt-1 text-muted">Kasbingizni tanlang. Administrator tasdiqlagach, faqat kasbingizga tegishli materiallarni ko'rasiz va olasiz.</p>
+  <form method="post" class="form-stack mt-6" novalidate>
+    {% csrf_token %}
+    {% include "partials/form_errors.html" %}
+    {% include "partials/field.html" with field=form.full_name %}
+    {% include "partials/field.html" with field=form.username %}
+    {% include "partials/field.html" with field=form.roles %}
+    {% include "partials/field.html" with field=form.password1 %}
+    {% include "partials/field.html" with field=form.password2 %}
+    <button type="submit" class="btn btn-primary btn-lg btn-block mt-2">So'rov yuborish</button>
+  </form>
+</div>
+<p class="mt-6 text-center text-muted">Hisobingiz bormi? <a class="font-medium text-ink underline underline-offset-4" href="{% url 'users:login' %}">Kirish</a></p>
+{% endblock %}

@@ -1,0 +1,16 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+
+# Local configuration and data
+.env
+db.sqlite3
+staticfiles/
+
+# Front-end build tooling (built CSS and vendored JS/fonts in static/ are committed)
+node_modules/
+
+# Local tool state
+.taste-skill/
+.claude/launch.json

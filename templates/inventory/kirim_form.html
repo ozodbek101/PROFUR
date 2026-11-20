@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% load wms %}
+{% block title %}Kirim{% endblock %}
+{% block content %}
+{{ material_meta|json_script:"material-meta" }}
+<div class="flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <h1 class="font-bold text-[24px] leading-8 lg:text-[32px] lg:leading-10">Kirim</h1>
+    <p class="mt-1 text-muted" style="font-size:15px">Kelgan materialni USD narxi bilan kiriting. O'rtacha narx avtomatik qayta hisoblanadi.</p>
+  </div>
+  <a href="{% url 'inventory:material_create' %}" class="btn btn-secondary">{% icon "plus" %} Yangi material</a>
+</div>
+
+<div class="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_384px]"
+     x-data="{
+       meta: JSON.parse(document.getElementById('material-meta').textContent),
+       material: '{{ form.material.value|default_if_none:''|escapejs }}',
+       containers: Number('{{ form.containers.value|default_if_none:''|escapejs }}') || '',
+       quantity: Number('{{ form.quantity.value|default_if_none:''|escapejs }}') || '',
+       mode: '{{ form.price_mode.value|default_if_none:'total'|escapejs }}',
+       price: Number('{{ form.price_usd.value|default_if_none:''|escapejs }}') || '',
+       get m() { return this.meta[this.material] || null; },
+       get qty() { return (this.m && this.m.container && this.containers) ? Math.round(this.containers * Number(this.m.container) * 100) / 100 : (Number(this.quantity) || 0); },
+       get p() { return Number(this.price) || 0; },
+       get total() { return this.mode === 'total' ? this.p : this.p * this.qty; },
+       get unit() { return this.qty ? (this.mode === 'total' ? this.p / this.qty : this.p) : 0; },
+       get stock() { return this.m ? Number(this.m.stock) : 0; },
+       get avg() { if (!this.m || !this.qty) return null; const old = this.stock * Number(this.m.price); return this.stock > 0 ? (old + this.total) / (this.stock + this.qty) : this.unit; },
+       usd(v, d = 2) { return '$' + Number(v || 0).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }); },
+       n(v) { return Number(v || 0).toLocaleString('en-US', { maximumFractionDigits: 2 }); }
+     }">
+  <form method="post" class="panel form-stack p-5 sm:p-6" novalidate>
+    {% csrf_token %}
+    {% include "partials/form_errors.html" %}
+    <div class="{% if form.material.errors %}has-error{% endif %}">
+      <label class="field-label" for="{{ form.material.id_for_label }}">{{ form.material.label }}</label>
+      <select name="{{ form.material.html_name }}" id="{{ form.material.id_for_label }}" x-model="material" required>
+        <option value="">Materialni tanlang</option>
+        {% for choice in form.material.field.choices %}{% if choice.0 %}<option value="{{ choice.0 }}" {% if form.material.value|stringformat:'s' == choice.0|stringformat:'s' %}selected{% endif %}>{{ choice.1 }}</option>{% endif %}{% endfor %}
+      </select>
+      {% for e in form.material.errors %}<p class="field-error">{{ e }}</p>{% endfor %}
+      <p class="field-help" x-show="m" x-cloak>Omborda: <span class="num" x-text="m && n(m.stock) + ' ' + m.unit"></span> · o'rtacha narx <span class="num" x-text="m && usd(m.price, 4)"></span></p>
+    </div>
+
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div x-show="m && m.container" x-cloak>
+        {% include "partials/field.html" with field=form.containers %}
+      </div>
+      <div class="{% if form.quantity.errors %}has-error{% endif %}">
+        <label class="field-label" for="{{ form.quantity.id_for_label }}">Miqdor <span class="font-normal text-muted" x-text="m ? '(' + m.unit + ')' : ''"></span></label>
+        <input type="number" name="{{ form.quantity.html_name }}" id="{{ form.quantity.id_for_label }}" step="0.01" min="0.01" inputmode="decimal"
+               :value="(m && m.container && containers) ? qty : quantity" @input="quantity = $event.target.value"
+               :readonly="!!(m && m.container && containers)" value="{{ form.quantity.value|default_if_none:'' }}">
+        {% for e in form.quantity.errors %}<p class="field-error">{{ e }}</p>{% endfor %}
+        <p class="field-help" x-show="m && m.container && containers" x-cloak>Idishlar soni × <span x-text="m && n(m.container)"></span> <span x-text="m && m.unit"></span></p>
+      </div>
+    </div>
+
+    {% include "partials/field.html" with field=form.price_mode %}
+    <div class="{% if form.price_usd.errors %}has-error{% endif %}">
+      <label class="field-label" for="{{ form.price_usd.id_for_label }}"><span x-text="mode === 'total' ? 'Partiyaning umumiy narxi (USD $)' : 'Bir birlik narxi (USD $)'">Narx (USD $)</span></label>
+      <input type="number" name="{{ form.price_usd.html_name }}" id="{{ form.price_usd.id_for_label }}" step="0.0001" min="0" inputmode="decimal" required
+             x-model.number="price" value="{{ form.price_usd.value|default_if_none:'' }}">
+      {% for e in form.price_usd.errors %}<p class="field-error">{{ e }}</p>{% endfor %}
+    </div>
+    {% include "partials/field.html" with field=form.notes %}
+
+    <div class="rounded-[6px] bg-raised px-4 py-3" x-show="m && qty && p" x-cloak>
+      <dl class="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1.5 num">
+        <dt class="text-muted">Bir birlik narxi</dt><dd class="text-right" x-text="usd(unit, 4)"></dd>
+        <dt class="text-muted">Partiya jami</dt><dd class="text-right font-semibold" x-text="usd(total)"></dd>
+        <dt class="text-muted">Kirimdan keyin omborda</dt><dd class="text-right" x-text="n(stock + qty) + ' ' + (m ? m.unit : '')"></dd>
+        <dt class="text-muted">Yangi o'rtacha narx</dt><dd class="text-right" x-text="avg !== null ? usd(avg, 4) : '—'"></dd>
+      </dl>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-lg btn-block">{% icon "arrival" 18 %} Kirimni saqlash</button>
+  </form>
+
+  <section class="panel overflow-hidden" aria-labelledby="recent-kirim">
+    <div class="panel-head"><h2 id="recent-kirim" class="panel-title">Oxirgi kirimlar</h2></div>
+    {% if recent_kirim %}
+    <ul>
+      {% for t in recent_kirim %}
+      <li class="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 border-t border-rule px-5 py-2.5">
+        <div class="min-w-0">
+          <p class="truncate font-medium">{{ t.material.name }}</p>
+          <p class="truncate text-muted" style="font-size:13px">{{ t.created_at|date:"j E, H:i" }}{% if t.notes %} · {{ t.notes }}{% endif %}</p>
+        </div>
+        <div class="num text-right">
+          <p class="font-semibold">{{ t.total_price_usd|usd }}</p>
+          <p class="text-muted" style="font-size:13px">+{{ t.quantity_changed|qty }} {{ t.material.unit_short }}</p>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+      <p class="border-t border-rule px-5 py-5 text-muted">Hali kirim yozilmagan.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

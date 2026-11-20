@@ -1,0 +1,113 @@
+from django.contrib.auth import password_validation
+from django.contrib.auth.validators import UnicodeUsernameValidator
+from django.core.exceptions import ValidationError as DjangoValidationError
+from rest_framework import generics, mixins, serializers, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework.throttling import ScopedRateThrottle
+from rest_framework.views import APIView
+
+from . import services
+from .models import WORKER_ROLE_CHOICES, User, UserRole
+from .permissions import IsWarehouseAdmin
+
+
+class UserSerializer(serializers.ModelSerializer):
+    role_labels = serializers.ListField(child=serializers.CharField(), read_only=True)
+    is_warehouse_admin = serializers.BooleanField(read_only=True)
+
+    class Meta:
+        model = User
+        fields = (
+            "id",
+            "username",
+            "full_name",
+            "roles",
+            "role_labels",
+            "is_warehouse_admin",
+            "is_approved",
+            "is_active",
+            "date_joined",
+        )
+        read_only_fields = fields
+
+
+class RegistrationSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=150, validators=[UnicodeUsernameValidator()])
+    full_name = serializers.CharField(max_length=255)
+    password = serializers.CharField(write_only=True, style={"input_type": "password"})
+    roles = serializers.MultipleChoiceField(choices=WORKER_ROLE_CHOICES)
+
+    def validate_username(self, value):
+        if User.objects.filter(username__iexact=value).exists():
+            raise serializers.ValidationError("Bu login band. Boshqasini tanlang.")
+        return value
+
+    def validate(self, attrs):
+        candidate = User(username=attrs["username"], full_name=attrs["full_name"])
+        try:
+            password_validation.validate_password(attrs["password"], candidate)
+        except DjangoValidationError as exc:
+            raise serializers.ValidationError({"password": list(exc.messages)}) from exc
+        return attrs
+
+    def create(self, validated_data):
+        return services.register_worker(
+            username=validated_data["username"],
+            password=validated_data["password"],
+            full_name=validated_data["full_name"],
+            roles=list(validated_data["roles"]),
+        )
+
+
+class RegistrationAPIView(generics.CreateAPIView):
+    serializer_class = RegistrationSerializer
+    permission_classes = [AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "registration"
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        return Response(
+            {
+                "detail": "Ro'yxatdan o'tdingiz. Administrator tasdiqlagach tizimga kira olasiz.",
+                "user": UserSerializer(user).data,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class MeAPIView(APIView):
+    def get(self, request):
+        return Response(UserSerializer(request.user).data)
+
+
+class ApprovalSerializer(serializers.Serializer):
+    roles = serializers.MultipleChoiceField(choices=UserRole.choices, required=False)
+
+
+class PendingUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    """Admin-only: review and approve/reject worker self-registrations."""
+
+    serializer_class = UserSerializer
+    permission_classes = [IsWarehouseAdmin]
+
+    def get_queryset(self):
+        return User.objects.pending_approval().order_by("date_joined")
+
+    @action(detail=True, methods=["post"], serializer_class=ApprovalSerializer)
+    def approve(self, request, pk=None):
+        user = self.get_object()
+        serializer = ApprovalSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        roles = serializer.validated_data.get("roles")
+        services.approve_user(user, approved_by=request.user, roles=list(roles) if roles else None)
+        return Response(UserSerializer(user).data)
+
+    @action(detail=True, methods=["post"])
+    def reject(self, request, pk=None):
+        services.reject_registration(self.get_object())
+        return Response(status=status.HTTP_204_NO_CONTENT)

@@ -1,0 +1,48 @@
+# Local production-like stack: PostgreSQL 16 + the app under gunicorn.
+#
+#   cp .env.example .env      # set DJANGO_SECRET_KEY and POSTGRES_PASSWORD
+#   docker compose up --build
+#   docker compose exec web python manage.py createsuperuser
+#
+# Then open http://localhost:8000. For a real deployment put a TLS-terminating
+# proxy in front and set DJANGO_BEHIND_PROXY=True and DJANGO_SECURE_SSL_REDIRECT=True.
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: wms
+      POSTGRES_USER: wms
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wms -d wms"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  web:
+    build: .
+    environment:
+      DJANGO_DEBUG: "False"
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?Set DJANGO_SECRET_KEY in .env}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+      DJANGO_CSRF_TRUSTED_ORIGINS: ${DJANGO_CSRF_TRUSTED_ORIGINS:-}
+      DJANGO_TIME_ZONE: ${DJANGO_TIME_ZONE:-Asia/Tashkent}
+      DATABASE_URL: postgres://wms:${POSTGRES_PASSWORD}@db:5432/wms
+      # Plain HTTP on localhost for this compose file; turn on behind HTTPS.
+      DJANGO_SECURE_SSL_REDIRECT: ${DJANGO_SECURE_SSL_REDIRECT:-False}
+      DJANGO_BEHIND_PROXY: ${DJANGO_BEHIND_PROXY:-False}
+      WMS_BRAND_NAME: ${WMS_BRAND_NAME:-Mebel Ombori}
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3 --access-logfile -"
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

@@ -1,0 +1,17 @@
+{
+  "name": "mebel-ombori-wms",
+  "private": true,
+  "description": "Front-end build for the furniture workshop WMS (Tailwind CSS + vendored Alpine.js).",
+  "scripts": {
+    "build:css": "tailwindcss -i frontend/app.css -o static/css/app.css --minify",
+    "watch:css": "tailwindcss -i frontend/app.css -o static/css/app.css --watch",
+    "vendor": "node scripts/vendor.mjs",
+    "build": "npm run vendor && npm run build:css"
+  },
+  "devDependencies": {
+    "@fontsource/dm-sans": "^5.3.0",
+    "@tailwindcss/cli": "^4.3.5",
+    "alpinejs": "^3.17.5",
+    "tailwindcss": "^4.3.5"
+  }
+}

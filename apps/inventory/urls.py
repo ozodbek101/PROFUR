@@ -1,0 +1,21 @@
+from django.urls import path
+
+from . import views
+
+app_name = "inventory"
+
+urlpatterns = [
+    path("", views.HomeView.as_view(), name="home"),
+    path("inventory/whole/<int:pk>/withdraw/", views.WithdrawWholeView.as_view(), name="withdraw_whole"),
+    path("inventory/offcuts/add/", views.OffcutCreateView.as_view(), name="offcut_add"),
+    path("inventory/offcuts/<int:pk>/withdraw/", views.OffcutWithdrawView.as_view(), name="offcut_withdraw"),
+    path("inventory/history/", views.MyHistoryView.as_view(), name="my_history"),
+    # Admin dashboard
+    path("admin-dashboard/", views.DashboardView.as_view(), name="dashboard"),
+    path("admin-dashboard/materials/", views.MaterialListView.as_view(), name="material_list"),
+    path("admin-dashboard/materials/new/", views.MaterialCreateView.as_view(), name="material_create"),
+    path("admin-dashboard/materials/<int:pk>/edit/", views.MaterialUpdateView.as_view(), name="material_edit"),
+    path("admin-dashboard/kirim/", views.KirimView.as_view(), name="kirim"),
+    path("admin-dashboard/reports/", views.ReportView.as_view(), name="reports"),
+    path("admin-dashboard/reports/export.csv", views.ReportExportView.as_view(), name="reports_export"),
+]

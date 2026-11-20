@@ -1,0 +1,55 @@
+from django.contrib import admin
+
+from .models import BaseMaterial, InventoryTransaction, LeftoverOffcut, WholeMaterial
+
+
+class WholeMaterialInline(admin.StackedInline):
+    model = WholeMaterial
+    can_delete = False
+    readonly_fields = ("quantity",)  # stock only moves through Kirim/Chiqim
+
+
+@admin.register(BaseMaterial)
+class BaseMaterialAdmin(admin.ModelAdmin):
+    list_display = ("name", "category", "unit_of_measure", "unit_price_usd", "minimum_threshold", "is_active")
+    list_filter = ("category", "is_active")
+    search_fields = ("name",)
+    readonly_fields = ("unit_price_usd", "created_at", "updated_at")
+    inlines = [WholeMaterialInline]
+
+    def has_delete_permission(self, request, obj=None):
+        return False  # archive instead; the ledger references materials
+
+
+@admin.register(LeftoverOffcut)
+class LeftoverOffcutAdmin(admin.ModelAdmin):
+    list_display = ("material", "length_mm", "width_mm", "quantity", "created_by", "created_at")
+    list_filter = ("material__category",)
+    search_fields = ("material__name", "notes")
+
+
+@admin.register(InventoryTransaction)
+class InventoryTransactionAdmin(admin.ModelAdmin):
+    """Read-only: the ledger is append-only and written by the service layer."""
+
+    list_display = (
+        "created_at",
+        "transaction_type",
+        "material",
+        "quantity_changed",
+        "unit_price_usd",
+        "total_price_usd",
+        "user",
+    )
+    list_filter = ("transaction_type", "is_offcut", "material__category")
+    search_fields = ("material__name", "user__username", "user__full_name", "notes")
+    date_hierarchy = "created_at"
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
