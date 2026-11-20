@@ -259,8 +259,9 @@ low item (a stock track with a tick at the minimum).
 
 Production runs on an Ubuntu EC2 host next to other apps: PostgreSQL (database
 `wms_db`, role `wms_user`), gunicorn as the `wms` systemd service on `127.0.0.1:8001`,
-and an nginx site `wms` that serves `http://3.27.91.152`. Static files are served by
-WhiteNoise.
+and an nginx site `wms` that serves **https://profur.shamsiyev.uz** (Let's Encrypt
+certificate, renewed by certbot's timer). Plain HTTP and the bare IP `3.27.91.152`
+redirect there. Static files are served by WhiteNoise.
 
 | Path on the server | What |
 |---|---|
@@ -284,8 +285,9 @@ installs anything missing, creates the database, role and `.env` (secrets are
 generated on the server), the systemd unit, the nginx site and `wms-manage`. It is safe
 to re-run and keeps an existing `.env`.
 
-**Moving to a domain with HTTPS:** point DNS at the server, add the name to the nginx
-site and run `sudo certbot --nginx -d NAME`, then in `/var/www/wms/.env` add the name
+**Moving to a domain with HTTPS** (already done for profur.shamsiyev.uz; the setup
+script leaves an HTTPS nginx site alone): point DNS at the server, add the name to the
+nginx site and run `sudo certbot --nginx -d NAME`, then in `/var/www/wms/.env` add the name
 to `DJANGO_ALLOWED_HOSTS` and `https://NAME` to `DJANGO_CSRF_TRUSTED_ORIGINS`, and set
 `DJANGO_SECURE_COOKIES=True`, `DJANGO_SECURE_SSL_REDIRECT=True` and
 `DJANGO_BEHIND_PROXY=True`; then `sudo systemctl restart wms`.

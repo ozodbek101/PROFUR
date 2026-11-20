@@ -114,6 +114,11 @@ EOF
 sudo chmod 755 /usr/local/bin/wms-manage
 
 # --- nginx -------------------------------------------------------------------------
+if sudo grep -q ssl_certificate /etc/nginx/sites-available/wms 2>/dev/null; then
+  echo "nginx site wms already serves HTTPS; leaving it unchanged."
+  echo "Server ready."
+  exit 0
+fi
 sudo tee /etc/nginx/sites-available/wms >/dev/null <<EOF
 # Mebel Ombori WMS on http://$PUBLIC_HOST (static files are served by WhiteNoise).
 server {

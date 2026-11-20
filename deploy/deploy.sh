@@ -24,7 +24,10 @@ fi
 sudo systemctl restart wms
 
 for _ in $(seq 1 30); do
-  code=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:$APP_PORT/accounts/login/" || true)
+  # Present the request as nginx does (HTTPS terminated in front), so the SSL
+  # redirect does not turn the check into a 301.
+  code=$(curl -s -o /dev/null -w '%{http_code}' -H 'X-Forwarded-Proto: https' \
+    "http://127.0.0.1:$APP_PORT/accounts/login/" || true)
   if [ "$code" = 200 ]; then
     echo "Deployed: login page answers 200."
     exit 0
