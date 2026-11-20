@@ -1,16 +1,16 @@
-{% load wms %}<ul class="grid gap-0.5">
-  <li><a class="nav-item" href="{% url 'inventory:home' %}" {% if nav_section == "home" %}aria-current="page"{% endif %}>{% icon "box" %} Ombor</a></li>
-  <li><a class="nav-item" href="{% url 'inventory:offcut_add' %}" {% if nav_section == "offcut_add" %}aria-current="page"{% endif %}>{% icon "offcut" %} Qoldiq qo'shish</a></li>
-  <li><a class="nav-item" href="{% url 'inventory:my_history' %}" {% if nav_section == "my_history" %}aria-current="page"{% endif %}>{% icon "clock" %} Mening tarixim</a></li>
+{% load wms i18n %}<ul class="grid gap-0.5">
+  <li><a class="nav-item" href="{% url 'inventory:home' %}" {% if nav_section == "home" %}aria-current="page"{% endif %}>{% icon "box" %} {% translate "Ombor" %}</a></li>
+  <li><a class="nav-item" href="{% url 'inventory:offcut_add' %}" {% if nav_section == "offcut_add" %}aria-current="page"{% endif %}>{% icon "offcut" %} {% translate "Qoldiq qo'shish" %}</a></li>
+  <li><a class="nav-item" href="{% url 'inventory:my_history' %}" {% if nav_section == "my_history" %}aria-current="page"{% endif %}>{% icon "clock" %} {% translate "Mening tarixim" %}</a></li>
 </ul>
 {% if user.is_warehouse_admin %}
-<p class="mb-1.5 mt-7 px-2.5 text-muted" style="font-size:12px">Boshqaruv</p>
+<p class="mb-1.5 mt-7 px-2.5 text-muted" style="font-size:12px">{% translate "Boshqaruv" %}</p>
 <ul class="grid gap-0.5">
-  <li><a class="nav-item" href="{% url 'inventory:dashboard' %}" {% if nav_section == "dashboard" %}aria-current="page"{% endif %}>{% icon "dashboard" %} Panel</a></li>
-  <li><a class="nav-item" href="{% url 'inventory:kirim' %}" {% if nav_section == "kirim" %}aria-current="page"{% endif %}>{% icon "arrival" %} Kirim</a></li>
-  <li><a class="nav-item" href="{% url 'inventory:material_list' %}" {% if nav_section == "materials" %}aria-current="page"{% endif %}>{% icon "layers" %} Materiallar</a></li>
-  <li><a class="nav-item" href="{% url 'inventory:reports' %}" {% if nav_section == "reports" %}aria-current="page"{% endif %}>{% icon "report" %} Oylik hisobot</a></li>
-  <li><a class="nav-item" href="{% url 'users:pending_users' %}" {% if nav_section == "pending_users" %}aria-current="page"{% endif %}>{% icon "check" %} So'rovlar{% if nav_pending_users %}<span class="nav-count" aria-label="{{ nav_pending_users }} ta tasdiq kutayotgan so'rov">{{ nav_pending_users }}</span>{% endif %}</a></li>
-  <li><a class="nav-item" href="{% url 'users:user_list' %}" {% if nav_section == "users" %}aria-current="page"{% endif %}>{% icon "users" %} Ishchilar</a></li>
+  <li><a class="nav-item" href="{% url 'inventory:dashboard' %}" {% if nav_section == "dashboard" %}aria-current="page"{% endif %}>{% icon "dashboard" %} {% translate "Panel" %}</a></li>
+  <li><a class="nav-item" href="{% url 'inventory:kirim' %}" {% if nav_section == "kirim" %}aria-current="page"{% endif %}>{% icon "arrival" %} {% translate "Kirim" %}</a></li>
+  <li><a class="nav-item" href="{% url 'inventory:material_list' %}" {% if nav_section == "materials" %}aria-current="page"{% endif %}>{% icon "layers" %} {% translate "Materiallar" %}</a></li>
+  <li><a class="nav-item" href="{% url 'inventory:reports' %}" {% if nav_section == "reports" %}aria-current="page"{% endif %}>{% icon "report" %} {% translate "Oylik hisobot" %}</a></li>
+  <li><a class="nav-item" href="{% url 'users:pending_users' %}" {% if nav_section == "pending_users" %}aria-current="page"{% endif %}>{% icon "check" %} {% translate "So'rovlar" %}{% if nav_pending_users %}<span class="nav-count" aria-label="{% blocktranslate count n=nav_pending_users|add:0 %}{{ n }} ta tasdiq kutayotgan so'rov{% plural %}{{ n }} ta tasdiq kutayotgan so'rov{% endblocktranslate %}">{{ nav_pending_users }}</span>{% endif %}</a></li>
+  <li><a class="nav-item" href="{% url 'users:user_list' %}" {% if nav_section == "users" %}aria-current="page"{% endif %}>{% icon "users" %} {% translate "Ishchilar" %}</a></li>
 </ul>
 {% endif %}

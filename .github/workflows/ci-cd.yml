@@ -48,6 +48,9 @@ jobs:
           python manage.py check
           python manage.py makemigrations --check --dry-run
 
+      - name: Translation catalogs (ru, en) complete and compiled
+        run: python scripts/i18n.py check
+
       - name: Run tests
         run: python manage.py test
 

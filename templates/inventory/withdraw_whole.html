@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% load wms l10n %}
-{% block title %}Oldim · {{ stock.material.name }}{% endblock %}
+{% load wms l10n i18n %}
+{% block title %}{% blocktranslate with name=stock.material.name %}Oldim · {{ name }}{% endblocktranslate %}{% endblock %}
 {% block content %}
 {% with m=stock.material %}
 <div class="max-w-[600px]"
@@ -12,25 +12,25 @@
        fmt(v) { return (Math.round(v * 100) / 100).toLocaleString('en-US', { maximumFractionDigits: 2 }); },
        bump(d) { this.q = Math.min(this.max, Math.max(0, Math.round(((Number(this.q) || 0) + d) * 100) / 100)); }
      }">
-  <a href="{% url 'inventory:home' %}?tab=whole" class="inline-flex items-center gap-1.5 text-muted hover:text-ink">{% icon "back" %} Ombor</a>
+  <a href="{% url 'inventory:home' %}?tab=whole" class="inline-flex items-center gap-1.5 text-muted hover:text-ink">{% icon "back" %} {% translate "Ombor" %}</a>
   <h1 class="mt-3 font-bold text-[24px] leading-8 lg:text-[32px] lg:leading-10">{{ m.name }}</h1>
-  <p class="mt-1 text-muted" style="font-size:15px">{{ m.category|cat_label }}{% if stock.length_mm %} · list {{ stock.length_mm }}×{{ stock.width_mm }} mm{% endif %}</p>
+  <p class="mt-1 text-muted" style="font-size:15px">{{ m.category|cat_label }}{% if stock.length_mm %} · {% blocktranslate with length=stock.length_mm width=stock.width_mm %}list {{ length }}×{{ width }} mm{% endblocktranslate %}{% endif %}</p>
 
   <form method="post" class="panel form-stack mt-6 p-5 sm:p-6" novalidate>
     {% csrf_token %}
     {% include "partials/form_errors.html" %}
 
     <div class="flex items-baseline justify-between gap-4">
-      <span class="text-muted">Omborda hozir</span>
+      <span class="text-muted">{% translate "Omborda hozir" %}</span>
       <span><span class="num font-semibold" style="font-size:20px">{{ stock.quantity|qty }}</span> <span class="text-muted">{{ m.unit_short }}</span></span>
     </div>
 
     <div class="{% if form.quantity.errors %}has-error{% endif %}">
       <label class="field-label" for="{{ form.quantity.id_for_label }}">{{ form.quantity.label }} <span class="font-normal text-muted">({{ m.unit_short }})</span></label>
       <div class="grid grid-cols-[52px_minmax(0,1fr)_52px] gap-2">
-        <button type="button" class="btn btn-secondary !min-h-[52px] !px-0" @click="bump(-step)" aria-label="Kamaytirish">{% icon "minus" 20 %}</button>
+        <button type="button" class="btn btn-secondary !min-h-[52px] !px-0" @click="bump(-step)" aria-label="{% translate 'Kamaytirish' %}">{% icon "minus" 20 %}</button>
         <div class="[&>input]:!min-h-[52px] [&>input]:text-center [&>input]:!text-[20px] [&>input]:font-semibold [&>input]:tabular-nums">{{ form.quantity }}</div>
-        <button type="button" class="btn btn-secondary !min-h-[52px] !px-0" @click="bump(step)" aria-label="Ko'paytirish">{% icon "plus" 20 %}</button>
+        <button type="button" class="btn btn-secondary !min-h-[52px] !px-0" @click="bump(step)" aria-label="{% translate "Ko'paytirish" %}">{% icon "plus" 20 %}</button>
       </div>
       {% for error in form.quantity.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
       <div class="mt-3 flex flex-wrap gap-2" x-cloak>
@@ -41,29 +41,29 @@
         {% else %}
           <button type="button" class="chip num" @click="q = Math.min(max, 0.5)">0.5</button>
           <button type="button" class="chip num" @click="q = Math.min(max, 1)">1</button>
-          {% if m.container_size %}<button type="button" class="chip num" @click="q = Math.min(max, {{ m.container_size|unlocalize }})">1 idish · {{ m.container_size|qty }} {{ m.unit_short }}</button>{% endif %}
+          {% if m.container_size %}<button type="button" class="chip num" @click="q = Math.min(max, {{ m.container_size|unlocalize }})">{% blocktranslate with size=m.container_size|qty unit=m.unit_short %}1 idish · {{ size }} {{ unit }}{% endblocktranslate %}</button>{% endif %}
         {% endif %}
-        <button type="button" class="chip" @click="q = max">Hammasini</button>
+        <button type="button" class="chip" @click="q = max">{% translate "Hammasini" %}</button>
       </div>
     </div>
 
     <div class="rounded-[6px] bg-raised px-4 py-3" x-cloak>
       <div class="flex items-baseline justify-between gap-4">
-        <span class="text-muted">Olgandan keyin omborda</span>
+        <span class="text-muted">{% translate "Olgandan keyin omborda" %}</span>
         <span><span class="num font-semibold" x-text="fmt(Math.max(0, max - q))"></span> <span class="text-muted">{{ m.unit_short }}</span></span>
       </div>
       <div class="track mt-3" role="presentation">
         <div class="fill" :class="(max - q) < min && 'is-low'" :style="`width: ${Math.max(0, Math.min(100, (max - q) / Math.max(max, min * 1.5, 1) * 100))}%`"></div>
         {% if m.minimum_threshold > 0 %}<div class="tick" :style="`left: ${Math.min(100, min / Math.max(max, min * 1.5, 1) * 100)}%`"></div>{% endif %}
       </div>
-      <p class="mt-2 text-muted" style="font-size:12px" x-show="(max - q) >= min || min == 0">Minimal qoldiq: {{ m.minimum_threshold|qty }} {{ m.unit_short }}</p>
-      <p class="mt-2 text-negative" style="font-size:12px" x-show="(max - q) < min && min > 0">Minimal qoldiqdan ({{ m.minimum_threshold|qty }} {{ m.unit_short }}) kam bo'ladi — administrator xarid ro'yxatida ko'radi.</p>
+      <p class="mt-2 text-muted" style="font-size:12px" x-show="(max - q) >= min || min == 0">{% blocktranslate with amount=m.minimum_threshold|qty unit=m.unit_short %}Minimal qoldiq: {{ amount }} {{ unit }}{% endblocktranslate %}</p>
+      <p class="mt-2 text-negative" style="font-size:12px" x-show="(max - q) < min && min > 0">{% blocktranslate with amount=m.minimum_threshold|qty unit=m.unit_short %}Minimal qoldiqdan ({{ amount }} {{ unit }}) kam bo'ladi — administrator xarid ro'yxatida ko'radi.{% endblocktranslate %}</p>
     </div>
 
     {% include "partials/field.html" with field=form.notes %}
 
-    <button type="submit" class="btn btn-primary btn-lg btn-block">{% icon "take" 18 %} Oldim — tasdiqlash</button>
-    <p class="text-center text-muted" style="font-size:12px">Chiqim ombordan ayriladi va tarixingizga yoziladi.</p>
+    <button type="submit" class="btn btn-primary btn-lg btn-block">{% icon "take" 18 %} {% translate "Oldim — tasdiqlash" %}</button>
+    <p class="text-center text-muted" style="font-size:12px">{% translate "Chiqim ombordan ayriladi va tarixingizga yoziladi." %}</p>
   </form>
 </div>
 {% endwith %}

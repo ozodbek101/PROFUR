@@ -1,12 +1,12 @@
 {% extends "users/auth_base.html" %}
-{% load wms %}
-{% block title %}So'rov yuborildi{% endblock %}
+{% load wms i18n %}
+{% block title %}{% translate "So'rov yuborildi" %}{% endblock %}
 {% block auth_content %}
 <div class="panel p-6 sm:p-8">
-  <span class="pill pill-warn">{% icon "clock" 13 %} Tasdiq kutilmoqda</span>
-  <h1 class="mt-4 font-bold" style="font-size:24px;line-height:32px">So'rovingiz yuborildi</h1>
-  <p class="mt-2">Administrator so'rovingizni ko'rib chiqib, kasbingizni tasdiqlaydi. Shundan keyin shu login va parol bilan tizimga kira olasiz.</p>
-  <p class="mt-2 text-muted">Uzoq kutib qolsangiz, sex boshlig'iga ayting.</p>
-  <a href="{% url 'users:login' %}" class="btn btn-secondary btn-lg btn-block mt-6">Kirish sahifasiga qaytish</a>
+  <span class="pill pill-warn">{% icon "clock" 13 %} {% translate "Tasdiq kutilmoqda" %}</span>
+  <h1 class="mt-4 font-bold" style="font-size:24px;line-height:32px">{% translate "So'rovingiz yuborildi" %}</h1>
+  <p class="mt-2">{% translate "Administrator so'rovingizni ko'rib chiqib, kasbingizni tasdiqlaydi. Shundan keyin shu login va parol bilan tizimga kira olasiz." %}</p>
+  <p class="mt-2 text-muted">{% translate "Uzoq kutib qolsangiz, sex boshlig'iga ayting." %}</p>
+  <a href="{% url 'users:login' %}" class="btn btn-secondary btn-lg btn-block mt-6">{% translate "Kirish sahifasiga qaytish" %}</a>
 </div>
 {% endblock %}

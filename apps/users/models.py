@@ -2,15 +2,17 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as DjangoUserManager
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext, pgettext_lazy
 
 
 class UserRole(models.TextChoices):
-    ADMIN = "ADMIN", "Administrator"
-    ARRACHI = "ARRACHI", "Arrachi"
-    KRASKACHI = "KRASKACHI", "Kraskachi"
-    SHKURKACHI = "SHKURKACHI", "Shkurkachi"
-    ROVERCHI = "ROVERCHI", "Roverchi"
-    SBORKACHI = "SBORKACHI", "Sborkachi"
+    ADMIN = "ADMIN", _("Administrator")
+    ARRACHI = "ARRACHI", pgettext_lazy("trade", "Arrachi")
+    KRASKACHI = "KRASKACHI", pgettext_lazy("trade", "Kraskachi")
+    SHKURKACHI = "SHKURKACHI", pgettext_lazy("trade", "Shkurkachi")
+    ROVERCHI = "ROVERCHI", pgettext_lazy("trade", "Roverchi")
+    SBORKACHI = "SBORKACHI", pgettext_lazy("trade", "Sborkachi")
 
 
 class WorkerRole(models.Model):
@@ -20,15 +22,15 @@ class WorkerRole(models.Model):
     so existing ``User.roles`` and ``BaseMaterial.allowed_roles`` values keep working.
     """
 
-    code = models.CharField("Kod", max_length=40, unique=True)
-    name = models.CharField("Nomi", max_length=100)
-    sort_order = models.PositiveIntegerField("Tartib", default=100)
+    code = models.CharField(_("Kod"), max_length=40, unique=True)
+    name = models.CharField(_("Nomi"), max_length=100)
+    sort_order = models.PositiveIntegerField(_("Tartib"), default=100)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ["sort_order", "name"]
-        verbose_name = "kasb"
-        verbose_name_plural = "kasblar"
+        verbose_name = _("kasb")
+        verbose_name_plural = _("kasblar")
 
     def __str__(self) -> str:
         return self.name
@@ -45,12 +47,17 @@ def clear_role_cache(*args, **kwargs) -> None:
     _role_cache = None
 
 
+def localized_trade_name(name: str) -> str:
+    """The five built-in trade names are translated; trades admins added are shown as typed."""
+    return pgettext("trade", name) if name else name
+
+
 def worker_role_choices() -> list[tuple[str, str]]:
-    """Trades as (code, name) pairs, in display order. Usable as a form ``choices`` callable."""
+    """Trades as (code, name) pairs in display order and the current language. Usable as form ``choices``."""
     global _role_cache
     if _role_cache is None:
         _role_cache = list(WorkerRole.objects.values_list("code", "name"))
-    return list(_role_cache)
+    return [(code, localized_trade_name(name)) for code, name in _role_cache]
 
 
 def worker_role_codes() -> list[str]:
@@ -58,12 +65,12 @@ def worker_role_codes() -> list[str]:
 
 
 def all_role_choices() -> list[tuple[str, str]]:
-    return [(UserRole.ADMIN.value, UserRole.ADMIN.label), *worker_role_choices()]
+    return [(UserRole.ADMIN.value, str(UserRole.ADMIN.label)), *worker_role_choices()]
 
 
 def role_label(code: str) -> str:
     if code == UserRole.ADMIN:
-        return UserRole.ADMIN.label
+        return str(UserRole.ADMIN.label)
     return dict(worker_role_choices()).get(code, code)
 
 
@@ -75,11 +82,11 @@ def normalize_roles(roles) -> list[str]:
 
 def validate_role_list(value) -> None:
     if not isinstance(value, list):
-        raise ValidationError("Rollar ro'yxat (list) ko'rinishida bo'lishi kerak.")
+        raise ValidationError(_("Rollar ro'yxat (list) ko'rinishida bo'lishi kerak."))
     known = {UserRole.ADMIN.value, *worker_role_codes()}
     unknown = [role for role in value if role not in known]
     if unknown:
-        raise ValidationError("Noma'lum rol(lar): %(roles)s", params={"roles": ", ".join(map(str, unknown))})
+        raise ValidationError(_("Noma'lum rol(lar): %(roles)s"), params={"roles": ", ".join(map(str, unknown))})
 
 
 class UserQuerySet(models.QuerySet):
@@ -98,7 +105,7 @@ class UserManager(DjangoUserManager.from_queryset(UserQuerySet)):
 
 
 class User(AbstractUser):
-    full_name = models.CharField("To'liq ism", max_length=255, blank=True)
+    full_name = models.CharField(_("To'liq ism"), max_length=255, blank=True)
     roles = models.JSONField(
         default=list,
         blank=True,
@@ -117,8 +124,8 @@ class User(AbstractUser):
 
     class Meta:
         ordering = ["full_name", "username"]
-        verbose_name = "foydalanuvchi"
-        verbose_name_plural = "foydalanuvchilar"
+        verbose_name = _("foydalanuvchi")
+        verbose_name_plural = _("foydalanuvchilar")
 
     def __str__(self) -> str:
         return self.full_name or self.username

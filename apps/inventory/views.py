@@ -8,13 +8,14 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from django.views import View
 from django.views.generic import CreateView, FormView, ListView, TemplateView, UpdateView
 
 from apps.users.permissions import ApprovedUserRequiredMixin, WarehouseAdminRequiredMixin
 
 from . import selectors, services
-from .templatetags.wms import uz_month
+from .templatetags.wms import month_name
 from .forms import (
     KirimForm,
     MaterialForm,
@@ -30,6 +31,7 @@ from .models import (
     category_choices,
     category_codes,
     default_roles_for_category,
+    transaction_type_label,
 )
 
 
@@ -116,8 +118,12 @@ class WithdrawWholeView(ApprovedUserRequiredMixin, FormView):
         unit = self.stock.material.unit_short
         messages.success(
             self.request,
-            f"Chiqim yozildi: {self.stock.material.name} — {fmt_qty(entry.quantity_abs)} {unit}. "
-            f"Omborda qoldi: {fmt_qty(entry.stock_after)} {unit}.",
+            _("Chiqim yozildi: %(name)s — %(amount)s %(unit)s. Omborda qoldi: %(left)s %(unit)s.") % {
+                "name": self.stock.material.name,
+                "amount": fmt_qty(entry.quantity_abs),
+                "left": fmt_qty(entry.stock_after),
+                "unit": unit,
+            },
         )
         return redirect(reverse("inventory:home") + "?tab=whole")
 
@@ -164,7 +170,12 @@ class OffcutCreateView(ApprovedUserRequiredMixin, FormView):
             return self.form_invalid(form)
         messages.success(
             self.request,
-            f"Qoldiq qo'shildi: {offcut.material.name} {offcut.length_mm}×{offcut.width_mm} mm — {offcut.quantity} dona.",
+            _("Qoldiq qo'shildi: %(name)s %(length)s×%(width)s mm — %(count)s dona.") % {
+                "name": offcut.material.name,
+                "length": offcut.length_mm,
+                "width": offcut.width_mm,
+                "count": offcut.quantity,
+            },
         )
         return redirect(reverse("inventory:home") + "?tab=offcuts")
 
@@ -197,8 +208,12 @@ class OffcutWithdrawView(ApprovedUserRequiredMixin, FormView):
             return self.form_invalid(form)
         messages.success(
             self.request,
-            f"Qoldiq olindi: {self.offcut.material.name} {self.offcut.length_mm}×{self.offcut.width_mm} mm — "
-            f"{form.cleaned_data['quantity']} dona.",
+            _("Qoldiq olindi: %(name)s %(length)s×%(width)s mm — %(count)s dona.") % {
+                "name": self.offcut.material.name,
+                "length": self.offcut.length_mm,
+                "width": self.offcut.width_mm,
+                "count": form.cleaned_data["quantity"],
+            },
         )
         return redirect(reverse("inventory:home") + "?tab=offcuts")
 
@@ -233,7 +248,7 @@ class DashboardView(WarehouseAdminRequiredMixin, TemplateView):
                 "month_flows": flows,
                 "flow_peak": peak,
                 "flow_chart": {
-                    "labels": [uz_month(f.month).capitalize() for f in flows],
+                    "labels": [month_name(f.month).capitalize() for f in flows],
                     "up": [float(f.kirim_usd) for f in flows],
                     "down": [float(f.chiqim_usd) for f in flows],
                 },
@@ -302,7 +317,7 @@ class MaterialCreateView(WarehouseAdminRequiredMixin, CreateView):
         except ValidationError as exc:
             apply_service_errors(form, exc)
             return self.form_invalid(form)
-        messages.success(self.request, f"“{material.name}” qo'shildi. Endi kirimni kiriting.")
+        messages.success(self.request, _("“%(name)s” qo'shildi. Endi kirimni kiriting.") % {"name": material.name})
         return redirect(reverse("inventory:kirim") + f"?material={material.pk}")
 
 
@@ -320,7 +335,7 @@ class MaterialUpdateView(WarehouseAdminRequiredMixin, UpdateView):
             form.create_pending_category()
             material.save()
             form.save_stock_dimensions(material)
-        messages.success(self.request, f"“{material.name}” saqlandi.")
+        messages.success(self.request, _("“%(name)s” saqlandi.") % {"name": material.name})
         return redirect("inventory:material_list")
 
 
@@ -363,8 +378,13 @@ class KirimView(WarehouseAdminRequiredMixin, FormView):
             return self.form_invalid(form)
         messages.success(
             self.request,
-            f"Kirim yozildi: {entry.material.name} +{fmt_qty(entry.quantity_changed)} {entry.material.unit_short}, "
-            f"${entry.total_price_usd:,.2f}. Yangi o'rtacha narx: ${entry.material.unit_price_usd:,.4f}.",
+            _("Kirim yozildi: %(name)s +%(amount)s %(unit)s, %(total)s. Yangi o'rtacha narx: %(price)s.") % {
+                "name": entry.material.name,
+                "amount": fmt_qty(entry.quantity_changed),
+                "unit": entry.material.unit_short,
+                "total": f"${entry.total_price_usd:,.2f}",
+                "price": f"${entry.material.unit_price_usd:,.4f}",
+            },
         )
         return redirect("inventory:kirim")
 
@@ -423,24 +443,24 @@ class ReportExportView(WarehouseAdminRequiredMixin, View):
         writer = csv.writer(response)
         writer.writerow(
             [
-                "Sana",
-                "Turi",
-                "Material",
-                "Kategoriya",
-                "Miqdor",
-                "Birlik",
-                "Birlik narxi (USD)",
-                "Jami (USD)",
-                "Qoldiq o'lchami (mm)",
-                "Ishchi",
-                "Izoh",
+                _("Sana"),
+                _("Turi"),
+                _("Material"),
+                _("Kategoriya"),
+                _("Miqdor"),
+                _("Birlik"),
+                _("Birlik narxi (USD)"),
+                _("Jami (USD)"),
+                _("Qoldiq o'lchami (mm)"),
+                _("Ishchi"),
+                _("Izoh"),
             ]
         )
         for txn in qs.iterator(chunk_size=500):
             writer.writerow(
                 [
                     timezone.localtime(txn.created_at).strftime("%Y-%m-%d %H:%M"),
-                    txn.get_transaction_type_display(),
+                    transaction_type_label(txn.transaction_type),
                     _csv_safe(txn.material.name),
                     _csv_safe(txn.material.category_short),
                     f"{txn.quantity_changed}",

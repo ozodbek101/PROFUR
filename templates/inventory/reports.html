@@ -1,54 +1,54 @@
 {% extends "base.html" %}
-{% load wms %}
-{% block title %}Oylik hisobot{% endblock %}
+{% load wms i18n %}
+{% block title %}{% translate "Oylik hisobot" %}{% endblock %}
 {% block content %}
 {% with f=filter_form.cleaned_data %}
 <div class="flex flex-wrap items-end justify-between gap-4">
   <div>
-    <h1 class="font-bold text-[24px] leading-8 lg:text-[32px] lg:leading-10">Oylik hisobot</h1>
-    <p class="mt-1 text-muted" style="font-size:15px">{% if f.month %}{{ f.month|uz_month|capfirst }} {{ f.month|date:"Y" }}{% else %}Barcha davr{% endif %} · kirim, chiqim va qoldiqlar, USD</p>
+    <h1 class="font-bold text-[24px] leading-8 lg:text-[32px] lg:leading-10">{% translate "Oylik hisobot" %}</h1>
+    <p class="mt-1 text-muted" style="font-size:15px">{% if f.month %}{{ f.month|month_name|capfirst }} {{ f.month|date:"Y" }}{% else %}{% translate "Barcha davr" %}{% endif %} · {% translate "kirim, chiqim va qoldiqlar, USD" %}</p>
   </div>
-  <a href="{% url 'inventory:reports_export' %}?{{ export_query }}" class="btn btn-secondary">{% icon "download" %} CSV yuklab olish</a>
+  <a href="{% url 'inventory:reports_export' %}?{{ export_query }}" class="btn btn-secondary">{% icon "download" %} {% translate "CSV yuklab olish" %}</a>
 </div>
 
-<form method="get" class="form-stack mt-6 grid grid-cols-2 items-end gap-3 md:grid-cols-[160px_repeat(4,minmax(0,1fr))_auto]" aria-label="Filtrlar">
+<form method="get" class="form-stack mt-6 grid grid-cols-2 items-end gap-3 md:grid-cols-[160px_repeat(4,minmax(0,1fr))_auto]" aria-label="{% translate 'Filtrlar' %}">
   <div>{% include "partials/field.html" with field=filter_form.month %}</div>
   <div>{% include "partials/field.html" with field=filter_form.transaction_type %}</div>
   <div>{% include "partials/field.html" with field=filter_form.category %}</div>
   <div>{% include "partials/field.html" with field=filter_form.user %}</div>
   <div class="col-span-2 md:col-span-1">{% include "partials/field.html" with field=filter_form.material %}</div>
   <div class="col-span-2 flex gap-2 md:col-span-1">
-    <button type="submit" class="btn btn-primary min-h-10 flex-1 md:flex-none">Ko'rsatish</button>
-    <a href="?month=" class="btn btn-ghost min-h-10">Tozalash</a>
+    <button type="submit" class="btn btn-primary min-h-10 flex-1 md:flex-none">{% translate "Ko'rsatish" %}</button>
+    <a href="?month=" class="btn btn-ghost min-h-10">{% translate "Tozalash" %}</a>
   </div>
 </form>
 
-<section class="panel mt-6 grid grid-cols-2 md:grid-cols-4" aria-label="Davr bo'yicha jami">
+<section class="panel mt-6 grid grid-cols-2 md:grid-cols-4" aria-label="{% translate "Davr bo'yicha jami" %}">
   <div class="border-b border-r border-line p-5 md:border-b-0">
-    <p class="text-muted">Kirim</p>
+    <p class="text-muted">{% translate "Kirim" %}</p>
     <p class="num mt-1 font-semibold" style="font-size:24px;line-height:32px">{{ totals.kirim_usd|usd }}</p>
-    <p class="mt-1 text-muted" style="font-size:12px"><span class="num">{{ totals.kirim_count }}</span> ta yozuv</p>
+    <p class="mt-1 text-muted" style="font-size:12px">{% blocktranslate count n=totals.kirim_count %}<span class="num">{{ n }}</span> ta yozuv{% plural %}<span class="num">{{ n }}</span> ta yozuv{% endblocktranslate %}</p>
   </div>
   <div class="border-b border-line p-5 md:border-b-0 md:border-r">
-    <p class="text-muted">Chiqim (sarf)</p>
+    <p class="text-muted">{% translate "Chiqim (sarf)" %}</p>
     <p class="num mt-1 font-semibold" style="font-size:24px;line-height:32px">{{ totals.chiqim_usd|usd }}</p>
-    <p class="mt-1 text-muted" style="font-size:12px"><span class="num">{{ totals.chiqim_count }}</span> ta yozuv</p>
+    <p class="mt-1 text-muted" style="font-size:12px">{% blocktranslate count n=totals.chiqim_count %}<span class="num">{{ n }}</span> ta yozuv{% plural %}<span class="num">{{ n }}</span> ta yozuv{% endblocktranslate %}</p>
   </div>
   <div class="border-r border-line p-5">
-    <p class="text-muted">Farq</p>
+    <p class="text-muted">{% translate "Farq" %}</p>
     <p class="num mt-1 font-semibold" style="font-size:24px;line-height:32px">{% if totals.kirim_usd >= totals.chiqim_usd %}+{% else %}−{% endif %}{{ totals.net_abs|usd }}</p>
-    <p class="mt-1 text-muted" style="font-size:12px">kirim − chiqim</p>
+    <p class="mt-1 text-muted" style="font-size:12px">{% translate "kirim − chiqim" %}</p>
   </div>
   <div class="p-5">
-    <p class="text-muted">Qoldiq qo'shildi</p>
+    <p class="text-muted">{% translate "Qoldiq qo'shildi" %}</p>
     <p class="num mt-1 font-semibold" style="font-size:24px;line-height:32px">{{ totals.offcut_count }}</p>
-    <p class="mt-1 text-muted" style="font-size:12px">ta yozuv, qiymati $0</p>
+    <p class="mt-1 text-muted" style="font-size:12px">{% blocktranslate count n=totals.offcut_count %}ta yozuv, qiymati $0{% plural %}ta yozuv, qiymati $0{% endblocktranslate %}</p>
   </div>
 </section>
 
 <div class="mt-6 grid items-start gap-6 lg:grid-cols-2">
   <section class="panel overflow-hidden" aria-labelledby="by-material">
-    <div class="panel-head"><h2 id="by-material" class="panel-title">Sarf materiallar bo'yicha</h2><p class="text-muted" style="font-size:12px">eng qimmati birinchi</p></div>
+    <div class="panel-head"><h2 id="by-material" class="panel-title">{% translate "Sarf materiallar bo'yicha" %}</h2><p class="text-muted" style="font-size:12px">{% translate "eng qimmati birinchi" %}</p></div>
     {% if by_material %}
     <ul>
       {% for row in by_material %}
@@ -59,42 +59,42 @@
         </div>
         <div class="mt-1 flex items-center gap-3">
           <div class="h-0.5 flex-1 bg-rule"><div class="h-0.5 {% if forloop.first %}bg-ink{% else %}bg-[#9ca3af]{% endif %}" style="width: {% widthratio row.total_usd by_material.0.total_usd 100 %}%"></div></div>
-          <p class="num whitespace-nowrap text-muted" style="font-size:12px">{{ row.quantity|absval|qty }} {{ row.material__unit_of_measure|unit_label }} · {{ row.entries }} marta</p>
+          <p class="num whitespace-nowrap text-muted" style="font-size:12px">{{ row.quantity|absval|qty }} {{ row.material__unit_of_measure|unit_label }} · {% blocktranslate count n=row.entries %}{{ n }} marta{% plural %}{{ n }} marta{% endblocktranslate %}</p>
         </div>
       </li>
       {% endfor %}
     </ul>
-    {% else %}<p class="border-t border-rule px-5 py-5 text-muted">Bu davrda chiqim yo'q.</p>{% endif %}
+    {% else %}<p class="border-t border-rule px-5 py-5 text-muted">{% translate "Bu davrda chiqim yo'q." %}</p>{% endif %}
   </section>
 
   <section class="panel overflow-hidden" aria-labelledby="by-worker">
-    <div class="panel-head"><h2 id="by-worker" class="panel-title">Sarf ishchilar bo'yicha</h2><p class="text-muted" style="font-size:12px">USD, olingan materiallar qiymati</p></div>
+    <div class="panel-head"><h2 id="by-worker" class="panel-title">{% translate "Sarf ishchilar bo'yicha" %}</h2><p class="text-muted" style="font-size:12px">{% translate "USD, olingan materiallar qiymati" %}</p></div>
     {% if by_worker %}
     <ul>
       {% for row in by_worker %}
       <li class="flex items-center justify-between gap-4 border-t border-rule px-5" style="min-height:45px">
         <p class="min-w-0 truncate">{{ row.user__full_name|default:row.user__username }}</p>
-        <p class="num whitespace-nowrap"><span class="font-semibold">{{ row.total_usd|usd }}</span> <span class="text-muted" style="font-size:12px">· {{ row.entries }} marta</span></p>
+        <p class="num whitespace-nowrap"><span class="font-semibold">{{ row.total_usd|usd }}</span> <span class="text-muted" style="font-size:12px">· {% blocktranslate count n=row.entries %}{{ n }} marta{% plural %}{{ n }} marta{% endblocktranslate %}</span></p>
       </li>
       {% endfor %}
     </ul>
-    {% else %}<p class="border-t border-rule px-5 py-5 text-muted">Bu davrda chiqim yo'q.</p>{% endif %}
+    {% else %}<p class="border-t border-rule px-5 py-5 text-muted">{% translate "Bu davrda chiqim yo'q." %}</p>{% endif %}
   </section>
 </div>
 
 <section class="panel mt-6 overflow-hidden" aria-labelledby="ledger-title">
   <div class="panel-head">
-    <h2 id="ledger-title" class="panel-title">Barcha harakatlar <span class="num font-normal text-muted">{{ page_obj.paginator.count|default:0 }}</span></h2>
-    <p class="text-muted" style="font-size:12px">o'zgartirib bo'lmaydigan jurnal</p>
+    <h2 id="ledger-title" class="panel-title">{% translate "Barcha harakatlar" %} <span class="num font-normal text-muted">{{ page_obj.paginator.count|default:0 }}</span></h2>
+    <p class="text-muted" style="font-size:12px">{% translate "o'zgartirib bo'lmaydigan jurnal" %}</p>
   </div>
   {% if transactions %}
     <div class="hidden grid-cols-[110px_minmax(0,1fr)_120px_110px_110px] gap-x-4 px-5 pb-2 text-muted md:grid" style="font-size:12px" aria-hidden="true">
-      <span>Turi</span><span>Material · sana · ishchi</span><span class="text-right">Miqdor</span><span class="text-right">Birlik narxi</span><span class="text-right">Jami</span>
+      <span>{% translate "Turi" %}</span><span>{% translate "Material · sana · ishchi" %}</span><span class="text-right">{% translate "Miqdor" %}</span><span class="text-right">{% translate "Birlik narxi" %}</span><span class="text-right">{% translate "Jami" %}</span>
     </div>
     {% include "inventory/_txn_rows.html" with show_user=True show_price=True %}
     {% include "partials/pagination.html" %}
   {% else %}
-    <p class="border-t border-rule px-5 py-6 text-muted">Tanlangan filtr bo'yicha harakat yo'q.</p>
+    <p class="border-t border-rule px-5 py-6 text-muted">{% translate "Tanlangan filtr bo'yicha harakat yo'q." %}</p>
   {% endif %}
 </section>
 {% endwith %}

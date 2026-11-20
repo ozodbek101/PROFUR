@@ -1,4 +1,4 @@
-{# Renders one bound form field: label above, control, help, errors. #}
+{% load i18n %}{# Renders one bound form field: label above, control, help, errors. #}
 <div class="{% if field.errors %}has-error{% endif %}{% if wrapper_class %} {{ wrapper_class }}{% endif %}">
   {% if field.widget_type == "checkboxselectmultiple" or field.widget_type == "radioselect" %}
     <fieldset>
@@ -12,7 +12,7 @@
   {% elif field.widget_type == "checkbox" %}
     <label class="choice-tile">{{ field }}<span>{{ field.label }}</span></label>
   {% else %}
-    <label class="field-label" for="{{ field.id_for_label }}">{{ field.label }}{% if not field.field.required %} <span class="font-normal text-muted">(ixtiyoriy)</span>{% endif %}</label>
+    <label class="field-label" for="{{ field.id_for_label }}">{{ field.label }}{% if not field.field.required %} <span class="font-normal text-muted">{% translate "(ixtiyoriy)" %}</span>{% endif %}</label>
     {{ field }}
   {% endif %}
   {% if field.help_text %}<p class="field-help" id="{{ field.auto_id }}_helptext">{{ field.help_text }}</p>{% endif %}

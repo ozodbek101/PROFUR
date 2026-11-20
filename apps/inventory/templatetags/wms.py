@@ -6,8 +6,10 @@ from django import template
 from django.utils.html import format_html
 from django.utils.http import urlencode
 from django.utils.safestring import mark_safe
+from django.utils.translation import gettext as _
+from django.utils.translation import pgettext_lazy
 
-from apps.inventory.models import UNIT_SHORT_LABELS, category_label
+from apps.inventory.models import category_label, unit_short_label
 from apps.users.models import role_label as _role_label
 
 register = template.Library()
@@ -45,7 +47,7 @@ def qty(value) -> str:
 
 @register.filter
 def unit_label(value: str) -> str:
-    return UNIT_SHORT_LABELS.get(value, value)
+    return unit_short_label(value)
 
 
 @register.filter
@@ -54,17 +56,20 @@ def absval(value):
     return abs(number) if number is not None else value
 
 
-UZ_MONTHS = (
-    "yanvar", "fevral", "mart", "aprel", "may", "iyun",
-    "iyul", "avgust", "sentabr", "oktabr", "noyabr", "dekabr",
+# Stand-alone month names (nominative), in the case used mid-sentence: "noyabr", "ноябрь", "November".
+MONTHS = (
+    pgettext_lazy("month", "yanvar"), pgettext_lazy("month", "fevral"), pgettext_lazy("month", "mart"),
+    pgettext_lazy("month", "aprel"), pgettext_lazy("month", "may"), pgettext_lazy("month", "iyun"),
+    pgettext_lazy("month", "iyul"), pgettext_lazy("month", "avgust"), pgettext_lazy("month", "sentabr"),
+    pgettext_lazy("month", "oktabr"), pgettext_lazy("month", "noyabr"), pgettext_lazy("month", "dekabr"),
 )
 
 
 @register.filter
-def uz_month(value) -> str:
-    """date -> 'noyabr' (Uzbek month names, lower case as in running text)."""
+def month_name(value) -> str:
+    """date -> month name in the current language ('noyabr', 'ноябрь', 'November')."""
     try:
-        return UZ_MONTHS[value.month - 1]
+        return str(MONTHS[value.month - 1])
     except (AttributeError, IndexError, TypeError):
         return ""
 
@@ -81,8 +86,14 @@ def role_label(value: str) -> str:
 
 @register.filter
 def short_role(value: str) -> str:
-    """'Arrachi (Sawyer)' -> 'Arrachi'."""
+    """Trade name without anything in brackets: 'Arrachi (Sawyer)' -> 'Arrachi'."""
     return role_label(value).split(" (")[0]
+
+
+@register.filter
+def role_list(values) -> str:
+    """['ARRACHI', 'ROVERCHI'] -> 'Arrachi, Roverchi' in the current language."""
+    return ", ".join(short_role(value) for value in (values or []))
 
 
 @register.filter
@@ -173,7 +184,11 @@ def offcut_figure(length_mm, width_mm, sheet_length=None, sheet_width=None, box_
         if has_sheet
         else ""
     )
-    label = f"{piece[0]} × {piece[1]} mm qoldiq" + (f", list {sheet[0]} × {sheet[1]} mm" if has_sheet else "")
+    sizes = {"length": piece[0], "width": piece[1], "sheet_length": sheet[0], "sheet_width": sheet[1]}
+    if has_sheet:
+        label = _("%(length)s × %(width)s mm qoldiq, list %(sheet_length)s × %(sheet_width)s mm") % sizes
+    else:
+        label = _("%(length)s × %(width)s mm qoldiq") % sizes
     return format_html(
         '<svg width="{}" height="{}" viewBox="0 0 {} {}" role="img" aria-label="{}">{}'
         '<rect x="{}" y="{}" width="{}" height="{}" fill="#f1e2cf" stroke="#9a5b22" stroke-width="1"/></svg>',

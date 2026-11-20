@@ -23,6 +23,11 @@
 @font-face { font-family: "DM Sans"; font-style: normal; font-weight: 500; font-display: swap; src: url("../fonts/dm-sans-latin-ext-500-normal.woff2") format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
 @font-face { font-family: "DM Sans"; font-style: normal; font-weight: 600; font-display: swap; src: url("../fonts/dm-sans-latin-ext-600-normal.woff2") format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
 @font-face { font-family: "DM Sans"; font-style: normal; font-weight: 700; font-display: swap; src: url("../fonts/dm-sans-latin-ext-700-normal.woff2") format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+/* DM Sans has no Cyrillic: Inter's Cyrillic subset fills in under the same family for Russian. */
+@font-face { font-family: "DM Sans"; font-style: normal; font-weight: 400; font-display: swap; src: url("../fonts/inter-cyrillic-400-normal.woff2") format("woff2"); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+@font-face { font-family: "DM Sans"; font-style: normal; font-weight: 500; font-display: swap; src: url("../fonts/inter-cyrillic-500-normal.woff2") format("woff2"); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+@font-face { font-family: "DM Sans"; font-style: normal; font-weight: 600; font-display: swap; src: url("../fonts/inter-cyrillic-600-normal.woff2") format("woff2"); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+@font-face { font-family: "DM Sans"; font-style: normal; font-weight: 700; font-display: swap; src: url("../fonts/inter-cyrillic-700-normal.woff2") format("woff2"); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
 
 @theme {
   --font-sans: "DM Sans", Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -179,6 +184,15 @@
 
   .chip { @apply inline-flex items-center rounded-full border border-control bg-surface px-3.5 whitespace-nowrap text-ink; min-height: 40px; font-size: 14px; }
   .chip[aria-current="true"] { @apply border-ink bg-ink text-white; }
+
+  /* Language switch: UZ / RU / EN segmented control */
+  .lang-switch { @apply inline-flex rounded-[6px] border border-control bg-surface p-0.5; }
+  .lang-option {
+    @apply rounded-[4px] px-2.5 font-semibold text-muted tabular-nums;
+    min-height: 30px; min-width: 40px; font-size: 12px; letter-spacing: 0.02em;
+  }
+  .lang-option:hover { @apply text-ink bg-raised; }
+  .lang-option[aria-pressed="true"] { @apply bg-ink text-white; }
 
   /* Stock track: quantity against its minimum (the restock strip) */
   .track { @apply relative h-1.5 rounded-full bg-raised; }

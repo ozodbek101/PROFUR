@@ -1,44 +1,44 @@
 {% extends "base.html" %}
-{% load wms %}
-{% block title %}Ishchilar{% endblock %}
+{% load wms i18n %}
+{% block title %}{% translate "Ishchilar" %}{% endblock %}
 {% block content %}
 <div class="flex flex-wrap items-end justify-between gap-4">
   <div>
-    <h1 class="font-bold text-[24px] leading-8 lg:text-[32px] lg:leading-10">Ishchilar</h1>
-    <p class="mt-1 text-muted" style="font-size:15px">Hisoblar, kasblar va kirish huquqi · <span class="num">{{ page_obj.paginator.count }}</span> ta hisob</p>
-    <a href="{% url 'users:worker_role_create' %}" class="btn btn-primary mt-4">{% icon "plus" %} Yangi kasb</a>
+    <h1 class="font-bold text-[24px] leading-8 lg:text-[32px] lg:leading-10">{% translate "Ishchilar" %}</h1>
+    <p class="mt-1 text-muted" style="font-size:15px">{% translate "Hisoblar, kasblar va kirish huquqi" %} · <span class="num">{{ page_obj.paginator.count }}</span> {% blocktranslate count n=page_obj.paginator.count %}ta hisob{% plural %}ta hisob{% endblocktranslate %}</p>
+    <a href="{% url 'users:worker_role_create' %}" class="btn btn-primary mt-4">{% icon "plus" %} {% translate "Yangi kasb" %}</a>
   </div>
-  {% if nav_pending_users %}<a href="{% url 'users:pending_users' %}" class="btn btn-primary">{% icon "check" %} So'rovlar · {{ nav_pending_users }}</a>{% endif %}
+  {% if nav_pending_users %}<a href="{% url 'users:pending_users' %}" class="btn btn-primary">{% icon "check" %} {% translate "So'rovlar" %} · {{ nav_pending_users }}</a>{% endif %}
 </div>
 
 <form method="get" class="mt-6" role="search">
   <div class="relative md:w-[316px]">
     <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted">{% icon "search" 16 %}</span>
-    <input type="search" name="q" value="{{ query }}" placeholder="Ism yoki login" aria-label="Ism yoki login" class="control !pl-9">
+    {% translate "Ism yoki login" as search_label %}<input type="search" name="q" value="{{ query }}" placeholder="{{ search_label }}" aria-label="{{ search_label }}" class="control !pl-9">
   </div>
 </form>
 
 <div class="panel mt-4 overflow-hidden">
   <div class="hidden grid-cols-[minmax(0,1fr)_260px_140px_auto] gap-x-4 px-5 pb-2 pt-4 text-muted md:grid" style="font-size:12px" aria-hidden="true">
-    <span>Ishchi</span><span>Kasblari</span><span>Holati</span><span></span>
+    <span>{% translate "Ishchi" %}</span><span>{% translate "Kasblari" %}</span><span>{% translate "Holati" %}</span><span></span>
   </div>
   <ul>
     {% for u in users %}
     <li class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 border-t border-rule px-4 py-3 md:grid-cols-[minmax(0,1fr)_260px_140px_auto] md:px-5">
       <div class="min-w-0">
-        <p class="truncate font-medium">{{ u.display_name }}{% if u.pk == user.pk %} <span class="text-muted font-normal">(siz)</span>{% endif %}</p>
-        <p class="truncate text-muted" style="font-size:13px">@{{ u.username }}<span class="md:hidden"> · {% for r in u.roles %}{{ r|short_role }}{% if not forloop.last %}, {% endif %}{% empty %}rol yo'q{% endfor %}</span></p>
+        <p class="truncate font-medium">{{ u.display_name }}{% if u.pk == user.pk %} <span class="text-muted font-normal">{% translate "(siz)" %}</span>{% endif %}</p>
+        <p class="truncate text-muted" style="font-size:13px">@{{ u.username }}<span class="md:hidden"> · {% for r in u.roles %}{{ r|short_role }}{% if not forloop.last %}, {% endif %}{% empty %}{% translate "rol yo'q" %}{% endfor %}</span></p>
       </div>
       <p class="hidden truncate md:block">{% for r in u.roles %}{{ r|short_role }}{% if not forloop.last %}, {% endif %}{% empty %}<span class="text-muted">—</span>{% endfor %}</p>
       <div class="hidden md:block">
-        {% if not u.is_active %}<span class="pill pill-neutral">O'chirilgan</span>
-        {% elif u.is_superuser or u.is_approved %}<span class="pill pill-pos">Faol</span>
-        {% else %}<span class="pill pill-warn">Tasdiq kutmoqda</span>{% endif %}
+        {% if not u.is_active %}<span class="pill pill-neutral">{% translate "O'chirilgan" %}</span>
+        {% elif u.is_superuser or u.is_approved %}<span class="pill pill-pos">{% translate "Faol" %}</span>
+        {% else %}<span class="pill pill-warn">{% translate "Tasdiq kutmoqda" %}</span>{% endif %}
       </div>
-      <a href="{% url 'users:user_edit' u.pk %}" class="btn btn-secondary">Tahrirlash</a>
+      <a href="{% url 'users:user_edit' u.pk %}" class="btn btn-secondary">{% translate "Tahrirlash" %}</a>
     </li>
     {% empty %}
-    <li class="border-t border-rule px-5 py-6 text-muted">Hech kim topilmadi.</li>
+    <li class="border-t border-rule px-5 py-6 text-muted">{% translate "Hech kim topilmadi." %}</li>
     {% endfor %}
   </ul>
   {% include "partials/pagination.html" %}

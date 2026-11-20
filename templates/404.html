@@ -1,15 +1,16 @@
 {% extends "base.html" %}
-{% block title %}Topilmadi{% endblock %}
+{% load i18n %}
+{% block title %}{% translate "Topilmadi" %}{% endblock %}
 {% block content %}
 <div class="panel max-w-[600px] p-6">
-  <h1 class="font-bold" style="font-size:24px;line-height:32px">Sahifa topilmadi</h1>
-  <p class="mt-2 text-muted">Bu material yoki qoldiq allaqachon olingan bo'lishi, yoki sizning kasbingiz uchun ko'rinmasligi mumkin.</p>
-  <a href="{% url 'inventory:home' %}" class="btn btn-secondary mt-5">Omborga qaytish</a>
+  <h1 class="font-bold" style="font-size:24px;line-height:32px">{% translate "Sahifa topilmadi" %}</h1>
+  <p class="mt-2 text-muted">{% translate "Bu material yoki qoldiq allaqachon olingan bo'lishi, yoki sizning kasbingiz uchun ko'rinmasligi mumkin." %}</p>
+  <a href="{% url 'inventory:home' %}" class="btn btn-secondary mt-5">{% translate "Omborga qaytish" %}</a>
 </div>
 {% endblock %}
 {% block auth %}
 <div class="mx-auto max-w-[400px] px-4 py-16">
-  <h1 class="font-bold" style="font-size:24px;line-height:32px">Sahifa topilmadi</h1>
-  <a href="{% url 'users:login' %}" class="btn btn-primary mt-5">Kirish sahifasi</a>
+  <h1 class="font-bold" style="font-size:24px;line-height:32px">{% translate "Sahifa topilmadi" %}</h1>
+  <a href="{% url 'users:login' %}" class="btn btn-primary mt-5">{% translate "Kirish sahifasi" %}</a>
 </div>
 {% endblock %}

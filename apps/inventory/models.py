@@ -4,6 +4,8 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext, pgettext_lazy
 
 from apps.users.models import UserRole, normalize_roles, role_label, worker_role_codes
 
@@ -17,27 +19,27 @@ class MaterialCategory(models.TextChoices):
     The full list, including categories admins add through "Boshqa", lives in ``Category``.
     """
 
-    SHEET = "SHEET", "List materiallar"
-    LIQUID = "LIQUID", "Bo'yoq va suyuqliklar"
-    LINEAR = "LINEAR", "Lenta va rulonlar"
-    HARDWARE = "HARDWARE", "Furnitura"
+    SHEET = "SHEET", pgettext_lazy("category", "List materiallar")
+    LIQUID = "LIQUID", pgettext_lazy("category", "Bo'yoq va suyuqliklar")
+    LINEAR = "LINEAR", pgettext_lazy("category", "Lenta va rulonlar")
+    HARDWARE = "HARDWARE", pgettext_lazy("category", "Furnitura")
 
 
 class MeasurementUnit(models.TextChoices):
-    PIECE = "PIECE", "Dona"
-    LITER = "LITER", "Litr"
-    KILOGRAM = "KG", "Kilogramm"
-    METER = "METER", "Metr"
-    CENTIMETER = "CM", "Santimetr"
+    PIECE = "PIECE", pgettext_lazy("unit", "Dona")
+    LITER = "LITER", pgettext_lazy("unit", "Litr")
+    KILOGRAM = "KG", pgettext_lazy("unit", "Kilogramm")
+    METER = "METER", pgettext_lazy("unit", "Metr")
+    CENTIMETER = "CM", pgettext_lazy("unit", "Santimetr")
 
 
 #: Short unit labels for compact tables and buttons.
 UNIT_SHORT_LABELS = {
-    MeasurementUnit.LITER: "L",
-    MeasurementUnit.KILOGRAM: "kg",
-    MeasurementUnit.METER: "m",
-    MeasurementUnit.CENTIMETER: "sm",
-    MeasurementUnit.PIECE: "dona",
+    MeasurementUnit.LITER: pgettext_lazy("unit short", "L"),
+    MeasurementUnit.KILOGRAM: pgettext_lazy("unit short", "kg"),
+    MeasurementUnit.METER: pgettext_lazy("unit short", "m"),
+    MeasurementUnit.CENTIMETER: pgettext_lazy("unit short", "sm"),
+    MeasurementUnit.PIECE: pgettext_lazy("unit short", "dona"),
 }
 
 #: Units that can only move in whole numbers (you cannot take 1.5 hinges).
@@ -55,6 +57,12 @@ DEFAULT_CATEGORY_ROLES: dict[str, list[str]] = {
 OFFCUT_CATEGORIES = frozenset({MaterialCategory.SHEET, MaterialCategory.LINEAR})
 
 
+def unit_short_label(unit: str) -> str:
+    """'LITER' -> 'L' (or 'л' in Russian); unknown units are returned as they are."""
+    label = UNIT_SHORT_LABELS.get(unit)
+    return str(label) if label is not None else unit
+
+
 def default_roles_for_category(category: str) -> list[str]:
     return [str(role) for role in DEFAULT_CATEGORY_ROLES.get(category, [])]
 
@@ -62,15 +70,15 @@ def default_roles_for_category(category: str) -> list[str]:
 class Category(models.Model):
     """A material category. The four built-in ones are seeded; admins add more via "Boshqa"."""
 
-    code = models.CharField("Kod", max_length=50, unique=True)
-    name = models.CharField("Nomi", max_length=60)
-    sort_order = models.PositiveIntegerField("Tartib", default=100)
+    code = models.CharField(_("Kod"), max_length=50, unique=True)
+    name = models.CharField(_("Nomi"), max_length=60)
+    sort_order = models.PositiveIntegerField(_("Tartib"), default=100)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ["sort_order", "name"]
-        verbose_name = "kategoriya"
-        verbose_name_plural = "kategoriyalar"
+        verbose_name = _("kategoriya")
+        verbose_name_plural = _("kategoriyalar")
 
     def __str__(self) -> str:
         return self.name
@@ -85,11 +93,17 @@ def clear_category_cache(*args, **kwargs) -> None:
     _category_cache = None
 
 
+def localized_category_name(name: str) -> str:
+    """The four built-in category names are translated; names admins typed are shown as typed."""
+    return pgettext("category", name) if name else name
+
+
 def category_choices() -> list[tuple[str, str]]:
+    """Categories as (code, name) pairs in the current language. Usable as a form ``choices`` callable."""
     global _category_cache
     if _category_cache is None:
         _category_cache = list(Category.objects.values_list("code", "name"))
-    return list(_category_cache)
+    return [(code, localized_category_name(name)) for code, name in _category_cache]
 
 
 def category_codes() -> list[str]:
@@ -97,36 +111,36 @@ def category_codes() -> list[str]:
 
 
 def category_label(code: str) -> str:
-    return dict(category_choices()).get(code, code)
+    return dict(category_choices()).get(code, code)  # already in the current language
 
 
 def validate_category_code(value: str) -> None:
     if value not in category_codes():
-        raise ValidationError("Noma'lum kategoriya: %(code)s", params={"code": value})
+        raise ValidationError(_("Noma'lum kategoriya: %(code)s"), params={"code": value})
 
 
 def validate_worker_role_list(value) -> None:
     if not isinstance(value, list):
-        raise ValidationError("Ruxsat etilgan kasblar ro'yxat (list) bo'lishi kerak.")
+        raise ValidationError(_("Ruxsat etilgan kasblar ro'yxat (list) bo'lishi kerak."))
     trades = set(worker_role_codes())
     unknown = [role for role in value if role not in trades]
     if unknown:
-        raise ValidationError("Noma'lum kasb(lar): %(roles)s", params={"roles": ", ".join(map(str, unknown))})
+        raise ValidationError(_("Noma'lum kasb(lar): %(roles)s"), params={"roles": ", ".join(map(str, unknown))})
 
 
 class BaseMaterial(models.Model):
-    name = models.CharField("Nomi", max_length=255)
-    category = models.CharField("Kategoriya", max_length=50, validators=[validate_category_code])
+    name = models.CharField(_("Nomi"), max_length=255)
+    category = models.CharField(_("Kategoriya"), max_length=50, validators=[validate_category_code])
     allowed_roles = models.JSONField(
-        "Ruxsat etilgan kasblar",
+        _("Ruxsat etilgan kasblar"),
         default=list,
         blank=True,
         validators=[validate_worker_role_list],
         help_text="List of UserRoles permitted to view/deduct this material",
     )
-    unit_of_measure = models.CharField("O'lchov birligi", max_length=20, choices=MeasurementUnit.choices)
+    unit_of_measure = models.CharField(_("O'lchov birligi"), max_length=20, choices=MeasurementUnit.choices)
     container_size = models.DecimalField(
-        "Idish hajmi",
+        _("Idish hajmi"),
         max_digits=10,
         decimal_places=2,
         null=True,
@@ -137,7 +151,7 @@ class BaseMaterial(models.Model):
 
     # Stock thresholds
     minimum_threshold = models.DecimalField(
-        "Minimal qoldiq",
+        _("Minimal qoldiq"),
         max_digits=12,
         decimal_places=2,
         default=ZERO,
@@ -146,7 +160,7 @@ class BaseMaterial(models.Model):
 
     # Price tracking (USD). Maintained as a weighted average cost by Kirim entries.
     unit_price_usd = models.DecimalField(
-        "Birlik narxi (USD)",
+        _("Birlik narxi (USD)"),
         max_digits=12,
         decimal_places=4,
         default=Decimal("0.0000"),
@@ -154,7 +168,7 @@ class BaseMaterial(models.Model):
     )
 
     is_active = models.BooleanField(
-        "Faol", default=True, help_text="Archived materials are hidden from workers but keep their history."
+        _("Faol"), default=True, help_text="Archived materials are hidden from workers but keep their history."
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -162,8 +176,8 @@ class BaseMaterial(models.Model):
 
     class Meta:
         ordering = ["name"]
-        verbose_name = "material"
-        verbose_name_plural = "materiallar"
+        verbose_name = _("material")
+        verbose_name_plural = _("materiallar")
         constraints = [
             models.CheckConstraint(condition=models.Q(unit_price_usd__gte=0), name="material_price_non_negative"),
             models.CheckConstraint(condition=models.Q(minimum_threshold__gte=0), name="material_threshold_non_negative"),
@@ -182,7 +196,7 @@ class BaseMaterial(models.Model):
 
     @property
     def unit_short(self) -> str:
-        return UNIT_SHORT_LABELS.get(self.unit_of_measure, self.unit_of_measure)
+        return unit_short_label(self.unit_of_measure)
 
     @property
     def requires_integer_quantity(self) -> bool:
@@ -200,20 +214,20 @@ class BaseMaterial(models.Model):
 class WholeMaterial(models.Model):
     material = models.OneToOneField(BaseMaterial, on_delete=models.CASCADE, related_name="whole_stock")
     quantity = models.DecimalField(
-        "Miqdor",
+        _("Miqdor"),
         max_digits=12,
         decimal_places=2,
         default=ZERO,
         validators=[MinValueValidator(ZERO)],
     )
-    length_mm = models.IntegerField("Uzunligi (mm)", null=True, blank=True, help_text="Standard sheet length in mm")
-    width_mm = models.IntegerField("Eni (mm)", null=True, blank=True, help_text="Standard sheet width in mm")
+    length_mm = models.IntegerField(_("Uzunligi (mm)"), null=True, blank=True, help_text="Standard sheet length in mm")
+    width_mm = models.IntegerField(_("Eni (mm)"), null=True, blank=True, help_text="Standard sheet width in mm")
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["material__name"]
-        verbose_name = "butun material"
-        verbose_name_plural = "butun materiallar"
+        verbose_name = _("butun material")
+        verbose_name_plural = _("butun materiallar")
         constraints = [
             models.CheckConstraint(condition=models.Q(quantity__gte=0), name="whole_stock_non_negative"),
         ]
@@ -249,10 +263,10 @@ class WholeMaterial(models.Model):
 
 class LeftoverOffcut(models.Model):
     material = models.ForeignKey(BaseMaterial, on_delete=models.CASCADE, related_name="offcuts")
-    length_mm = models.IntegerField("Uzunligi (mm)", validators=[MinValueValidator(1)], help_text="Remaining length in mm")
-    width_mm = models.IntegerField("Eni (mm)", validators=[MinValueValidator(1)], help_text="Remaining width in mm")
-    quantity = models.IntegerField("Soni", default=1, validators=[MinValueValidator(1)])
-    notes = models.TextField("Izoh", blank=True, help_text="Location or description of offcut scrap")
+    length_mm = models.IntegerField(_("Uzunligi (mm)"), validators=[MinValueValidator(1)], help_text="Remaining length in mm")
+    width_mm = models.IntegerField(_("Eni (mm)"), validators=[MinValueValidator(1)], help_text="Remaining width in mm")
+    quantity = models.IntegerField(_("Soni"), default=1, validators=[MinValueValidator(1)])
+    notes = models.TextField(_("Izoh"), blank=True, help_text="Location or description of offcut scrap")
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="registered_offcuts"
     )
@@ -260,8 +274,8 @@ class LeftoverOffcut(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
-        verbose_name = "qoldiq material"
-        verbose_name_plural = "qoldiq materiallar"
+        verbose_name = _("qoldiq material")
+        verbose_name_plural = _("qoldiq materiallar")
         constraints = [
             models.CheckConstraint(condition=models.Q(quantity__gte=1), name="offcut_quantity_positive"),
             models.CheckConstraint(
@@ -297,6 +311,23 @@ class TransactionType(models.TextChoices):
     KIRIM = "KIRIM", "Stock Arrival (Kirim)"
     CHIQIM = "CHIQIM", "Worker Withdrawal (Chiqim)"
     OFFCUT_DEPOSIT = "OFFCUT_DEPOSIT", "Offcut Deposit (Qoldiq)"
+
+
+#: Labels shown in the app (report filter, CSV). The English choice labels above are for Django admin only.
+TRANSACTION_TYPE_LABELS = {
+    TransactionType.KIRIM: _("Kirim"),
+    TransactionType.CHIQIM: _("Chiqim"),
+    TransactionType.OFFCUT_DEPOSIT: _("Qoldiq qo'shildi"),
+}
+
+
+def transaction_type_choices() -> list[tuple[str, str]]:
+    return [(value, str(TRANSACTION_TYPE_LABELS[value])) for value in TransactionType.values]
+
+
+def transaction_type_label(value: str) -> str:
+    label = TRANSACTION_TYPE_LABELS.get(value)
+    return str(label) if label is not None else value
 
 
 class ImmutableLedgerError(Exception):
@@ -354,8 +385,8 @@ class InventoryTransaction(models.Model):
 
     class Meta:
         ordering = ["-created_at", "-id"]
-        verbose_name = "ombor harakati"
-        verbose_name_plural = "ombor harakatlari"
+        verbose_name = _("ombor harakati")
+        verbose_name_plural = _("ombor harakatlari")
         indexes = [
             models.Index(fields=["transaction_type", "created_at"]),
             models.Index(fields=["material", "created_at"]),

@@ -1,6 +1,7 @@
 from django.contrib.auth import password_validation
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.exceptions import ValidationError as DjangoValidationError
+from django.utils.translation import gettext as _
 from rest_framework import generics, mixins, serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
@@ -45,7 +46,7 @@ class RegistrationSerializer(serializers.Serializer):
 
     def validate_username(self, value):
         if User.objects.filter(username__iexact=value).exists():
-            raise serializers.ValidationError("Bu login band. Boshqasini tanlang.")
+            raise serializers.ValidationError(_("Bu login band. Boshqasini tanlang."))
         return value
 
     def validate(self, attrs):
@@ -77,7 +78,7 @@ class RegistrationAPIView(generics.CreateAPIView):
         user = serializer.save()
         return Response(
             {
-                "detail": "Ro'yxatdan o'tdingiz. Administrator tasdiqlagach tizimga kira olasiz.",
+                "detail": _("Ro'yxatdan o'tdingiz. Administrator tasdiqlagach tizimga kira olasiz."),
                 "user": UserSerializer(user).data,
             },
             status=status.HTTP_201_CREATED,

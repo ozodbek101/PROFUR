@@ -4,16 +4,25 @@ import unicodedata
 from django import forms
 from django.contrib.auth import password_validation
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.utils.translation import gettext_lazy as _
 
-from .models import User, UserRole, WorkerRole, all_role_choices, normalize_roles, worker_role_choices
+from .models import (
+    User,
+    UserRole,
+    WorkerRole,
+    all_role_choices,
+    localized_trade_name,
+    normalize_roles,
+    worker_role_choices,
+)
 
 
 class LoginForm(AuthenticationForm):
     error_messages = {
         **AuthenticationForm.error_messages,
-        "invalid_login": "Login yoki parol noto'g'ri.",
-        "inactive": "Bu hisob o'chirilgan. Administratorga murojaat qiling.",
-        "pending": (
+        "invalid_login": _("Login yoki parol noto'g'ri."),
+        "inactive": _("Bu hisob o'chirilgan. Administratorga murojaat qiling."),
+        "pending": _(
             "Hisobingiz hali tasdiqlanmagan. Administrator so'rovingizni ko'rib chiqqach, "
             "tizimga kira olasiz."
         ),
@@ -21,11 +30,11 @@ class LoginForm(AuthenticationForm):
 
     def __init__(self, request=None, *args, **kwargs):
         super().__init__(request, *args, **kwargs)
-        self.fields["username"].label = "Login"
+        self.fields["username"].label = _("Login")
         self.fields["username"].widget.attrs.update(
             {"autocapitalize": "none", "autocomplete": "username", "autofocus": True}
         )
-        self.fields["password"].label = "Parol"
+        self.fields["password"].label = _("Parol")
 
     def clean(self):
         username = self.cleaned_data.get("username")
@@ -46,13 +55,13 @@ class LoginForm(AuthenticationForm):
 
 
 class WorkerRegistrationForm(UserCreationForm):
-    full_name = forms.CharField(label="To'liq ism (F.I.Sh.)", max_length=255)
+    full_name = forms.CharField(label=_("To'liq ism (F.I.Sh.)"), max_length=255)
     roles = forms.MultipleChoiceField(
-        label="Kasbingiz",
+        label=_("Kasbingiz"),
         choices=worker_role_choices,
         widget=forms.CheckboxSelectMultiple,
-        help_text="Bir nechta kasbni tanlashingiz mumkin.",
-        error_messages={"required": "Kamida bitta kasbni tanlang."},
+        help_text=_("Bir nechta kasbni tanlashingiz mumkin."),
+        error_messages={"required": _("Kamida bitta kasbni tanlang.")},
     )
 
     class Meta(UserCreationForm.Meta):
@@ -61,12 +70,12 @@ class WorkerRegistrationForm(UserCreationForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["username"].label = "Login"
-        self.fields["username"].help_text = "Faqat lotin harflari, raqamlar va @/./+/-/_ belgilar."
+        self.fields["username"].label = _("Login")
+        self.fields["username"].help_text = _("Faqat lotin harflari, raqamlar va @/./+/-/_ belgilar.")
         self.fields["username"].widget.attrs.update({"autocapitalize": "none", "autocomplete": "username"})
-        self.fields["password1"].label = "Parol"
-        self.fields["password1"].help_text = "Kamida 8 ta belgi; faqat raqamlardan iborat bo'lmasin."
-        self.fields["password2"].label = "Parolni takrorlang"
+        self.fields["password1"].label = _("Parol")
+        self.fields["password1"].help_text = _("Kamida 8 ta belgi; faqat raqamlardan iborat bo'lmasin.")
+        self.fields["password2"].label = _("Parolni takrorlang")
         self.fields["password2"].help_text = ""
 
     def save(self, commit=True):
@@ -84,10 +93,10 @@ class RoleAssignmentForm(forms.ModelForm):
     """Used by admins when reviewing a pending registration."""
 
     roles = forms.MultipleChoiceField(
-        label="Rollar",
+        label=_("Rollar"),
         choices=all_role_choices,
         widget=forms.CheckboxSelectMultiple,
-        error_messages={"required": "Kamida bitta rol belgilang."},
+        error_messages={"required": _("Kamida bitta rol belgilang.")},
     )
 
     class Meta:
@@ -99,23 +108,28 @@ class UserAdminEditForm(forms.ModelForm):
     """Used by admins to manage an existing account."""
 
     roles = forms.MultipleChoiceField(
-        label="Rollar",
+        label=_("Rollar"),
         choices=all_role_choices,
         widget=forms.CheckboxSelectMultiple,
         required=False,
     )
     new_password = forms.CharField(
-        label="Yangi parol",
+        label=_("Yangi parol"),
         required=False,
         strip=False,
         widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}),
-        help_text="Ishchi parolini unutgan bo'lsa, shu yerda yangisini o'rnating.",
+        help_text=_("Ishchi parolini unutgan bo'lsa, shu yerda yangisini o'rnating."),
     )
 
     class Meta:
         model = User
         fields = ("full_name", "roles", "is_approved", "is_active")
-        labels = {"is_approved": "Tasdiqlangan", "is_active": "Faol hisob"}
+        labels = {"is_approved": _("Tasdiqlangan"), "is_active": _("Faol hisob")}
+        # The model/Django defaults are English ("Admin approval status for worker login", "Designates whether...").
+        help_texts = {
+            "is_approved": _("Tasdiqlangan ishchi tizimga kira oladi."),
+            "is_active": _("O'chirilsa, foydalanuvchi tizimga kira olmaydi; tarixi saqlanadi."),
+        }
 
     def __init__(self, *args, acting_user=None, **kwargs):
         self.acting_user = acting_user
@@ -131,11 +145,11 @@ class UserAdminEditForm(forms.ModelForm):
         cleaned = super().clean()
         if self.acting_user is not None and self.instance.pk == self.acting_user.pk:
             if UserRole.ADMIN not in (cleaned.get("roles") or []) and not self.instance.is_superuser:
-                self.add_error("roles", "O'zingizdan administrator rolini olib tashlay olmaysiz.")
+                self.add_error("roles", _("O'zingizdan administrator rolini olib tashlay olmaysiz."))
             if not cleaned.get("is_active", True) or not cleaned.get("is_approved", True):
-                self.add_error(None, "O'z hisobingizni o'chira yoki tasdiqdan chiqara olmaysiz.")
+                self.add_error(None, _("O'z hisobingizni o'chira yoki tasdiqdan chiqara olmaysiz."))
         if cleaned.get("is_approved") and not cleaned.get("roles"):
-            self.add_error("roles", "Tasdiqlangan foydalanuvchida kamida bitta rol bo'lishi kerak.")
+            self.add_error("roles", _("Tasdiqlangan foydalanuvchida kamida bitta rol bo'lishi kerak."))
         return cleaned
 
     def save(self, commit=True):
@@ -154,13 +168,16 @@ class WorkerRoleForm(forms.ModelForm):
     class Meta:
         model = WorkerRole
         fields = ("name",)
-        labels = {"name": "Kasb nomi"}
-        help_texts = {"name": "Masalan: Pardozchi. Ishchilar ro'yxatdan o'tishda shu nomni ko'radi."}
+        labels = {"name": _("Kasb nomi")}
+        help_texts = {"name": _("Masalan: Pardozchi. Ishchilar ro'yxatdan o'tishda shu nomni ko'radi.")}
 
     def clean_name(self):
         name = " ".join(self.cleaned_data["name"].split())
-        if WorkerRole.objects.filter(name__iexact=name).exists():
-            raise forms.ValidationError("Bunday kasb allaqachon bor.")
+        # Compare with the stored names and with their translations, so "Маляр" can't duplicate Kraskachi.
+        existing = WorkerRole.objects.values_list("name", flat=True)
+        taken = {n.casefold() for n in existing} | {localized_trade_name(n).casefold() for n in existing}
+        if name.casefold() in taken:
+            raise forms.ValidationError(_("Bunday kasb allaqachon bor."))
         return name
 
     def save(self, commit=True):

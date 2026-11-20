@@ -1,14 +1,14 @@
 {% extends "base.html" %}
-{% load wms %}
-{% block title %}Kirim{% endblock %}
+{% load wms i18n %}
+{% block title %}{% translate "Kirim" %}{% endblock %}
 {% block content %}
 {{ material_meta|json_script:"material-meta" }}
 <div class="flex flex-wrap items-end justify-between gap-4">
   <div>
-    <h1 class="font-bold text-[24px] leading-8 lg:text-[32px] lg:leading-10">Kirim</h1>
-    <p class="mt-1 text-muted" style="font-size:15px">Kelgan materialni USD narxi bilan kiriting. O'rtacha narx avtomatik qayta hisoblanadi.</p>
+    <h1 class="font-bold text-[24px] leading-8 lg:text-[32px] lg:leading-10">{% translate "Kirim" %}</h1>
+    <p class="mt-1 text-muted" style="font-size:15px">{% translate "Kelgan materialni USD narxi bilan kiriting. O'rtacha narx avtomatik qayta hisoblanadi." %}</p>
   </div>
-  <a href="{% url 'inventory:material_create' %}" class="btn btn-secondary">{% icon "plus" %} Yangi material</a>
+  <a href="{% url 'inventory:material_create' %}" class="btn btn-secondary">{% icon "plus" %} {% translate "Yangi material" %}</a>
 </div>
 
 <div class="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_384px]"
@@ -35,11 +35,11 @@
     <div class="{% if form.material.errors %}has-error{% endif %}">
       <label class="field-label" for="{{ form.material.id_for_label }}">{{ form.material.label }}</label>
       <select name="{{ form.material.html_name }}" id="{{ form.material.id_for_label }}" x-model="material" required>
-        <option value="">Materialni tanlang</option>
+        <option value="">{% translate "Materialni tanlang" %}</option>
         {% for choice in form.material.field.choices %}{% if choice.0 %}<option value="{{ choice.0 }}" {% if form.material.value|stringformat:'s' == choice.0|stringformat:'s' %}selected{% endif %}>{{ choice.1 }}</option>{% endif %}{% endfor %}
       </select>
       {% for e in form.material.errors %}<p class="field-error">{{ e }}</p>{% endfor %}
-      <p class="field-help" x-show="m" x-cloak>Omborda: <span class="num" x-text="m && n(m.stock) + ' ' + m.unit"></span> · o'rtacha narx <span class="num" x-text="m && usd(m.price, 4)"></span></p>
+      <p class="field-help" x-show="m" x-cloak>{% translate "Omborda:" %} <span class="num" x-text="m && n(m.stock) + ' ' + m.unit"></span> · {% translate "o'rtacha narx" %} <span class="num" x-text="m && usd(m.price, 4)"></span></p>
     </div>
 
     <div class="grid gap-4 sm:grid-cols-2">
@@ -47,18 +47,19 @@
         {% include "partials/field.html" with field=form.containers %}
       </div>
       <div class="{% if form.quantity.errors %}has-error{% endif %}">
-        <label class="field-label" for="{{ form.quantity.id_for_label }}">Miqdor <span class="font-normal text-muted" x-text="m ? '(' + m.unit + ')' : ''"></span></label>
+        <label class="field-label" for="{{ form.quantity.id_for_label }}">{% translate "Miqdor" %} <span class="font-normal text-muted" x-text="m ? '(' + m.unit + ')' : ''"></span></label>
         <input type="number" name="{{ form.quantity.html_name }}" id="{{ form.quantity.id_for_label }}" step="0.01" min="0.01" inputmode="decimal"
                :value="(m && m.container && containers) ? qty : quantity" @input="quantity = $event.target.value"
                :readonly="!!(m && m.container && containers)" value="{{ form.quantity.value|default_if_none:'' }}">
         {% for e in form.quantity.errors %}<p class="field-error">{{ e }}</p>{% endfor %}
-        <p class="field-help" x-show="m && m.container && containers" x-cloak>Idishlar soni × <span x-text="m && n(m.container)"></span> <span x-text="m && m.unit"></span></p>
+        <p class="field-help" x-show="m && m.container && containers" x-cloak>{% translate "Idishlar soni" %} × <span x-text="m && n(m.container)"></span> <span x-text="m && m.unit"></span></p>
       </div>
     </div>
 
     {% include "partials/field.html" with field=form.price_mode %}
     <div class="{% if form.price_usd.errors %}has-error{% endif %}">
-      <label class="field-label" for="{{ form.price_usd.id_for_label }}"><span x-text="mode === 'total' ? 'Partiyaning umumiy narxi (USD $)' : 'Bir birlik narxi (USD $)'">Narx (USD $)</span></label>
+      {% translate "Partiyaning umumiy narxi (USD $)" as t_total_price %}{% translate "Bir birlik narxi (USD $)" as t_unit_price %}
+      <label class="field-label" for="{{ form.price_usd.id_for_label }}"><span x-text="mode === 'total' ? '{{ t_total_price|escapejs }}' : '{{ t_unit_price|escapejs }}'">{% translate "Narx (USD $)" %}</span></label>
       <input type="number" name="{{ form.price_usd.html_name }}" id="{{ form.price_usd.id_for_label }}" step="0.0001" min="0" inputmode="decimal" required
              x-model.number="price" value="{{ form.price_usd.value|default_if_none:'' }}">
       {% for e in form.price_usd.errors %}<p class="field-error">{{ e }}</p>{% endfor %}
@@ -67,18 +68,18 @@
 
     <div class="rounded-[6px] bg-raised px-4 py-3" x-show="m && qty && p" x-cloak>
       <dl class="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1.5 num">
-        <dt class="text-muted">Bir birlik narxi</dt><dd class="text-right" x-text="usd(unit, 4)"></dd>
-        <dt class="text-muted">Partiya jami</dt><dd class="text-right font-semibold" x-text="usd(total)"></dd>
-        <dt class="text-muted">Kirimdan keyin omborda</dt><dd class="text-right" x-text="n(stock + qty) + ' ' + (m ? m.unit : '')"></dd>
-        <dt class="text-muted">Yangi o'rtacha narx</dt><dd class="text-right" x-text="avg !== null ? usd(avg, 4) : '—'"></dd>
+        <dt class="text-muted">{% translate "Bir birlik narxi" %}</dt><dd class="text-right" x-text="usd(unit, 4)"></dd>
+        <dt class="text-muted">{% translate "Partiya jami" %}</dt><dd class="text-right font-semibold" x-text="usd(total)"></dd>
+        <dt class="text-muted">{% translate "Kirimdan keyin omborda" %}</dt><dd class="text-right" x-text="n(stock + qty) + ' ' + (m ? m.unit : '')"></dd>
+        <dt class="text-muted">{% translate "Yangi o'rtacha narx" %}</dt><dd class="text-right" x-text="avg !== null ? usd(avg, 4) : '—'"></dd>
       </dl>
     </div>
 
-    <button type="submit" class="btn btn-primary btn-lg btn-block">{% icon "arrival" 18 %} Kirimni saqlash</button>
+    <button type="submit" class="btn btn-primary btn-lg btn-block">{% icon "arrival" 18 %} {% translate "Kirimni saqlash" %}</button>
   </form>
 
   <section class="panel overflow-hidden" aria-labelledby="recent-kirim">
-    <div class="panel-head"><h2 id="recent-kirim" class="panel-title">Oxirgi kirimlar</h2></div>
+    <div class="panel-head"><h2 id="recent-kirim" class="panel-title">{% translate "Oxirgi kirimlar" %}</h2></div>
     {% if recent_kirim %}
     <ul>
       {% for t in recent_kirim %}
@@ -95,7 +96,7 @@
       {% endfor %}
     </ul>
     {% else %}
-      <p class="border-t border-rule px-5 py-5 text-muted">Hali kirim yozilmagan.</p>
+      <p class="border-t border-rule px-5 py-5 text-muted">{% translate "Hali kirim yozilmagan." %}</p>
     {% endif %}
   </section>
 </div>
