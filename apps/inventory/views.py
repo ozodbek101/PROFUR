@@ -3,6 +3,7 @@ from decimal import Decimal
 
 from django.contrib import messages
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
@@ -10,7 +11,6 @@ from django.utils import timezone
 from django.views import View
 from django.views.generic import CreateView, FormView, ListView, TemplateView, UpdateView
 
-from apps.users.models import User
 from apps.users.permissions import ApprovedUserRequiredMixin, WarehouseAdminRequiredMixin
 
 from . import selectors, services
@@ -27,7 +27,8 @@ from .models import (
     BaseMaterial,
     InventoryTransaction,
     LeftoverOffcut,
-    MaterialCategory,
+    category_choices,
+    category_codes,
     default_roles_for_category,
 )
 
@@ -61,7 +62,7 @@ class HomeView(ApprovedUserRequiredMixin, TemplateView):
         user = self.request.user
         query = self.request.GET.get("q", "").strip()
         category = self.request.GET.get("category", "")
-        if category not in MaterialCategory.values:
+        if category not in category_codes():
             category = ""
         tab = self.request.GET.get("tab", "whole")
 
@@ -76,7 +77,7 @@ class HomeView(ApprovedUserRequiredMixin, TemplateView):
                 "query": query,
                 "category": category,
                 "tab": tab if tab in ("whole", "offcuts") else "whole",
-                "categories": [c for c in MaterialCategory if c.value in visible_categories],
+                "categories": [(code, name) for code, name in category_choices() if code in visible_categories],
                 "can_add_offcut": selectors.offcut_capable_materials(user).exists(),
             }
         )
@@ -238,7 +239,6 @@ class DashboardView(WarehouseAdminRequiredMixin, TemplateView):
                 },
                 "low_stock": selectors.low_stock_items(),
                 "recent_transactions": InventoryTransaction.objects.select_related("material", "user")[:10],
-                "pending_users": User.objects.pending_approval().order_by("date_joined")[:5],
                 "material_count": BaseMaterial.objects.filter(is_active=True).count(),
                 "offcut_count": LeftoverOffcut.objects.filter(material__is_active=True).count(),
                 "offcut_value_usd": selectors.estimated_offcut_value_usd(),
@@ -259,7 +259,7 @@ class MaterialListView(WarehouseAdminRequiredMixin, ListView):
         status = self.request.GET.get("status", "active")
         if query:
             qs = qs.filter(name__icontains=query)
-        if category in MaterialCategory.values:
+        if category in category_codes():
             qs = qs.filter(category=category)
         if status == "active":
             qs = qs.filter(is_active=True)
@@ -274,7 +274,7 @@ class MaterialListView(WarehouseAdminRequiredMixin, ListView):
                 "query": self.request.GET.get("q", ""),
                 "category": self.request.GET.get("category", ""),
                 "status": self.request.GET.get("status", "active"),
-                "categories": MaterialCategory,
+                "categories": category_choices(),
             }
         )
         return context
@@ -287,16 +287,18 @@ class MaterialCreateView(WarehouseAdminRequiredMixin, CreateView):
     def form_valid(self, form):
         data = form.cleaned_data
         try:
-            material = services.create_material(
-                name=data["name"],
-                category=data["category"],
-                unit_of_measure=data["unit_of_measure"],
-                allowed_roles=data.get("allowed_roles"),
-                container_size=data.get("container_size"),
-                minimum_threshold=data.get("minimum_threshold") or Decimal("0"),
-                length_mm=data.get("length_mm"),
-                width_mm=data.get("width_mm"),
-            )
+            with transaction.atomic():
+                form.create_pending_category()
+                material = services.create_material(
+                    name=data["name"],
+                    category=data["category"],
+                    unit_of_measure=data["unit_of_measure"],
+                    allowed_roles=data.get("allowed_roles"),
+                    container_size=data.get("container_size"),
+                    minimum_threshold=data.get("minimum_threshold") or Decimal("0"),
+                    length_mm=data.get("length_mm"),
+                    width_mm=data.get("width_mm"),
+                )
         except ValidationError as exc:
             apply_service_errors(form, exc)
             return self.form_invalid(form)
@@ -314,8 +316,10 @@ class MaterialUpdateView(WarehouseAdminRequiredMixin, UpdateView):
         material = form.save(commit=False)
         if not material.allowed_roles:
             material.allowed_roles = default_roles_for_category(material.category)
-        material.save()
-        form.save_stock_dimensions(material)
+        with transaction.atomic():
+            form.create_pending_category()
+            material.save()
+            form.save_stock_dimensions(material)
         messages.success(self.request, f"“{material.name}” saqlandi.")
         return redirect("inventory:material_list")
 
@@ -438,7 +442,7 @@ class ReportExportView(WarehouseAdminRequiredMixin, View):
                     timezone.localtime(txn.created_at).strftime("%Y-%m-%d %H:%M"),
                     txn.get_transaction_type_display(),
                     _csv_safe(txn.material.name),
-                    txn.material.get_category_display(),
+                    _csv_safe(txn.material.category_short),
                     f"{txn.quantity_changed}",
                     txn.material.unit_short,
                     f"{txn.unit_price_usd}",

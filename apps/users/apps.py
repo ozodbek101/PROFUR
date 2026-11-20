@@ -6,3 +6,11 @@ class UsersConfig(AppConfig):
     name = "apps.users"
     label = "users"
     verbose_name = "Foydalanuvchilar"
+
+    def ready(self):
+        from django.db.models.signals import post_delete, post_save
+
+        from .models import WorkerRole, clear_role_cache
+
+        post_save.connect(clear_role_cache, sender=WorkerRole, dispatch_uid="users.worker_role_saved")
+        post_delete.connect(clear_role_cache, sender=WorkerRole, dispatch_uid="users.worker_role_deleted")

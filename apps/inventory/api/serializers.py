@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from rest_framework import serializers
 
-from apps.users.models import WORKER_ROLE_CHOICES
+from apps.users.models import worker_role_choices
 
 from .. import services
 from ..models import (
@@ -30,13 +30,17 @@ class HidePricesForWorkersMixin:
 
 
 class BaseMaterialSerializer(serializers.ModelSerializer):
-    allowed_roles = serializers.MultipleChoiceField(choices=WORKER_ROLE_CHOICES, required=False)
+    allowed_roles = serializers.MultipleChoiceField(choices=(), required=False)
     unit_short = serializers.CharField(read_only=True)
     quantity = serializers.DecimalField(
         source="whole_stock.quantity", max_digits=12, decimal_places=2, read_only=True
     )
     length_mm = serializers.IntegerField(required=False, allow_null=True, min_value=1)
     width_mm = serializers.IntegerField(required=False, allow_null=True, min_value=1)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["allowed_roles"].choices = worker_role_choices()  # trades live in the database
 
     class Meta:
         model = BaseMaterial

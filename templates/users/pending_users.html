@@ -2,10 +2,9 @@
 {% load wms %}
 {% block title %}So'rovlar{% endblock %}
 {% block content %}
-<h1 class="font-bold text-[24px] leading-8 lg:text-[32px] lg:leading-10">Ro'yxatdan o'tish so'rovlari</h1>
-<p class="mt-1 text-muted" style="font-size:15px">{% if pending_users %}<span class="num">{{ pending_users|length }}</span> ta ishchi tasdiq kutmoqda. Kasbini tekshirib, tasdiqlang.{% else %}Tasdiq kutayotgan so'rov yo'q.{% endif %}</p>
+<h1 class="sr-only">So'rovlar</h1>{# visible only to screen readers #}
 
-<div class="panel mt-6 max-w-[920px] overflow-hidden">
+<div class="panel max-w-[920px] overflow-hidden">
   {% if pending_users %}
   <div class="hidden grid-cols-[minmax(0,1fr)_220px_120px_auto] gap-x-4 px-5 pb-2 pt-4 text-muted md:grid" style="font-size:12px" aria-hidden="true">
     <span>Ishchi</span><span>Tanlagan kasbi</span><span class="text-right">Yuborilgan</span><span></span>

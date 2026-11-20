@@ -19,11 +19,17 @@
         <div class="{% if form.category.errors %}has-error{% endif %}">
           <label class="field-label" for="{{ form.category.id_for_label }}">{{ form.category.label }}</label>
           <select name="{{ form.category.html_name }}" id="{{ form.category.id_for_label }}" x-model="category">
-            {% for value, label in form.category.field.choices %}<option value="{{ value }}" {% if form.category.value == value %}selected{% endif %}>{% if value %}{{ value|cat_label }}{% else %}Tanlang{% endif %}</option>{% endfor %}
+            {% for value, label in form.category.field.choices %}<option value="{{ value }}" {% if form.category.value == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
           </select>
           {% for e in form.category.errors %}<p class="field-error">{{ e }}</p>{% endfor %}
         </div>
         {% include "partials/field.html" with field=form.unit_of_measure %}
+      </div>
+      <div x-show="category === '__other__'" {% if form.category.value != "__other__" %}x-cloak{% endif %} class="{% if form.new_category.errors %}has-error{% endif %}">
+        <label class="field-label" for="{{ form.new_category.id_for_label }}">{{ form.new_category.label }}</label>
+        {{ form.new_category }}
+        <p class="field-help">Yangi kategoriya saqlanadi va keyingi safar ro'yxatda chiqadi. Unga kasblarni pastda belgilang.</p>
+        {% for e in form.new_category.errors %}<p class="field-error">{{ e }}</p>{% endfor %}
       </div>
     </div>
   </section>

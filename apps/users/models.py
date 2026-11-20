@@ -6,28 +6,78 @@ from django.db import models
 
 class UserRole(models.TextChoices):
     ADMIN = "ADMIN", "Administrator"
-    ARRACHI = "ARRACHI", "Arrachi (Sawyer)"
-    KRASKACHI = "KRASKACHI", "Kraskachi (Painter)"
-    SHKURKACHI = "SHKURKACHI", "Shkurkachi (Sander)"
-    ROVERCHI = "ROVERCHI", "Roverchi (CNC Operator)"
-    SBORKACHI = "SBORKACHI", "Sborkachi (Assembler)"
+    ARRACHI = "ARRACHI", "Arrachi"
+    KRASKACHI = "KRASKACHI", "Kraskachi"
+    SHKURKACHI = "SHKURKACHI", "Shkurkachi"
+    ROVERCHI = "ROVERCHI", "Roverchi"
+    SBORKACHI = "SBORKACHI", "Sborkachi"
 
 
-#: Roles a worker may pick on the self-registration form (ADMIN is assigned by admins only).
-WORKER_ROLES: tuple[str, ...] = tuple(role for role in UserRole.values if role != UserRole.ADMIN)
-WORKER_ROLE_CHOICES = [(role.value, role.label) for role in UserRole if role != UserRole.ADMIN]
+class WorkerRole(models.Model):
+    """A trade (kasb) workers register with. ADMIN is not a trade; it stays in UserRole.
+
+    The five original trades are seeded by migration with the same codes as UserRole,
+    so existing ``User.roles`` and ``BaseMaterial.allowed_roles`` values keep working.
+    """
+
+    code = models.CharField("Kod", max_length=40, unique=True)
+    name = models.CharField("Nomi", max_length=100)
+    sort_order = models.PositiveIntegerField("Tartib", default=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["sort_order", "name"]
+        verbose_name = "kasb"
+        verbose_name_plural = "kasblar"
+
+    def __str__(self) -> str:
+        return self.name
+
+
+# Trade codes and names are read on almost every page, so they are cached per process.
+# The cache is cleared at the start of each request (RoleCacheMiddleware) and whenever a
+# WorkerRole is saved, so a trade added in one worker process shows up everywhere.
+_role_cache: list[tuple[str, str]] | None = None
+
+
+def clear_role_cache(*args, **kwargs) -> None:
+    global _role_cache
+    _role_cache = None
+
+
+def worker_role_choices() -> list[tuple[str, str]]:
+    """Trades as (code, name) pairs, in display order. Usable as a form ``choices`` callable."""
+    global _role_cache
+    if _role_cache is None:
+        _role_cache = list(WorkerRole.objects.values_list("code", "name"))
+    return list(_role_cache)
+
+
+def worker_role_codes() -> list[str]:
+    return [code for code, _ in worker_role_choices()]
+
+
+def all_role_choices() -> list[tuple[str, str]]:
+    return [(UserRole.ADMIN.value, UserRole.ADMIN.label), *worker_role_choices()]
+
+
+def role_label(code: str) -> str:
+    if code == UserRole.ADMIN:
+        return UserRole.ADMIN.label
+    return dict(worker_role_choices()).get(code, code)
 
 
 def normalize_roles(roles) -> list[str]:
-    """De-duplicate roles and keep them in canonical UserRole order."""
+    """De-duplicate roles; ADMIN first, then trades in display order. Unknown codes are dropped."""
     wanted = set(roles or [])
-    return [role for role in UserRole.values if role in wanted]
+    return [role for role in [UserRole.ADMIN.value, *worker_role_codes()] if role in wanted]
 
 
 def validate_role_list(value) -> None:
     if not isinstance(value, list):
         raise ValidationError("Rollar ro'yxat (list) ko'rinishida bo'lishi kerak.")
-    unknown = [role for role in value if role not in UserRole.values]
+    known = {UserRole.ADMIN.value, *worker_role_codes()}
+    unknown = [role for role in value if role not in known]
     if unknown:
         raise ValidationError("Noma'lum rol(lar): %(roles)s", params={"roles": ", ".join(map(str, unknown))})
 
@@ -87,7 +137,8 @@ class User(AbstractUser):
 
     @property
     def worker_roles(self) -> list[str]:
-        return [role for role in (self.roles or []) if role in WORKER_ROLES]
+        trades = set(worker_role_codes())
+        return [role for role in (self.roles or []) if role in trades]
 
     @property
     def can_use_system(self) -> bool:
@@ -96,7 +147,7 @@ class User(AbstractUser):
 
     @property
     def role_labels(self) -> list[str]:
-        return [UserRole(role).label for role in (self.roles or []) if role in UserRole.values]
+        return [role_label(role) for role in (self.roles or [])]
 
     @property
     def display_name(self) -> str:

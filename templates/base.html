@@ -40,11 +40,6 @@
         <img src="{% static 'img/mark.svg' %}" alt="" width="28" height="28">
         <span class="font-semibold">{{ brand_name }}</span>
       </a>
-      <form method="get" action="{% url 'inventory:home' %}" class="relative hidden w-[316px] lg:block" role="search">
-        <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted">{% icon "search" 15 %}</span>
-        <input type="search" name="q" value="{{ request.GET.q|default:'' }}" placeholder="Material qidirish" aria-label="Material qidirish"
-               class="control !min-h-9 !pl-9 !text-[14px]">
-      </form>
       <div class="ml-auto flex h-full items-center gap-4">
         {% if user.is_warehouse_admin %}
           <a href="{% url 'inventory:dashboard' %}" class="flex items-baseline gap-2 whitespace-nowrap" title="Ombordagi butun materiallarning joriy qiymati">
@@ -96,5 +91,27 @@
   {% block auth %}{% endblock %}
 {% endif %}
 {% block scripts %}{% endblock %}
+<script>
+  // Number fields with a min of 0 or more never accept a minus sign (typed or pasted).
+  (function () {
+    function guarded(el) {
+      return el && el.matches && el.matches('input[type="number"][min]') && parseFloat(el.min) >= 0;
+    }
+    document.addEventListener('keydown', function (e) {
+      if (guarded(e.target) && (e.key === '-' || e.key === '+' || e.key === 'e' || e.key === 'E')) e.preventDefault();
+    });
+    document.addEventListener('paste', function (e) {
+      if (!guarded(e.target)) return;
+      var text = (e.clipboardData || window.clipboardData).getData('text');
+      if (/[-+eE]/.test(text)) e.preventDefault();
+    });
+    document.addEventListener('change', function (e) {
+      if (guarded(e.target) && e.target.value !== '' && parseFloat(e.target.value) < parseFloat(e.target.min)) {
+        e.target.value = e.target.min;
+        e.target.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    });
+  })();
+</script>
 </body>
 </html>

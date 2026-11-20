@@ -23,4 +23,5 @@ urlpatterns = [
     ),
     path("admin-dashboard/users/", views.UserListView.as_view(), name="user_list"),
     path("admin-dashboard/users/<int:pk>/edit/", views.UserUpdateView.as_view(), name="user_edit"),
+    path("admin-dashboard/worker-types/new/", views.WorkerRoleCreateView.as_view(), name="worker_role_create"),
 ]

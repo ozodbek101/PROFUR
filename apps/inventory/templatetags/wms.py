@@ -7,8 +7,8 @@ from django.utils.html import format_html
 from django.utils.http import urlencode
 from django.utils.safestring import mark_safe
 
-from apps.inventory.models import CATEGORY_SHORT_LABELS, UNIT_SHORT_LABELS
-from apps.users.models import UserRole
+from apps.inventory.models import UNIT_SHORT_LABELS, category_label
+from apps.users.models import role_label as _role_label
 
 register = template.Library()
 
@@ -71,15 +71,12 @@ def uz_month(value) -> str:
 
 @register.filter
 def cat_label(value: str) -> str:
-    return CATEGORY_SHORT_LABELS.get(value, value)
+    return category_label(value)
 
 
 @register.filter
 def role_label(value: str) -> str:
-    try:
-        return UserRole(value).label
-    except ValueError:
-        return value
+    return _role_label(value)
 
 
 @register.filter

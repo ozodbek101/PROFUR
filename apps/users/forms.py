@@ -1,10 +1,11 @@
+import re
+import unicodedata
+
 from django import forms
 from django.contrib.auth import password_validation
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 
-from .models import WORKER_ROLE_CHOICES, User, UserRole, normalize_roles
-
-ALL_ROLE_CHOICES = list(UserRole.choices)
+from .models import User, UserRole, WorkerRole, all_role_choices, normalize_roles, worker_role_choices
 
 
 class LoginForm(AuthenticationForm):
@@ -48,7 +49,7 @@ class WorkerRegistrationForm(UserCreationForm):
     full_name = forms.CharField(label="To'liq ism (F.I.Sh.)", max_length=255)
     roles = forms.MultipleChoiceField(
         label="Kasbingiz",
-        choices=WORKER_ROLE_CHOICES,
+        choices=worker_role_choices,
         widget=forms.CheckboxSelectMultiple,
         help_text="Bir nechta kasbni tanlashingiz mumkin.",
         error_messages={"required": "Kamida bitta kasbni tanlang."},
@@ -84,7 +85,7 @@ class RoleAssignmentForm(forms.ModelForm):
 
     roles = forms.MultipleChoiceField(
         label="Rollar",
-        choices=ALL_ROLE_CHOICES,
+        choices=all_role_choices,
         widget=forms.CheckboxSelectMultiple,
         error_messages={"required": "Kamida bitta rol belgilang."},
     )
@@ -99,7 +100,7 @@ class UserAdminEditForm(forms.ModelForm):
 
     roles = forms.MultipleChoiceField(
         label="Rollar",
-        choices=ALL_ROLE_CHOICES,
+        choices=all_role_choices,
         widget=forms.CheckboxSelectMultiple,
         required=False,
     )
@@ -145,3 +146,47 @@ class UserAdminEditForm(forms.ModelForm):
         if commit:
             user.save()
         return user
+
+
+class WorkerRoleForm(forms.ModelForm):
+    """Admin: add a new trade (kasb). The code is generated from the name and never changes."""
+
+    class Meta:
+        model = WorkerRole
+        fields = ("name",)
+        labels = {"name": "Kasb nomi"}
+        help_texts = {"name": "Masalan: Pardozchi. Ishchilar ro'yxatdan o'tishda shu nomni ko'radi."}
+
+    def clean_name(self):
+        name = " ".join(self.cleaned_data["name"].split())
+        if WorkerRole.objects.filter(name__iexact=name).exists():
+            raise forms.ValidationError("Bunday kasb allaqachon bor.")
+        return name
+
+    def save(self, commit=True):
+        role = super().save(commit=False)
+        role.code = trade_code_from(role.name)
+        last = WorkerRole.objects.order_by("-sort_order").values_list("sort_order", flat=True).first() or 0
+        role.sort_order = last + 10
+        if commit:
+            role.save()
+        return role
+
+
+def unique_code(name: str, is_taken, fallback: str, max_length: int = 34) -> str:
+    """'Pardozchi usta' -> 'PARDOZCHI_USTA', with _2, _3 ... appended while ``is_taken(code)``."""
+    ascii_name = unicodedata.normalize("NFKD", name).encode("ascii", "ignore").decode()
+    base = re.sub(r"[^A-Za-z0-9]+", "_", ascii_name).strip("_").upper()[:max_length] or fallback
+    if not base[0].isalpha():
+        base = f"{fallback}_{base}"[:max_length]
+    code, n = base, 2
+    while is_taken(code):
+        code, n = f"{base}_{n}", n + 1
+    return code
+
+
+def trade_code_from(name: str) -> str:
+    """A unique trade code for ``name``; never 'ADMIN'."""
+    return unique_code(
+        name, lambda code: code == UserRole.ADMIN or WorkerRole.objects.filter(code=code).exists(), "KASB"
+    )

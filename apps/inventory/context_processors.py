@@ -24,6 +24,7 @@ NAV_SECTIONS = {
     "pending_user_review": "pending_users",
     "user_list": "users",
     "user_edit": "users",
+    "worker_role_create": "users",
 }
 
 

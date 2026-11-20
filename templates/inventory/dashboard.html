@@ -13,7 +13,6 @@
       {% else %}<span class="text-muted">Barcha materiallar minimal qoldiqdan yuqori.</span>{% endif %}
     </p>
   </div>
-  <a href="{% url 'inventory:kirim' %}" class="btn btn-primary">{% icon "arrival" %} Kirim qo'shish</a>
 </div>
 
 <div class="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_384px]">
@@ -96,30 +95,6 @@
 
   {# ===================== Rail ===================== #}
   <div class="grid min-w-0 gap-6">
-    <section aria-labelledby="pending-title">
-      <div class="panel">
-        <div class="panel-head">
-          <h2 id="pending-title" class="panel-title">Tasdiq kutayotgan ishchilar {% if nav_pending_users %}<span class="num font-normal text-muted">{{ nav_pending_users }}</span>{% endif %}</h2>
-        </div>
-        {% if pending_users %}
-        <ul>
-          {% for p in pending_users %}
-          <li class="flex items-center gap-3 border-t border-rule px-5 py-2.5">
-            <div class="min-w-0 flex-1">
-              <p class="truncate font-medium">{{ p.display_name }}</p>
-              <p class="truncate text-muted" style="font-size:13px">{% for r in p.roles %}{{ r|short_role }}{% if not forloop.last %}, {% endif %}{% endfor %} · {{ p.date_joined|date:"j E" }}</p>
-            </div>
-            <a class="btn btn-secondary" href="{% url 'users:pending_user_review' p.pk %}">Ko'rish</a>
-          </li>
-          {% endfor %}
-        </ul>
-        <div class="border-t border-rule px-5 py-3"><a class="btn btn-ghost -ml-3.5" href="{% url 'users:pending_users' %}">Barcha so'rovlar</a></div>
-        {% else %}
-          <p class="border-t border-rule px-5 py-5 text-muted">Yangi so'rov yo'q.</p>
-        {% endif %}
-      </div>
-    </section>
-
     <section aria-labelledby="recent-title">
       <div class="panel overflow-hidden">
         <div class="panel-head"><h2 id="recent-title" class="panel-title">Oxirgi harakatlar</h2></div>

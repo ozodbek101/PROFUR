@@ -5,39 +5,34 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
 
-from apps.users.models import WORKER_ROLES, UserRole, normalize_roles
+from apps.users.models import UserRole, normalize_roles, role_label, worker_role_codes
 
 ZERO = Decimal("0.00")
 CENTS = Decimal("0.01")
 
 
 class MaterialCategory(models.TextChoices):
-    SHEET = "SHEET", "Sheet & Board Materials (MDF, Fanera, PVC, Shpon)"
-    LIQUID = "LIQUID", "Liquids & Paints (Kraska, Lak, Gruntovka)"
-    LINEAR = "LINEAR", "Linear Materials (Lenta, Shkurka roll)"
-    HARDWARE = "HARDWARE", "Hardware & Fittings (Furnitura, Samarez, Handles, Legs)"
+    """The built-in categories, which carry special behaviour (sheet sizes, offcuts, default trades).
+
+    The full list, including categories admins add through "Boshqa", lives in ``Category``.
+    """
+
+    SHEET = "SHEET", "List materiallar"
+    LIQUID = "LIQUID", "Bo'yoq va suyuqliklar"
+    LINEAR = "LINEAR", "Lenta va rulonlar"
+    HARDWARE = "HARDWARE", "Furnitura"
 
 
 class MeasurementUnit(models.TextChoices):
-    SHEET_COUNT = "SHEET", "Sheet Count (Dona)"
-    LITER = "LITER", "Liter (L)"
-    KILOGRAM = "KG", "Kilogram (kg)"
-    METER = "METER", "Meter (m)"
-    CENTIMETER = "CM", "Centimeter (cm)"
-    PIECE = "PIECE", "Unit Piece (Dona)"
+    PIECE = "PIECE", "Dona"
+    LITER = "LITER", "Litr"
+    KILOGRAM = "KG", "Kilogramm"
+    METER = "METER", "Metr"
+    CENTIMETER = "CM", "Santimetr"
 
-
-#: Short Uzbek category names for the UI (the TextChoices labels are the long bilingual ones).
-CATEGORY_SHORT_LABELS = {
-    MaterialCategory.SHEET: "List materiallar",
-    MaterialCategory.LIQUID: "Bo'yoq va suyuqliklar",
-    MaterialCategory.LINEAR: "Lenta va rulonlar",
-    MaterialCategory.HARDWARE: "Furnitura",
-}
 
 #: Short unit labels for compact tables and buttons.
 UNIT_SHORT_LABELS = {
-    MeasurementUnit.SHEET_COUNT: "dona",
     MeasurementUnit.LITER: "L",
     MeasurementUnit.KILOGRAM: "kg",
     MeasurementUnit.METER: "m",
@@ -46,7 +41,7 @@ UNIT_SHORT_LABELS = {
 }
 
 #: Units that can only move in whole numbers (you cannot take 1.5 hinges).
-INTEGER_UNITS = frozenset({MeasurementUnit.SHEET_COUNT, MeasurementUnit.PIECE})
+INTEGER_UNITS = frozenset({MeasurementUnit.PIECE})
 
 #: Default trade access per category; admins can override per material.
 DEFAULT_CATEGORY_ROLES: dict[str, list[str]] = {
@@ -64,17 +59,64 @@ def default_roles_for_category(category: str) -> list[str]:
     return [str(role) for role in DEFAULT_CATEGORY_ROLES.get(category, [])]
 
 
+class Category(models.Model):
+    """A material category. The four built-in ones are seeded; admins add more via "Boshqa"."""
+
+    code = models.CharField("Kod", max_length=50, unique=True)
+    name = models.CharField("Nomi", max_length=60)
+    sort_order = models.PositiveIntegerField("Tartib", default=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["sort_order", "name"]
+        verbose_name = "kategoriya"
+        verbose_name_plural = "kategoriyalar"
+
+    def __str__(self) -> str:
+        return self.name
+
+
+# Per-process cache of (code, name) pairs; cleared on every request and whenever a category changes.
+_category_cache: list[tuple[str, str]] | None = None
+
+
+def clear_category_cache(*args, **kwargs) -> None:
+    global _category_cache
+    _category_cache = None
+
+
+def category_choices() -> list[tuple[str, str]]:
+    global _category_cache
+    if _category_cache is None:
+        _category_cache = list(Category.objects.values_list("code", "name"))
+    return list(_category_cache)
+
+
+def category_codes() -> list[str]:
+    return [code for code, _ in category_choices()]
+
+
+def category_label(code: str) -> str:
+    return dict(category_choices()).get(code, code)
+
+
+def validate_category_code(value: str) -> None:
+    if value not in category_codes():
+        raise ValidationError("Noma'lum kategoriya: %(code)s", params={"code": value})
+
+
 def validate_worker_role_list(value) -> None:
     if not isinstance(value, list):
         raise ValidationError("Ruxsat etilgan kasblar ro'yxat (list) bo'lishi kerak.")
-    unknown = [role for role in value if role not in WORKER_ROLES]
+    trades = set(worker_role_codes())
+    unknown = [role for role in value if role not in trades]
     if unknown:
         raise ValidationError("Noma'lum kasb(lar): %(roles)s", params={"roles": ", ".join(map(str, unknown))})
 
 
 class BaseMaterial(models.Model):
     name = models.CharField("Nomi", max_length=255)
-    category = models.CharField("Kategoriya", max_length=50, choices=MaterialCategory.choices)
+    category = models.CharField("Kategoriya", max_length=50, validators=[validate_category_code])
     allowed_roles = models.JSONField(
         "Ruxsat etilgan kasblar",
         default=list,
@@ -136,7 +178,7 @@ class BaseMaterial(models.Model):
 
     @property
     def category_short(self) -> str:
-        return CATEGORY_SHORT_LABELS.get(self.category, self.category)
+        return category_label(self.category)
 
     @property
     def unit_short(self) -> str:
@@ -152,7 +194,7 @@ class BaseMaterial(models.Model):
 
     @property
     def allowed_role_labels(self) -> list[str]:
-        return [UserRole(role).label for role in self.allowed_roles if role in UserRole.values]
+        return [role_label(role) for role in self.allowed_roles]
 
 
 class WholeMaterial(models.Model):

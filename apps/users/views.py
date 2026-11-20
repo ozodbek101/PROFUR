@@ -9,8 +9,8 @@ from django.views import View
 from django.views.generic import CreateView, ListView, TemplateView, UpdateView
 
 from . import services
-from .forms import LoginForm, RoleAssignmentForm, UserAdminEditForm, WorkerRegistrationForm
-from .models import User
+from .forms import LoginForm, RoleAssignmentForm, UserAdminEditForm, WorkerRegistrationForm, WorkerRoleForm
+from .models import User, WorkerRole
 from .permissions import WarehouseAdminRequiredMixin
 
 
@@ -119,3 +119,19 @@ class UserUpdateView(WarehouseAdminRequiredMixin, UpdateView):
         user.save()
         messages.success(self.request, f"{user.display_name} ma'lumotlari saqlandi.")
         return redirect(reverse("users:user_list"))
+
+
+class WorkerRoleCreateView(WarehouseAdminRequiredMixin, CreateView):
+    form_class = WorkerRoleForm
+    template_name = "users/worker_role_form.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["existing_roles"] = WorkerRole.objects.all()
+        return context
+
+    def form_valid(self, form):
+        role = form.save()
+        messages.success(self.request, f"“{role.name}” kasbi qo'shildi. Endi ishchilar ro'yxatdan o'tishda uni tanlay oladi.")
+        return redirect("users:user_list")
+

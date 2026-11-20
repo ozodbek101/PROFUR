@@ -37,10 +37,10 @@ WORKERS = [
 
 # name, category, unit, container, minimum, (length, width), monthly kirim, unit price USD, monthly use share
 MATERIALS = [
-    ("MDF 16 mm oq", MaterialCategory.SHEET, MeasurementUnit.SHEET_COUNT, None, 10, (2750, 1830), 30, "38.50", 0.85),
-    ("LDSP 18 mm yong'oq", MaterialCategory.SHEET, MeasurementUnit.SHEET_COUNT, None, 8, (2800, 2070), 20, "46.00", 0.80),
-    ("Fanera 12 mm", MaterialCategory.SHEET, MeasurementUnit.SHEET_COUNT, None, 6, (2440, 1220), 12, "27.40", 0.90),
-    ("HDF 3 mm orqa devor", MaterialCategory.SHEET, MeasurementUnit.SHEET_COUNT, None, 6, (2800, 2070), 15, "9.80", 0.75),
+    ("MDF 16 mm oq", MaterialCategory.SHEET, MeasurementUnit.PIECE, None, 10, (2750, 1830), 30, "38.50", 0.85),
+    ("LDSP 18 mm yong'oq", MaterialCategory.SHEET, MeasurementUnit.PIECE, None, 8, (2800, 2070), 20, "46.00", 0.80),
+    ("Fanera 12 mm", MaterialCategory.SHEET, MeasurementUnit.PIECE, None, 6, (2440, 1220), 12, "27.40", 0.90),
+    ("HDF 3 mm orqa devor", MaterialCategory.SHEET, MeasurementUnit.PIECE, None, 6, (2800, 2070), 15, "9.80", 0.75),
     ("Akril kraska oq", MaterialCategory.LIQUID, MeasurementUnit.LITER, "12", 24, None, 48, "4.35", 0.90),
     ("Poliuretan lak, yarim mat", MaterialCategory.LIQUID, MeasurementUnit.LITER, "5", 10, None, 25, "7.90", 0.80),
     ("Gruntovka", MaterialCategory.LIQUID, MeasurementUnit.KILOGRAM, "25", 25, None, 50, "2.10", 0.70),

@@ -4,18 +4,33 @@ from decimal import Decimal
 from django import forms
 from django.core.validators import MaxValueValidator
 
-from apps.users.models import WORKER_ROLE_CHOICES, User
+from apps.users.forms import unique_code
+from apps.users.models import User, worker_role_choices
 
 from .models import (
     BaseMaterial,
+    Category,
     MaterialCategory,
     MeasurementUnit,
     TransactionType,
     WholeMaterial,
+    category_choices,
+    default_roles_for_category,
 )
 from .selectors import offcut_capable_materials
 
 MAX_MM = 100_000
+
+#: Value of the "Boshqa" option in the category dropdown; the admin then types a new category name.
+OTHER_CATEGORY = "__other__"
+
+
+def material_category_choices() -> list[tuple[str, str]]:
+    return [("", "Tanlang"), *category_choices(), (OTHER_CATEGORY, "Boshqa")]
+
+
+def category_code_from(name: str) -> str:
+    return unique_code(name, lambda code: Category.objects.filter(code=code).exists(), "KATEGORIYA", 50)
 
 
 class MaterialChoiceField(forms.ModelChoiceField):
@@ -26,9 +41,14 @@ class MaterialChoiceField(forms.ModelChoiceField):
 class MaterialForm(forms.ModelForm):
     """Admin: create or edit a material card (and its standard sheet size)."""
 
+    category = forms.ChoiceField(label="Kategoriya", choices=material_category_choices)
+    new_category = forms.CharField(
+        label="Yangi kategoriya nomi", required=False, max_length=60,
+        widget=forms.TextInput(attrs={"placeholder": "Masalan: Oyna va ko'zgu"}),
+    )
     allowed_roles = forms.MultipleChoiceField(
         label="Qaysi kasblar ko'ra oladi va oladi",
-        choices=WORKER_ROLE_CHOICES,
+        choices=worker_role_choices,
         widget=forms.CheckboxSelectMultiple,
         required=False,
         help_text="Bo'sh qoldirilsa, kategoriya bo'yicha standart kasblar belgilanadi.",
@@ -61,25 +81,61 @@ class MaterialForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.pending_category_name = ""  # set by clean() when "Boshqa" names a category that doesn't exist yet
         stock = getattr(self.instance, "whole_stock", None) if self.instance.pk else None
         if stock is not None:
             self.fields["length_mm"].initial = stock.length_mm
             self.fields["width_mm"].initial = stock.width_mm
+        self.fields["unit_of_measure"].choices = [("", "Tanlang"), *MeasurementUnit.choices]
+        # Browser-side floor so a minus sign can't be entered; the model validators enforce it on save.
+        self.fields["minimum_threshold"].widget.attrs.update({"min": "0", "inputmode": "decimal"})
+        self.fields["container_size"].widget.attrs.update({"min": "0.01", "inputmode": "decimal"})
         if not self.instance.pk:
             self.fields.pop("is_active")
 
     def clean(self):
         cleaned = super().clean()
+        if cleaned.get("category") == OTHER_CATEGORY:
+            self._resolve_new_category(cleaned)
+        category = cleaned.get("category")
+        if category and category != OTHER_CATEGORY and not cleaned.get("allowed_roles")                 and not default_roles_for_category(category):
+            self.add_error("allowed_roles", "Bu kategoriya uchun kamida bitta kasbni belgilang.")
         length, width = cleaned.get("length_mm"), cleaned.get("width_mm")
         if bool(length) != bool(width):
             self.add_error("width_mm" if length else "length_mm", "Uzunlik va enni birga kiriting.")
         if cleaned.get("category") == MaterialCategory.LIQUID and cleaned.get("unit_of_measure") in (
-            MeasurementUnit.SHEET_COUNT,
             MeasurementUnit.METER,
             MeasurementUnit.CENTIMETER,
         ):
             self.add_error("unit_of_measure", "Suyuqliklar uchun litr, kg yoki dona tanlang.")
         return cleaned
+
+    def _resolve_new_category(self, cleaned) -> None:
+        name = " ".join((cleaned.get("new_category") or "").split())
+        if not name:
+            self.add_error("new_category", "Yangi kategoriya nomini yozing.")
+            return
+        existing = Category.objects.filter(name__iexact=name).first()
+        if existing is not None:
+            cleaned["category"] = existing.code  # typed a name that already exists: just use it
+        else:
+            self.pending_category_name = name
+            cleaned["category"] = category_code_from(name)
+
+    def _get_validation_exclusions(self):
+        exclusions = super()._get_validation_exclusions()
+        if self.pending_category_name:
+            exclusions.add("category")  # the new category row is only created once the whole form is valid
+        return exclusions
+
+    def create_pending_category(self) -> None:
+        """Create the category typed under "Boshqa". Call inside the transaction that saves the material."""
+        if not self.pending_category_name:
+            return
+        last = Category.objects.order_by("-sort_order").values_list("sort_order", flat=True).first() or 0
+        Category.objects.create(
+            code=self.cleaned_data["category"], name=self.pending_category_name, sort_order=last + 10
+        )
 
     def save_stock_dimensions(self, material: BaseMaterial) -> None:
         stock, _ = WholeMaterial.objects.get_or_create(material=material)
@@ -213,7 +269,7 @@ class ReportFilterForm(forms.Form):
         label="Harakat turi", required=False, choices=[("", "Barchasi"), *TransactionType.choices]
     )
     category = forms.ChoiceField(
-        label="Kategoriya", required=False, choices=[("", "Barchasi"), *MaterialCategory.choices]
+        label="Kategoriya", required=False, choices=lambda: [("", "Barchasi"), *category_choices()]
     )
     user = forms.ModelChoiceField(
         label="Ishchi", required=False, queryset=User.objects.order_by("full_name", "username"), empty_label="Barchasi"

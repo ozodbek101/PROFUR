@@ -6,6 +6,7 @@
   <div>
     <h1 class="font-bold text-[24px] leading-8 lg:text-[32px] lg:leading-10">Ishchilar</h1>
     <p class="mt-1 text-muted" style="font-size:15px">Hisoblar, kasblar va kirish huquqi · <span class="num">{{ page_obj.paginator.count }}</span> ta hisob</p>
+    <a href="{% url 'users:worker_role_create' %}" class="btn btn-primary mt-4">{% icon "plus" %} Yangi kasb</a>
   </div>
   {% if nav_pending_users %}<a href="{% url 'users:pending_users' %}" class="btn btn-primary">{% icon "check" %} So'rovlar · {{ nav_pending_users }}</a>{% endif %}
 </div>

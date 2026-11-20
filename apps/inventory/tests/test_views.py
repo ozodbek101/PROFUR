@@ -223,13 +223,28 @@ class KirimViewTests(WorkshopTestCase):
     def test_new_material_goes_straight_to_kirim(self):
         response = self.client.post(
             reverse("inventory:material_create"),
-            {"name": "Fanera 12 mm", "category": MaterialCategory.SHEET, "unit_of_measure": MeasurementUnit.SHEET_COUNT,
+            {"name": "Fanera 12 mm", "category": MaterialCategory.SHEET, "unit_of_measure": MeasurementUnit.PIECE,
              "minimum_threshold": "6", "length_mm": "2440", "width_mm": "1220"},
         )
         material = BaseMaterial.objects.get(name="Fanera 12 mm")
         self.assertRedirects(response, f"{self.url}?material={material.pk}")
         self.assertEqual(material.allowed_roles, [UserRole.ARRACHI, UserRole.ROVERCHI])  # category default
         self.assertEqual((material.whole_stock.length_mm, material.whole_stock.width_mm), (2440, 1220))
+
+    def test_material_form_rejects_negative_minimum_and_container_size(self):
+        url = reverse("inventory:material_create")
+        page = self.client.get(url)
+        html = page.content.decode()
+        self.assertRegex(html, r'name="minimum_threshold"[^>]*min="0"')
+        self.assertRegex(html, r'name="container_size"[^>]*min="0.01"')
+
+        response = self.client.post(url, {
+            "name": "Lak X", "category": MaterialCategory.LIQUID, "unit_of_measure": MeasurementUnit.LITER,
+            "minimum_threshold": "-3", "container_size": "-12",
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(set(response.context["form"].errors), {"minimum_threshold", "container_size"})
+        self.assertFalse(BaseMaterial.objects.filter(name="Lak X").exists())
 
 
 class DashboardAndReportTests(WorkshopTestCase):

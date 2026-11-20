@@ -31,7 +31,7 @@ def make_admin(username: str = "boss") -> User:
 def make_material(
     name: str = "MDF 16 mm",
     category: str = MaterialCategory.SHEET,
-    unit: str = MeasurementUnit.SHEET_COUNT,
+    unit: str = MeasurementUnit.PIECE,
     *,
     allowed_roles=None,
     minimum=Decimal("0"),

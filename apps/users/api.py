@@ -9,7 +9,7 @@ from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
 from . import services
-from .models import WORKER_ROLE_CHOICES, User, UserRole
+from .models import User, all_role_choices, worker_role_choices
 from .permissions import IsWarehouseAdmin
 
 
@@ -37,7 +37,11 @@ class RegistrationSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150, validators=[UnicodeUsernameValidator()])
     full_name = serializers.CharField(max_length=255)
     password = serializers.CharField(write_only=True, style={"input_type": "password"})
-    roles = serializers.MultipleChoiceField(choices=WORKER_ROLE_CHOICES)
+    roles = serializers.MultipleChoiceField(choices=())
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["roles"].choices = worker_role_choices()  # trades live in the database
 
     def validate_username(self, value):
         if User.objects.filter(username__iexact=value).exists():
@@ -86,7 +90,11 @@ class MeAPIView(APIView):
 
 
 class ApprovalSerializer(serializers.Serializer):
-    roles = serializers.MultipleChoiceField(choices=UserRole.choices, required=False)
+    roles = serializers.MultipleChoiceField(choices=(), required=False)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["roles"].choices = all_role_choices()
 
 
 class PendingUserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
