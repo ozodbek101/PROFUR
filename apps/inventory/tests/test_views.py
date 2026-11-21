@@ -236,7 +236,7 @@ class KirimViewTests(WorkshopTestCase):
         page = self.client.get(url)
         html = page.content.decode()
         self.assertRegex(html, r'name="minimum_threshold"[^>]*min="0"')
-        self.assertRegex(html, r'name="container_size"[^>]*min="0.01"')
+        self.assertRegex(html, r'name="container_size"[^>]*min="1"')
 
         response = self.client.post(url, {
             "name": "Lak X", "category": MaterialCategory.LIQUID, "unit_of_measure": MeasurementUnit.LITER,

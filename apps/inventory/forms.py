@@ -63,6 +63,17 @@ class MaterialForm(forms.ModelForm):
         label=_("List eni (mm)"), required=False, min_value=1, max_value=MAX_MM,
         help_text=_("Masalan 1830."),
     )
+    # Whole numbers only in the form; the model columns stay decimal so existing data is untouched.
+    minimum_threshold = forms.IntegerField(
+        label=_("Minimal qoldiq"), min_value=0, max_value=10**9, initial=0,
+        help_text=_("Miqdor shundan kam bo'lsa, xarid ro'yxatida ko'rinadi."),
+        widget=forms.NumberInput(attrs={"step": "1", "inputmode": "numeric"}),
+    )
+    container_size = forms.IntegerField(
+        label=_("Idish hajmi"), required=False, min_value=1, max_value=10**7,
+        help_text=_("Masalan, 12 litrli chelak uchun 12. Kirimda idish soni bilan hisoblash uchun."),
+        widget=forms.NumberInput(attrs={"step": "1", "inputmode": "numeric"}),
+    )
 
     class Meta:
         model = BaseMaterial
@@ -76,8 +87,6 @@ class MaterialForm(forms.ModelForm):
             "is_active",
         )
         help_texts = {
-            "container_size": _("Masalan, 12 litrli chelak uchun 12. Kirimda idish soni bilan hisoblash uchun."),
-            "minimum_threshold": _("Miqdor shundan kam bo'lsa, xarid ro'yxatida ko'rinadi."),
             "is_active": _("O'chirilsa, ishchilar materialni ko'rmaydi; tarix saqlanadi."),
         }
 
@@ -89,9 +98,11 @@ class MaterialForm(forms.ModelForm):
             self.fields["length_mm"].initial = stock.length_mm
             self.fields["width_mm"].initial = stock.width_mm
         self.fields["unit_of_measure"].choices = [("", _("Tanlang")), *MeasurementUnit.choices]
-        # Browser-side floor so a minus sign can't be entered; the model validators enforce it on save.
-        self.fields["minimum_threshold"].widget.attrs.update({"min": "0", "inputmode": "decimal"})
-        self.fields["container_size"].widget.attrs.update({"min": "0.01", "inputmode": "decimal"})
+        # Show stored whole values without the ".00" the decimal columns carry.
+        for name in ("minimum_threshold", "container_size"):
+            value = getattr(self.instance, name, None) if self.instance.pk else None
+            if value is not None and value == value.to_integral_value():
+                self.initial[name] = int(value)
         if not self.instance.pk:
             self.fields.pop("is_active")
 
@@ -170,12 +181,10 @@ class KirimForm(forms.Form):
         widget=forms.NumberInput(attrs={"x-model.number": "containers", "inputmode": "decimal"}),
         help_text=_("Masalan, 5 chelak. Miqdor idish hajmiga ko'paytirib hisoblanadi."),
     )
-    quantity = forms.DecimalField(
-        label=_("Miqdor"), required=False, min_value=Decimal("0.01"), max_digits=12, decimal_places=2
-    )
+    quantity = forms.IntegerField(label=_("Miqdor"), required=False, min_value=1)
     price_mode = forms.ChoiceField(
         label=_("Narx turi"),
-        choices=[(PRICE_TOTAL, _("Umumiy partiya narxi")), (PRICE_UNIT, _("Bir birlik narxi"))],
+        choices=[(PRICE_TOTAL, _("Optom narx")), (PRICE_UNIT, _("Dona narxi"))],
         widget=forms.RadioSelect(attrs={"x-model": "mode"}),
         initial=PRICE_TOTAL,
     )
@@ -200,8 +209,11 @@ class KirimForm(forms.Form):
             else:
                 quantity = (containers * material.container_size).quantize(Decimal("0.01"))
                 cleaned["quantity"] = quantity
-        if not quantity and not self.has_error("containers"):
+        if not quantity and not self.has_error("containers") and not self.has_error("quantity"):
             self.add_error("quantity", _("Miqdorni yoki idishlar sonini kiriting."))
+        price = cleaned.get("price_usd")
+        if cleaned.get("price_mode") == self.PRICE_TOTAL and price is not None and price != price.quantize(Decimal("0.01")):
+            self.add_error("price_usd", _("Optom narx ko'pi bilan 2 xonali kasr bo'lishi mumkin."))
         return cleaned
 
     def service_kwargs(self) -> dict:

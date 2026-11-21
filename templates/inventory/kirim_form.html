@@ -48,7 +48,7 @@
       </div>
       <div class="{% if form.quantity.errors %}has-error{% endif %}">
         <label class="field-label" for="{{ form.quantity.id_for_label }}">{% translate "Miqdor" %} <span class="font-normal text-muted" x-text="m ? '(' + m.unit + ')' : ''"></span></label>
-        <input type="number" name="{{ form.quantity.html_name }}" id="{{ form.quantity.id_for_label }}" step="0.01" min="0.01" inputmode="decimal"
+        <input type="number" name="{{ form.quantity.html_name }}" id="{{ form.quantity.id_for_label }}" step="1" min="1" inputmode="numeric"
                :value="(m && m.container && containers) ? qty : quantity" @input="quantity = $event.target.value"
                :readonly="!!(m && m.container && containers)" value="{{ form.quantity.value|default_if_none:'' }}">
         {% for e in form.quantity.errors %}<p class="field-error">{{ e }}</p>{% endfor %}
@@ -60,7 +60,7 @@
     <div class="{% if form.price_usd.errors %}has-error{% endif %}">
       {% translate "Partiyaning umumiy narxi (USD $)" as t_total_price %}{% translate "Bir birlik narxi (USD $)" as t_unit_price %}
       <label class="field-label" for="{{ form.price_usd.id_for_label }}"><span x-text="mode === 'total' ? '{{ t_total_price|escapejs }}' : '{{ t_unit_price|escapejs }}'">{% translate "Narx (USD $)" %}</span></label>
-      <input type="number" name="{{ form.price_usd.html_name }}" id="{{ form.price_usd.id_for_label }}" step="0.0001" min="0" inputmode="decimal" required
+      <input type="number" name="{{ form.price_usd.html_name }}" id="{{ form.price_usd.id_for_label }}" step="0.01" :step="mode === 'total' ? '0.01' : '0.0001'" min="0" inputmode="decimal" required
              x-model.number="price" value="{{ form.price_usd.value|default_if_none:'' }}">
       {% for e in form.price_usd.errors %}<p class="field-error">{{ e }}</p>{% endfor %}
     </div>
