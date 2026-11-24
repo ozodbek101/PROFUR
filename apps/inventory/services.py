@@ -68,6 +68,17 @@ def _require_access(user, material: BaseMaterial) -> None:
         raise PermissionDenied(_("Bu material sizning kasbingiz uchun ruxsat etilmagan."))
 
 
+def _require_taker(user) -> None:
+    """Taking stock off the shelf is a worker's action, never an administrator's.
+
+    The administrator books arrivals, sets minimums and reads the history; the
+    ledger should name the person who actually carried the material away. Checked
+    here rather than only in the templates, so the REST API is bound by it too.
+    """
+    if getattr(user, "is_warehouse_admin", False):
+        raise PermissionDenied(_("Administrator ombordan material olmaydi — buni ishchi bajaradi."))
+
+
 def _locked_stock(material: BaseMaterial) -> WholeMaterial:
     """Fetch (creating if missing) and row-lock the WholeMaterial for ``material``."""
     WholeMaterial.objects.get_or_create(material=material)
@@ -180,6 +191,7 @@ def record_kirim(
 # ---------------------------------------------------------------------------
 def withdraw_whole_material(*, material: BaseMaterial, user, quantity, notes: str = "") -> InventoryTransaction:
     """Worker takes whole units (sheets, litres, pieces...) from the shelf."""
+    _require_taker(user)
     _require_access(user, material)
     quantity = _positive_quantity(material, quantity)
 
@@ -212,6 +224,7 @@ def withdraw_whole_material(*, material: BaseMaterial, user, quantity, notes: st
 
 def withdraw_offcut(*, offcut: LeftoverOffcut, user, quantity: int = 1, notes: str = "") -> InventoryTransaction:
     """Worker reuses offcut piece(s). The record is removed once no pieces remain."""
+    _require_taker(user)
     _require_access(user, offcut.material)
     try:
         pieces = int(quantity)

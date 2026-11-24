@@ -1,3 +1,5 @@
+import re
+
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import UserManager as DjangoUserManager
 from django.core.exceptions import ValidationError
@@ -89,6 +91,46 @@ def validate_role_list(value) -> None:
         raise ValidationError(_("Noma'lum rol(lar): %(roles)s"), params={"roles": ", ".join(map(str, unknown))})
 
 
+# ---------------------------------------------------------------------------
+# Phone numbers (the login identifier)
+# ---------------------------------------------------------------------------
+#: Uzbek mobile numbers: +998 followed by nine digits.
+PHONE_PREFIX = "+998"
+PHONE_DIGITS = 9
+
+
+def normalize_phone(raw) -> str:
+    """Accept what a worker actually types and return one canonical form.
+
+    ``90 123 45 67``, ``+998 90 123 45 67``, ``998901234567`` and ``0901234567``
+    all become ``+998901234567``, so the same person cannot register twice with
+    the same number written two ways.
+    """
+    digits = re.sub(r"\D", "", str(raw or ""))
+    if len(digits) == PHONE_DIGITS + 3 and digits.startswith("998"):
+        digits = digits[3:]
+    elif len(digits) == PHONE_DIGITS + 1 and digits.startswith("0"):
+        digits = digits[1:]
+    if len(digits) != PHONE_DIGITS:
+        raise ValidationError(
+            _("Telefon raqamini +998 90 123 45 67 ko'rinishida kiriting."), code="invalid_phone"
+        )
+    return PHONE_PREFIX + digits
+
+
+def phone_display(phone: str) -> str:
+    """``+998901234567`` -> ``+998 90 123 45 67`` for reading off a screen."""
+    digits = re.sub(r"\D", "", str(phone or ""))
+    if len(digits) != PHONE_DIGITS + 3:
+        return phone or ""
+    d = digits[3:]
+    return f"+{digits[:3]} {d[:2]} {d[2:5]} {d[5:7]} {d[7:]}"
+
+
+def validate_phone(value) -> None:
+    normalize_phone(value)
+
+
 class UserQuerySet(models.QuerySet):
     def pending_approval(self):
         return self.filter(is_approved=False, is_superuser=False, is_active=True)
@@ -106,6 +148,20 @@ class UserManager(DjangoUserManager.from_queryset(UserQuerySet)):
 
 class User(AbstractUser):
     full_name = models.CharField(_("To'liq ism"), max_length=255, blank=True)
+    phone = models.CharField(
+        _("Telefon raqami"),
+        max_length=20,
+        unique=True,
+        null=True,
+        blank=True,
+        validators=[validate_phone],
+        help_text=_("Tizimga shu raqam bilan kiriladi."),
+    )
+    #: The password as typed, kept readable so an administrator can tell a worker
+    #: their own password over the phone. Requested deliberately; it means a copy of
+    #: this database exposes every worker account, so keep backups and admin access
+    #: as tightly held as the warehouse itself.
+    password_plain = models.CharField(_("Parol"), max_length=128, blank=True, default="")
     roles = models.JSONField(
         default=list,
         blank=True,
@@ -133,6 +189,25 @@ class User(AbstractUser):
     def save(self, *args, **kwargs):
         self.roles = normalize_roles(self.roles)
         super().save(*args, **kwargs)
+
+    def set_password(self, raw_password):
+        """Hash the password *and* keep the readable copy the admin screens show.
+
+        Every path that sets a password (registration, the admin's reset field,
+        ``createsuperuser``, ``seed_demo``) goes through here, so the two stay in step.
+        """
+        super().set_password(raw_password)
+        self.password_plain = raw_password or ""
+
+    # --- Phone ------------------------------------------------------------
+    @property
+    def phone_display(self) -> str:
+        return phone_display(self.phone)
+
+    @property
+    def login_id(self) -> str:
+        """What the person types to log in: their phone, or the username for old accounts."""
+        return self.phone_display or self.username
 
     # --- Role helpers -----------------------------------------------------
     def has_role(self, role_name: str) -> bool:
